@@ -1,0 +1,22 @@
+#!/bin/bash
+
+db_user=leed
+db_name=leed
+root_pwd=$(sudo cat /etc/yunohost/mysql)
+domain=$(sudo yunohost app setting leed domain)
+admin=$(sudo yunohost app setting leed admin)
+path=$(sudo yunohost app setting leed path)
+
+# Suppression de la base de donnée et son user
+mysql -u root -p$root_pwd -e "DROP DATABASE $db_name ; DROP USER $db_user@localhost ;"
+# Suppression du dossier
+sudo rm -rf /var/www/leed
+# Suppression de la configuration nginx
+sudo rm -f /etc/nginx/conf.d/$domain.d/leed.conf
+
+# Retirer le cron
+sudo rm -f /etc/cron.d/leed
+
+# Reload Nginx and regenerate SSOwat conf
+sudo service nginx reload
+sudo yunohost app ssowatconf
