@@ -6,10 +6,11 @@
 	"fr": "Leed est un agrégateur RSS minimaliste qui permet la consultation de flux RSS de manière rapide et non intrusive."
 Lutim est un logiciel d’hébergement d’images. Il s’agit aussi du nom du logiciel (libre) qui fournit ce service.
     },
-    "developer": {
+	"version": "0.6",
+	"url": "https://lut.im",
+    "maintainer": {
         "name": "Maniack Crudelis",
-        "email": "maniack@crudelis.fr",
-        "url": "https://lut.im/"
+        "email": "maniackc_dev@crudelis.fr"
     },
     "multi_instance": "true",
     "arguments": {

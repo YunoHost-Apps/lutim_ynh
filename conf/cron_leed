@@ -1,3 +1,0 @@
-# Mise a jour de leed toutes les 2 heures.
-
-0 */2 * * * __ADMIN__ wget -q -O - "https://__DOMAIN____PATH__/action.php?action=synchronize&code=__CODESYNC__" > /dev/null 2>&1

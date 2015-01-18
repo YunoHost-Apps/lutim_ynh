@@ -29,9 +29,6 @@ sudo mkdir -p $final_path
 sudo cp -a ../sources/lutim-master/* $final_path
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/lutim.conf
 
-# Set right permissions for curl install
-# sudo chown -R www-data: $final_path
-
 # Installation du module perl carton
 yes | sudo cpan Carton
 # Installation de perlmagick, interface perl pour imagemagick
@@ -43,29 +40,25 @@ cd $final_path
 sudo carton install
 
 ## Copie et configuration du fichier de conf.
+sudo cp ../conf/lutim.conf.template $final_path/lutim.conf
+sudo sed -i "s@__DOMAIN__@$domain@g" $final_path/lutim.conf
 
 # Mise en place des scripts init
-sudo cp $final_path/utilities/lutim.init /etc/init.d/lutim
-sudo cp $final_path/utilities/lutim.default /etc/default/lutim
+sudo cp ../sources/lutim-master/utilities/lutim.init /etc/init.d/lutim
+sudo cp ../conf/lutim.default /etc/default/lutim
 sudo chmod +x /etc/init.d/lutim
 chown root:root /etc/init.d/lutim /etc/default/lutim
-## vim /etc/default/lutim
-
-## /etc/init.d/lutim start
+sudo sed -i "s@__FINALPATH__@$final_path@g" /etc/default/lutim
 
 ## Démarrage auto des scripts init
+sudo update-rc.d lutim defaults
+# sudo update-rc.d -f lutim remove
+
+# Change variables in nginx configuration
+sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/lutim.conf
+sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/nginx/conf.d/$domain.d/lutim.conf
 
 ## Voir les crons et les mettre en place.
-
-## Reverse proxy nginx à configurer
-
-
-
-
-# Change variables in lutim configuration
-sudo sed -i "s@PATHTOCHANGE@$path@g" /etc/nginx/conf.d/$domain.d/lutim.conf
-sudo sed -i "s@ALIASTOCHANGE@$final_path/@g" /etc/nginx/conf.d/$domain.d/lutim.conf
-
 
 
 # Files owned by root, www-data can just read
@@ -74,6 +67,8 @@ sudo sed -i "s@ALIASTOCHANGE@$final_path/@g" /etc/nginx/conf.d/$domain.d/lutim.c
 # sudo chown -R root: $final_path
 # www-data can write on plugins and cache
 # sudo chown -R www-data $final_path/cache $final_path/plugins
+# Set right permissions
+sudo chown -R www-data: $final_path
 
 # Make app public or private
 sudo yunohost app setting lutim is_public -v "$is_public"
