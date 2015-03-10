@@ -10,14 +10,12 @@ mkdir($ENV{MOJO_TMPDIR}, 0700) unless (-d $ENV{MOJO_TMPDIR});
 sub startup {
     my $self = shift;
 
-    push @{$self->commands->namespaces}, 'Lutim::Command';
-
     $self->{wait_for_it} = {};
 
     $self->plugin('I18N');
     $self->plugin('AssetPack');
 
-    my $config = $self->plugin('ConfigHashMerge', {
+    my $config = $self->plugin('Config', {
         default => {
             provisioning     => 100,
             provis_step      => 5,
@@ -32,9 +30,6 @@ sub startup {
             token_length     => 24,
         }
     });
-
-    # Default values
-    $config->{provisioning}     = $config->{provisionning} if (defined($config->{provisionning}));
 
     die "You need to provide a contact information in lutim.conf !" unless (defined($config->{contact}));
 
@@ -80,6 +75,19 @@ sub startup {
             $headers->add('Content-Length' => $asset->size);
 
             return $c->rendered(200);
+        }
+    );
+
+    $self->helper(
+        index_url => sub {
+            my $c      = shift;
+            my $to_abs = shift;
+
+            my $url = $c->url_for('index');
+            $url    = $url->to_abs() if (defined($to_abs) && $to_abs);
+
+            $url =~ s#([^/])$#$1/#;
+            return $url;
         }
     );
 
@@ -293,8 +301,9 @@ sub startup {
     $self->asset('stats.css' => 'css/bootstrap.min.css', 'css/fontello-embedded.css', 'css/morris-0.4.3.min.css', 'css/hennypenny.css', 'css/lutim.css');
     $self->asset('about.css' => 'css/bootstrap.min.css', 'css/fontello-embedded.css', 'css/hennypenny.css', 'css/lutim.css');
 
-    $self->asset('index.js' => 'js/jquery-2.1.0.min.js', 'js/bootstrap.min.js', 'js/lutim.js', 'js/dmuploader.min.js');
-    $self->asset('stats.js' => 'js/jquery-2.1.0.min.js', 'js/bootstrap.min.js', 'js/lutim.js', 'js/raphael-min.js', 'js/morris-0.4.3.min.js', 'js/stats.js');
+    $self->asset('index.js'  => 'js/jquery-2.1.0.min.js', 'js/bootstrap.min.js', 'js/lutim.js', 'js/dmuploader.min.js');
+    $self->asset('stats.js'  => 'js/jquery-2.1.0.min.js', 'js/bootstrap.min.js', 'js/lutim.js', 'js/raphael-min.js', 'js/morris-0.4.3.min.js', 'js/stats.js');
+    $self->asset('freeze.js' => 'js/jquery-2.1.0.min.js', 'js/freezeframe.min.js');
 
     $self->defaults(layout => 'default');
 

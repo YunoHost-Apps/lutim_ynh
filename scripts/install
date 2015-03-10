@@ -14,7 +14,7 @@ if [[ ! $? -eq 0 ]]; then
 fi
 
 # Check domain/path availability
-sudo yunohost app checkurl $domain$path -a leed
+sudo yunohost app checkurl $domain$path -a lutim
 if [[ ! $? -eq 0 ]]; then
     exit 1
 fi
@@ -30,25 +30,32 @@ sudo cp -a ../sources/lutim-master/* $final_path
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/lutim.conf
 
 # Installation du module perl carton
-yes | sudo cpan Carton
+echo "Installation du module perl carton. Attention, étape très longue..."
+# yes | sudo cpan Carton | sudo tee $final_path/cpan_setup.log 2>&1 > /dev/null 2>&1 # Debug
+yes | sudo cpan Carton > /dev/null 2>&1
+
 # Installation de perlmagick, interface perl pour imagemagick
 sudo apt-get install perlmagick -qy
-
-# Installation de lutim via carton
-cd $final_path
-	echo pwd
-sudo carton install
 
 ## Copie et configuration du fichier de conf.
 sudo cp ../conf/lutim.conf.template $final_path/lutim.conf
 sudo sed -i "s@__DOMAIN__@$domain@g" $final_path/lutim.conf
+sudo sed -i "s@__PATH__@$path@g" $final_path/lutim.conf
 
 # Mise en place des scripts init
 sudo cp ../sources/lutim-master/utilities/lutim.init /etc/init.d/lutim
 sudo cp ../conf/lutim.default /etc/default/lutim
 sudo chmod +x /etc/init.d/lutim
-chown root:root /etc/init.d/lutim /etc/default/lutim
-sudo sed -i "s@__FINALPATH__@$final_path@g" /etc/default/lutim
+sudo chown root:root /etc/init.d/lutim /etc/default/lutim
+sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/default/lutim
+
+## Mise en place des crons
+sudo cp ../conf/cron_lutim /etc/cron.d/lutim
+sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/lutim
+
+# Installation de lutim via carton
+cd $final_path
+sudo carton install
 
 ## Démarrage auto des scripts init
 sudo update-rc.d lutim defaults
@@ -56,17 +63,8 @@ sudo update-rc.d lutim defaults
 
 # Change variables in nginx configuration
 sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/lutim.conf
-sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/nginx/conf.d/$domain.d/lutim.conf
-
-## Voir les crons et les mettre en place.
 
 
-# Files owned by root, www-data can just read
-# sudo find $final_path -type f | xargs sudo chmod 644
-# sudo find $final_path -type d | xargs sudo chmod 755
-# sudo chown -R root: $final_path
-# www-data can write on plugins and cache
-# sudo chown -R www-data $final_path/cache $final_path/plugins
 # Set right permissions
 sudo chown -R www-data: $final_path
 
@@ -76,8 +74,8 @@ if [ "$is_public" = "Yes" ];
 then
 	sudo yunohost app setting lutim skipped_uris -v "/"
 else	# Si l'app est privée, seul le visionnage des images est public
-	sudo yunohost app setting lutim skipped_regex -v "/(stats|manifest.webapp|(d|m)/.+)?$"
-fi		# REGEX À INVERSER ! Je pense...
+# 	sudo yunohost app setting lutim skipped_regex -v "/(stats|manifest.webapp|(d|m)/.+)?$"
+fi
 
 # Reload Nginx, start lutim and regenerate SSOwat conf
 sudo service nginx reload

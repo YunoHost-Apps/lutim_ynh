@@ -3,8 +3,7 @@
     "id": "lutim",
     "description": {
         "en": "Leed is a minimalistic RSS feed aggregator which allows quick and non-intrusive reading of feeds.",
-	"fr": "Leed est un agrégateur RSS minimaliste qui permet la consultation de flux RSS de manière rapide et non intrusive."
-Lutim est un logiciel d’hébergement d’images. Il s’agit aussi du nom du logiciel (libre) qui fournit ce service.
+	"fr": "Lutim est un logiciel d’hébergement d’images. Il s’agit aussi du nom du logiciel (libre) qui fournit ce service."
     },
 	"version": "0.6",
 	"url": "https://lut.im",
@@ -19,36 +18,38 @@ Lutim est un logiciel d’hébergement d’images. Il s’agit aussi du nom du l
                 "name": "domain",
                 "ask": {
                     "en": "Choose a domain for Lutim",
-		    "fr": "Choisissez un domaine pour Lutim"
+					"fr": "Choisissez un domaine pour Lutim"
                 },
-                "example": "domain.org"
+                "example": "domain.org",
+                "default": "crudelis-test.fr"
             },
             {
                 "name": "path",
                 "ask": {
                     "en": "Choose a path for Lutim",
-		    "fr": "Choisissez un chemin pour Lutim"
+					"fr": "Choisissez un chemin pour Lutim"
                 },
                 "example": "/lutim",
                 "default": "/lutim"
             },
-	    {
-		"name": "admin",
-		"ask": {
-		    "en": "Choose the Lutim administrator (must be an existing YunoHost user)",
-		    "fr": "Choisissez un administrateur Lutim (doit être un utilisateur YunoHost)"
-		},
-		"example": "john"
-	    },
-	    {
-		"name": "is_public",
-		"ask": {
-		    "en": "Uploading images is it public?",
-		    "fr": "L'upload des images est-il public ?"
-		},
-		"choices": ["Yes", "No"],
-		"default": "No"
-	    }
+			{
+			"name": "admin",
+			"ask": {
+				"en": "Choose the Lutim administrator (must be an existing YunoHost user)",
+				"fr": "Choisissez un administrateur Lutim (doit être un utilisateur YunoHost)"
+			},
+				"example": "john",
+				"default": "mcrudelis"
+			},
+			{
+			"name": "is_public",
+			"ask": {
+				"en": "Uploading images is it public?",
+				"fr": "L'upload des images est-il public ?"
+			},
+				"choices": ["Yes", "No"],
+				"default": "No"
+			}
         ]
     }
 }

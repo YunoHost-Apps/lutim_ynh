@@ -10,14 +10,14 @@
 %     }
         <div>
 % # Display image informations
-            % my $url = url_for('/')->to_abs().stash('short');
+            % my $url = index_url(1).stash('short');
             <strong><%= stash('filename') %></strong>
             &nbsp;&nbsp;&nbsp;<a target="_blank" class="btn btn-default btn-primary btn-xs" href="https://twitter.com/share?url=<%= $url %>?t"><%=l 'tweet_it' %></a>
             <ul class="list-unstyled">
                 % my $delete_url = url_for('delete', {short => stash('real_short'), token => stash('token')})->to_abs();
                 <li><i class="icon icon-eye"      title =" <%= l 'view-link' %>"></i>     <%= link_to $url        => begin %> <%= $url %>        <%= end %></li>
                 <li><i class="icon icon-download" title =" <%= l 'download-link' %>"></i> <%= link_to $url.'?dl'  => begin %> <%= $url.'?dl' %>  <%= end %></li>
-                <li><i class="icon icon-twitter"  title =" <%= l 'twitter-link' %>"></i>  <%= link_to $url.'?t'   => begin %> <%= $url.'?t' %>   <%= end %></li>
+                <li><i class="icon icon-share"    title =" <%= l 'share-link' %>"></i>    <%= link_to $url.'?t'   => begin %> <%= $url.'?t' %>   <%= end %></li>
                 <li><i class="icon icon-trash"    title =" <%= l 'delete-link' %>"></i>   <%= link_to $delete_url => begin %> <%= $delete_url %> <%= end %></li>
             </ul>
         </div>
@@ -76,7 +76,7 @@
 </div>
 
 <noscript>
-    <form class="form" role="form" method="POST" action="<%== url_for('add') %>" enctype="multipart/form-data">
+    <form class="form" role="form" method="POST" action="<%== index_url %>" enctype="multipart/form-data">
         <div class="form-group form-inline">
             <select name="delete-day" class="form-control">
                 % for my $delay (qw/0 1 7 30 365/) {
@@ -165,7 +165,7 @@
         </div>
     </div>
     <p class="help-block"><%=l 'image-only' %></p>
-    <form class="form-horizontal" role="form" method="POST" action="<%== url_for('add') %>">
+    <form class="form-horizontal" role="form" method="POST" action="<%== index_url %>">
         <div class="form-group">
             <span class="col-sm-3 col-xs-12"><span class="hidden-spin" style="font-size:200%; display:none;" > <i class="icon-spinner animate-spin pull-right"></i></span><label for="lutim-file-url" class="control-label pull-right"><%=l 'upload_image_url' %></label></span>
             <div class="col-sm-9 col-xs-12">
@@ -181,14 +181,14 @@
     function link(url, dl, token, modify) {
         if (token !== undefined) {
             if (modify !== undefined && modify === true) {
-                return  '<%== url_for('index')->to_abs() %>m/'+url+'/'+token;
+                return  '<%== index_url(1) %>m/'+url+'/'+token;
             } else {
                 url = 'd/'+url+'/'+token;
             }
         } else if (dl !== '') {
             url = url+'?'+dl;
         }
-        return '<a href="<%== url_for('index')->to_abs() %>'+url+'"><%== url_for('index')->to_abs() %>'+url+'</a>';
+        return '<a href="<%== index_url(1) %>'+url+'"><%== index_url(1) %>'+url+'</a>';
     }
     function share(url) {
         console.log(url);
@@ -202,9 +202,9 @@
         });
     }
     function tw_url(url) {
-        var btn = '&nbsp;&nbsp;&nbsp;<a target="_blank" class="btn btn-default btn-primary btn-xs" href="https://twitter.com/share?url=<%== url_for('index')->to_abs() %>'+url+'?t"><%=l 'tweet_it' %></a>';
+        var btn = '&nbsp;&nbsp;&nbsp;<a target="_blank" class="btn btn-default btn-primary btn-xs" href="https://twitter.com/share?url=<%== index_url(1) %>'+url+'?t"><%=l 'tweet_it' %></a>';
         if (navigator.mozSetMessageHandler !== undefined) {
-            btn = btn+'&nbsp;&nbsp;&nbsp;<a target="_blank" class="btn btn-default btn-primary btn-xs" href="" onclick="share(\'<%== url_for('index')->to_abs() %>'+url+'?t\');return false;"><%=l 'share_it' %></a>';
+            btn = btn+'&nbsp;&nbsp;&nbsp;<a target="_blank" class="btn btn-default btn-primary btn-xs" href="" onclick="share(\'<%== index_url(1) %>'+url+'?t\');return false;"><%=l 'share_it' %></a>';
         }
         return btn
     }
@@ -213,7 +213,7 @@
             url  : url,
             type : "POST",
             data : {
-                'image_url'      : '<%== url_for('index')->to_abs() %>'+short,
+                'image_url'      : '<%== index_url(1) %>'+short,
                 'format'         : 'json',
                 'first-view'     : ($("#first-view-"+short).prop('checked')) ? 1 : 0,
                 'delete-day'     : $("#day-"+short).val()
@@ -239,7 +239,7 @@
                 +link(msg.short, '')
                 +'</li><li><i class="icon icon-download" title="<%=l 'download-link' %>"></i>&nbsp;'
                 +link(msg.short, 'dl')
-                +'</li><li><i class="icon icon-twitter" title="<%=l 'twitter-link' %>"></i>&nbsp;'
+                +'</li><li><i class="icon icon-share" title="<%=l 'share-link' %>"></i>&nbsp;'
                 +link(msg.short, 't')
                 +'</li><li><i class="icon icon-trash" title="<%=l 'delete-link' %>"></i>&nbsp;'
                 +link(msg.real_short, '', msg.token)
@@ -279,7 +279,7 @@
     }
     function bindddz(firstview, deleteday) {
         $('#drag-and-drop-zone').dmUploader({
-            url: '<%== url_for('add') %>',
+            url: '<%== index_url %>',
             dataType: 'json',
             allowedTypes: 'image/*',
             maxFileSize: <%= $max_file_size %>,
@@ -312,7 +312,7 @@
             $(".hidden-spin").css('display', 'block');
             console.log(val);
             $.ajax({
-                url  : '<%== url_for('add') %>',
+                url  : '<%== index_url %>',
                 type : "POST",
                 data : {
                     'lutim-file-url' : val,
@@ -352,7 +352,7 @@
         $(".messages").append('<div id="1-div">'+file.name+'<br><div class="progress"><div id="1"class="progress-bar progress-striped active" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"><span id="1-text" class="pull-left" style="padding-left: 10px;"> 0%</span></div></div></div>');
         // Ajax Submit
         $.ajax({
-            url: '<%== url_for('add') %>',
+            url: '<%== index_url %>',
             type: 'POST',
             dataType: 'json',
             data: fd,

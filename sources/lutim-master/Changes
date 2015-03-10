@@ -1,5 +1,19 @@
 Revision history for Lutim
 
+0.7  2015-?
+	- Allow Lutim to be on a sub-directory (like http://example.org/lutim/) (#46)
+	- Remove deprecated (due to typo) option "provisionning".
+
+0.6  2014-10-03
+	- Add OpenGraph tags in social page (ex-twitter page)
+	- Update README.md
+	- Update info page
+
+0.5  2014-09-24
+	- Add support for animated gif in Twitter cards (#45)
+	- Update README.md with Twitter integration informations
+	- bugfixes
+
 0.4  2014-07-12
 	- Webapp ! Downloadable directly from the Lutim instance
 	- Configure expiration delay after uploading (#12)
