@@ -7,7 +7,7 @@
     hypnotoad => {
         # array of IP addresses and ports you want to listen to
         #listen => ['http://127.0.0.1:8080'],
-        listen => ['http://127.0.0.1:8095'],
+        listen => ['http://127.0.0.1:__PORT__'],
         # user and group you want for Lutim to run with
         # be sure that this user/group have rights on the lutim directory
         # if you launch lutim from a different user, be sure that this user have the right to su this user/group
@@ -26,7 +26,7 @@
 
     # random string used to encrypt cookies
     # mandatory
-    secrets           => ['fdjsofjoihrei'],
+    secrets           => ['__SECRET__'],
 
     # length of the images random URL
     # optional, default is 8
@@ -64,7 +64,7 @@
     # here's an exemple to put the logo of your hoster
     # optional, no default
     #hosted_by         => 'My super hoster <img src="http://hoster.example.com" alt="Hoster logo">',
-    hosted_by         => '<a href="__DOMAIN__/__PATH__/stats">Stats</a>',
+    hosted_by         => '<a href="stats" target="_blank">Statistiques</a>',
 
     # DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED
     # Lutim now checks if the X-Forwarded-Proto header is present and equal to https.

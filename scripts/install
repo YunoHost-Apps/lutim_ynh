@@ -13,20 +13,47 @@ if [[ ! $? -eq 0 ]]; then
     exit 1
 fi
 
+# Vérifie l'existence du / en fin de path
+if [ $(echo "$path" | grep -c '/$') -eq 0 ]
+then
+    path="$path/"
+fi 
+
 # Check domain/path availability
 sudo yunohost app checkurl $domain$path -a lutim
 if [[ ! $? -eq 0 ]]; then
     exit 1
 fi
 
+# Get an available port
+port=8095
+sudo yunohost app checkport $port
+while [[ ! $? -eq 0 ]]; do
+    port=$((port+1))
+    sudo yunohost app checkport $port
+done
+
+# Check /var/www/$app path is available
+final_path=/var/www/lutim
+if [ -e "$final_path" ]
+then
+    echo "This path already contains a folder"
+    exit 1
+fi
+
 # Add settings to YunoHost
 sudo yunohost app setting lutim admin -v $admin
 sudo yunohost app setting lutim domain -v $domain
+sudo yunohost app setting lutim is_public -v $is_public
+
 
 # Copy files to right place
-final_path=/var/www/lutim
 sudo mkdir -p $final_path
-sudo cp -a ../sources/lutim-master/* $final_path
+# Création archive source: tar -czp -f lutim.tar.gz lutim
+# Décompresse la source
+tar -x -f ../sources/lutim.tar.gz
+sudo cp -a lutim/. $final_path
+sudo cp -a ../sources/ajouts/. $final_path
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/lutim.conf
 
 # Installation du module perl carton
@@ -41,9 +68,13 @@ sudo apt-get install perlmagick -qy
 sudo cp ../conf/lutim.conf.template $final_path/lutim.conf
 sudo sed -i "s@__DOMAIN__@$domain@g" $final_path/lutim.conf
 sudo sed -i "s@__PATH__@$path@g" $final_path/lutim.conf
+sudo sed -i "s@__PORT__@$port@g" $final_path/lutim.conf
+secret=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d '[A-Za-z0-9]' | sed -n 's/\(.\{24\}\).*/\1/p')
+sudo sed -i "s@__SECRET__@$secret@g" $final_path/lutim.conf
+
 
 # Mise en place des scripts init
-sudo cp ../sources/lutim-master/utilities/lutim.init /etc/init.d/lutim
+sudo cp ../conf/lutim.init /etc/init.d/lutim
 sudo cp ../conf/lutim.default /etc/default/lutim
 sudo chmod +x /etc/init.d/lutim
 sudo chown root:root /etc/init.d/lutim /etc/default/lutim
@@ -63,13 +94,13 @@ sudo update-rc.d lutim defaults
 
 # Change variables in nginx configuration
 sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/lutim.conf
+sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/lutim.conf
 
 
 # Set right permissions
 sudo chown -R www-data: $final_path
 
 # Make app public or private
-sudo yunohost app setting lutim is_public -v "$is_public"
 if [ "$is_public" = "Yes" ];
 then
 	sudo yunohost app setting lutim skipped_uris -v "/"
