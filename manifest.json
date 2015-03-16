@@ -1,0 +1,55 @@
+{
+    "name": "Lutim",
+    "id": "lutim",
+    "description": {
+        "en": "Leed is a minimalistic RSS feed aggregator which allows quick and non-intrusive reading of feeds.",
+	"fr": "Lutim est un logiciel d’hébergement d’images. Il s’agit aussi du nom du logiciel (libre) qui fournit ce service."
+    },
+	"version": "0.6",
+	"url": "https://lut.im",
+    "maintainer": {
+        "name": "Maniack Crudelis",
+        "email": "maniackc_dev@crudelis.fr"
+    },
+    "multi_instance": "false",
+    "arguments": {
+        "install" : [
+            {
+                "name": "domain",
+                "ask": {
+                    "en": "Choose a domain for Lutim",
+					"fr": "Choisissez un domaine pour Lutim"
+                },
+                "example": "domain.org",
+                "default": "crudelis-test.fr"
+            },
+            {
+                "name": "path",
+                "ask": {
+                    "en": "Choose a path for Lutim",
+					"fr": "Choisissez un chemin pour Lutim"
+                },
+                "example": "/lutim",
+                "default": "/lutim"
+            },
+			{
+			"name": "admin",
+			"ask": {
+				"en": "Choose the Lutim administrator (must be an existing YunoHost user)",
+				"fr": "Choisissez un administrateur Lutim (doit être un utilisateur YunoHost)"
+			},
+				"example": "john",
+				"default": "mcrudelis"
+			},
+			{
+			"name": "is_public",
+			"ask": {
+				"en": "Uploading images is it public?",
+				"fr": "L'upload des images est-il public ?"
+			},
+				"choices": ["Yes", "No"],
+				"default": "No"
+			}
+        ]
+    }
+}

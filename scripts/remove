@@ -1,0 +1,12 @@
+#!/bin/bash
+
+app=lutim
+
+domain=$(sudo yunohost app setting $app domain)
+final_path=$(sudo yunohost app setting $app final_path)
+sudo service lutim stop
+sudo rm -f /etc/nginx/conf.d/$domain.d/$app.conf
+# sudo rm -rf $final_path
+sudo rm -rf /var/www/lutim
+sudo rm -f /etc/default/lutim
+sudo rm -f /etc/init.d/lutim
