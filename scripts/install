@@ -5,6 +5,7 @@ domain=$1
 path=$2
 admin=$3
 is_public=$4
+app=lutim
 
 # Check if admin exists
 sudo yunohost user list --json | grep -q "\"username\": \"$admin\""
@@ -20,7 +21,7 @@ then
 fi 
 
 # Check domain/path availability
-sudo yunohost app checkurl $domain$path -a lutim
+sudo yunohost app checkurl $domain$path -a $app
 if [[ ! $? -eq 0 ]]; then
     exit 1
 fi
@@ -34,7 +35,7 @@ while [[ ! $? -eq 0 ]]; do
 done
 
 # Check /var/www/$app path is available
-final_path=/var/www/lutim
+final_path=/var/www/$app
 if [ -e "$final_path" ]
 then
     echo "This path already contains a folder"
@@ -42,9 +43,9 @@ then
 fi
 
 # Add settings to YunoHost
-sudo yunohost app setting lutim admin -v $admin
-sudo yunohost app setting lutim domain -v $domain
-sudo yunohost app setting lutim is_public -v $is_public
+sudo yunohost app setting $app admin -v $admin
+sudo yunohost app setting $app domain -v $domain
+sudo yunohost app setting $app is_public -v $is_public
 
 
 # Copy files to right place
@@ -54,7 +55,7 @@ sudo mkdir -p $final_path
 tar -x -f ../sources/lutim.tar.gz
 sudo cp -a lutim/. $final_path
 sudo cp -a ../sources/ajouts/. $final_path
-sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/lutim.conf
+sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
 # Installation du module perl carton
 echo "Installation du module perl carton. Attention, étape très longue..."
@@ -81,8 +82,8 @@ sudo chown root:root /etc/init.d/lutim /etc/default/lutim
 sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/default/lutim
 
 ## Mise en place des crons
-sudo cp ../conf/cron_lutim /etc/cron.d/lutim
-sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/lutim
+sudo cp ../conf/cron_lutim /etc/cron.d/$app
+sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
 
 # Installation de lutim via carton
 cd $final_path
@@ -93,22 +94,24 @@ sudo update-rc.d lutim defaults
 # sudo update-rc.d -f lutim remove
 
 # Change variables in nginx configuration
-sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/lutim.conf
-sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/lutim.conf
+sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/$app.conf
+sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
 
+# Make app public or private
+sudo yunohost app setting $app skipped_uris -v "/"
+if [ "$is_public" = "No" ];
+then	# Si l'app est privée, seul le visionnage des images est public
+	sudo yunohost app setting $app protected_regex -v "/stats$","/manifest.webapp$","/$","/d/.*$","/m/.*$"
+# 	sudo yunohost app setting $app skipped_regex -v "$domain/$path/[0-9A-Za-z]{8}"
+fi
 
 # Set right permissions
 sudo chown -R www-data: $final_path
-
-# Make app public or private
-if [ "$is_public" = "Yes" ];
-then
-	sudo yunohost app setting lutim skipped_uris -v "/"
-# else	# Si l'app est privée, seul le visionnage des images est public
-# 	sudo yunohost app setting lutim skipped_regex -v "/(stats|manifest.webapp|(d|m)/.+)?$"
-fi
-
-# Reload Nginx, start lutim and regenerate SSOwat conf
-sudo service nginx reload
+# Start lutim
 sudo /etc/init.d/lutim start
+# Set right permissions on new files created at first start
+sudo chown -R www-data: $final_path
+
+# Reload Nginx and regenerate SSOwat conf
+sudo service nginx reload
 sudo yunohost app ssowatconf
