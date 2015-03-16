@@ -11,7 +11,7 @@
         "name": "Maniack Crudelis",
         "email": "maniackc_dev@crudelis.fr"
     },
-    "multi_instance": "true",
+    "multi_instance": "false",
     "arguments": {
         "install" : [
             {
