@@ -14,11 +14,8 @@ if [[ ! $? -eq 0 ]]; then
     exit 1
 fi
 
-# Vérifie l'existence du / en fin de path
-if [ $(echo "$path" | grep -c '/$') -eq 0 ]
-then
-    path="$path/"
-fi 
+# Vérifie l'absence du / en fin de path
+echo "$path" | sed 's@/$@@'
 
 # Check domain/path availability
 sudo yunohost app checkurl $domain$path -a $app
@@ -49,29 +46,29 @@ sudo yunohost app setting $app is_public -v $is_public
 
 
 # Copy files to right place
-sudo mkdir -p $final_path
+sudo mkdir -p "$final_path"
 # Création archive source: tar -czp -f lutim.tar.gz lutim
 # Décompresse la source
 tar -x -f ../sources/lutim.tar.gz
-sudo cp -a lutim/. $final_path
-sudo cp -a ../sources/ajouts/. $final_path
+sudo cp -a lutim/. "$final_path"
+sudo cp -a ../sources/ajouts/. "$final_path"
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
 # Installation du module perl carton
 echo "Installation du module perl carton. Attention, étape très longue..."
 # yes | sudo cpan Carton | sudo tee $final_path/cpan_setup.log 2>&1 > /dev/null 2>&1 # Debug
-yes | sudo cpan Carton > /dev/null 2>&1
+yes | sudo cpan Carton > "$final_path/log/setup_carton.log" 2>&1
 
 # Installation de perlmagick, interface perl pour imagemagick
 sudo apt-get install perlmagick -qy
 
 ## Copie et configuration du fichier de conf.
-sudo cp ../conf/lutim.conf.template $final_path/lutim.conf
-sudo sed -i "s@__DOMAIN__@$domain@g" $final_path/lutim.conf
-sudo sed -i "s@__PATH__@$path@g" $final_path/lutim.conf
-sudo sed -i "s@__PORT__@$port@g" $final_path/lutim.conf
+sudo cp ../conf/lutim.conf.template "$final_path/lutim.conf"
+sudo sed -i "s@__DOMAIN__@$domain@g" "$final_path/lutim.conf"
+sudo sed -i "s@__PATH__@$path@g" "$final_path/lutim.conf"
+sudo sed -i "s@__PORT__@$port@g" "$final_path/lutim.conf"
 secret=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
-sudo sed -i "s@__SECRET__@$secret@g" $final_path/lutim.conf
+sudo sed -i "s@__SECRET__@$secret@g" "$final_path/lutim.conf"
 
 
 # Mise en place des scripts init
@@ -88,7 +85,7 @@ sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
 
 # Installation de lutim via carton
 cd $final_path
-sudo carton install
+sudo carton install 2>&1 | tee -a "$final_path/log/setup_carton.log"
 
 ## Démarrage auto des scripts init
 sudo update-rc.d lutim defaults
@@ -111,7 +108,7 @@ sudo chown -R www-data: $final_path
 # Start lutim
 sudo /etc/init.d/lutim start
 # Set right permissions on new files created at first start
-sudo chown -R www-data: $final_path
+sudo chown -R www-data: "$final_path"
 
 # Reload Nginx and regenerate SSOwat conf
 sudo service nginx reload
