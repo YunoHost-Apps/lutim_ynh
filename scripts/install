@@ -70,12 +70,13 @@ sudo cp ../conf/lutim.conf.template $final_path/lutim.conf
 sudo sed -i "s@__DOMAIN__@$domain@g" $final_path/lutim.conf
 sudo sed -i "s@__PATH__@$path@g" $final_path/lutim.conf
 sudo sed -i "s@__PORT__@$port@g" $final_path/lutim.conf
-secret=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d '[A-Za-z0-9]' | sed -n 's/\(.\{24\}\).*/\1/p')
+secret=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
 sudo sed -i "s@__SECRET__@$secret@g" $final_path/lutim.conf
 
 
 # Mise en place des scripts init
 sudo cp ../conf/lutim.init /etc/init.d/lutim
+sudo sed -i "s@__FINALPATH__@$final_path@g" /etc/init.d/lutim
 sudo cp ../conf/lutim.default /etc/default/lutim
 sudo chmod +x /etc/init.d/lutim
 sudo chown root:root /etc/init.d/lutim /etc/default/lutim

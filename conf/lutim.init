@@ -17,7 +17,7 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=script/lutim
 NAME=lutim
 DESC=lutim
-LUTIM_DIR=__PATH__
+LUTIM_DIR=__FINALPATH__
 
 if [ -f "/etc/default/lutim" ]
 then
