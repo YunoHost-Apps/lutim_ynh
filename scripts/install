@@ -98,8 +98,8 @@ sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
 # Make app public or private
 sudo yunohost app setting $app skipped_uris -v "/"
 if [ "$is_public" = "No" ];
-then	# Si l'app est privée, seul le visionnage des images est public
-	sudo yunohost app setting $app protected_regex -v "/stats$","/manifest.webapp$","/$","/d/.*$","/m/.*$"
+then	# Si l'app est privée, seul le visionnage des images reste public
+	sudo yunohost app setting $app protected_regex -v "$path/stats$","$path/manifest.webapp$","$path/$","$path/d/.*$","$path/m/.*$"
 # 	sudo yunohost app setting $app skipped_regex -v "$domain/$path/[0-9A-Za-z]{8}"
 fi
 
