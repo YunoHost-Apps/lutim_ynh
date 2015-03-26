@@ -18,15 +18,15 @@
                 "name": "domain",
                 "ask": {
                     "en": "Choose a domain for Lutim",
-					"fr": "Choisissez un domaine pour Lutim"
+		    "fr": "Choisissez un domaine pour Lutim"
                 },
-                "example": "domain.org",
+                "example": "domain.org"
             },
             {
                 "name": "path",
                 "ask": {
                     "en": "Choose a path for Lutim",
-					"fr": "Choisissez un chemin pour Lutim"
+		    "fr": "Choisissez un chemin pour Lutim"
                 },
                 "example": "/lutim",
                 "default": "/lutim"
@@ -37,7 +37,7 @@
 					"en": "Choose the Lutim administrator (must be an existing YunoHost user)",
 					"fr": "Choisissez un administrateur Lutim (doit être un utilisateur YunoHost)"
 				},
-				"example": "john",
+				"example": "john"
 			},
 			{
 				"name": "is_public",
