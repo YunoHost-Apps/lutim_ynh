@@ -93,7 +93,7 @@
 
     # if set to 1, all the images will be encrypted and the encryption option will no be displayed
     # optional, default is 0
-    #always_encrypt    => 0,
+    always_encrypt    => __ENCRYPT__,
 
     # length of the image's delete token
     # optional, default is 24

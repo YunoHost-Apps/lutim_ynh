@@ -1,12 +1,31 @@
 #!/bin/bash
-
 app=lutim
 
 domain=$(sudo yunohost app setting $app domain)
-final_path=$(sudo yunohost app setting $app final_path)
+
+# Arrêt de lutim
 sudo service lutim stop
+
+# Suppression du dossier
+sudo rm -rf /var/www/$app
+
+# Suppression de la configuration nginx
 sudo rm -f /etc/nginx/conf.d/$domain.d/$app.conf
-# sudo rm -rf $final_path
-sudo rm -rf /var/www/lutim
+
+# Suppression des fichiers init
 sudo rm -f /etc/default/lutim
 sudo rm -f /etc/init.d/lutim
+sudo update-rc.d -f lutim remove
+
+# Retirer le cron
+sudo rm -f /etc/cron.d/$app
+
+# Remove lutim service in ynh panel
+sudo yunohost service remove lutim
+
+# Suppression des log
+sudo rm -r /var/log/$app/
+
+# Reload Nginx and regenerate SSOwat conf
+sudo service nginx reload
+sudo yunohost app ssowatconf

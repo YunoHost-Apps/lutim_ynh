@@ -2,8 +2,8 @@
     "name": "Lutim",
     "id": "lutim",
     "description": {
-		"en": "Images self hosting application",
-		"fr": "Application d'upload d'images"
+		"en": "Self hosting images and sharing anonymous application",
+		"fr": "Application d'hébergement et de partage d'images anonyme"
     },
 	"version": "0.6",
 	"url": "https://lut.im",
@@ -21,7 +21,6 @@
 					"fr": "Choisissez un domaine pour Lutim"
                 },
                 "example": "domain.org",
-                "default": "crudelis-test.fr"
             },
             {
                 "name": "path",
@@ -39,7 +38,6 @@
 					"fr": "Choisissez un administrateur Lutim (doit être un utilisateur YunoHost)"
 				},
 				"example": "john",
-				"default": "mcrudelis"
 			},
 			{
 				"name": "is_public",
@@ -49,6 +47,15 @@
 				},
 				"choices": ["Yes", "No"],
 				"default": "No"
+			},
+			{
+				"name": "always_encrypt",
+				"ask": {
+					"en": "Force the encryption of images?",
+					"fr": "Forcer le chiffrement des images ?"
+				},
+				"choices": ["Yes", "No"],
+				"default": "Yes"
 			}
         ]
     }

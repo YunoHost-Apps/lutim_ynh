@@ -3,7 +3,7 @@ Lutim for YunoHost
 
 [Yunohost project](https://yunohost.org/#/)
 
-...Description...
+Application d'hébergement et de partage d'images anonyme.
 
 https://lut.im
 

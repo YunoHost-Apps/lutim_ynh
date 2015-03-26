@@ -5,6 +5,7 @@ domain=$1
 path=$2
 admin=$3
 is_public=$4
+always_encrypt=$5
 app=lutim
 
 # Check if admin exists
@@ -43,6 +44,8 @@ fi
 sudo yunohost app setting $app admin -v $admin
 sudo yunohost app setting $app domain -v $domain
 sudo yunohost app setting $app is_public -v $is_public
+sudo yunohost app setting $app port -v $port
+sudo yunohost app setting $app always_encrypt -v $always_encrypt
 
 
 # Copy files to right place
@@ -55,9 +58,9 @@ sudo cp -a ../sources/ajouts/. "$final_path"
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
 # Installation du module perl carton
+sudo mkdir -p /var/log/$app/
 echo "Installation du module perl carton. Attention, étape très longue..."
-# yes | sudo cpan Carton | sudo tee $final_path/cpan_setup.log 2>&1 > /dev/null 2>&1 # Debug
-yes | sudo cpan Carton > "$final_path/log/setup_carton.log" 2>&1
+yes | sudo cpan Carton 2>&1 | sudo tee "/var/log/$app/setup_carton.log" > /dev/null
 
 # Installation de perlmagick, interface perl pour imagemagick
 sudo apt-get install perlmagick -qy
@@ -67,13 +70,19 @@ sudo cp ../conf/lutim.conf.template "$final_path/lutim.conf"
 sudo sed -i "s@__DOMAIN__@$domain@g" "$final_path/lutim.conf"
 sudo sed -i "s@__PATH__@$path@g" "$final_path/lutim.conf"
 sudo sed -i "s@__PORT__@$port@g" "$final_path/lutim.conf"
+if [ "always_encrypt" = "No" ]; then
+	always_encrypt=0
+else
+	always_encrypt=1
+fi
+sudo sed -i "s@__ENCRYPT__@$always_encrypt@g" "$final_path/lutim.conf"
 secret=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
 sudo sed -i "s@__SECRET__@$secret@g" "$final_path/lutim.conf"
 
 
 # Mise en place des scripts init
 sudo cp ../conf/lutim.init /etc/init.d/lutim
-sudo sed -i "s@__FINALPATH__@$final_path@g" /etc/init.d/lutim
+# sudo sed -i "s@__FINALPATH__@$final_path@g" /etc/init.d/lutim
 sudo cp ../conf/lutim.default /etc/default/lutim
 sudo chmod +x /etc/init.d/lutim
 sudo chown root:root /etc/init.d/lutim /etc/default/lutim
@@ -85,7 +94,7 @@ sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
 
 # Installation de lutim via carton
 cd $final_path
-sudo carton install 2>&1 | tee -a "$final_path/log/setup_carton.log"
+sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
 
 ## Démarrage auto des scripts init
 sudo update-rc.d lutim defaults
@@ -100,8 +109,13 @@ sudo yunohost app setting $app skipped_uris -v "/"
 if [ "$is_public" = "No" ];
 then	# Si l'app est privée, seul le visionnage des images reste public
 	sudo yunohost app setting $app protected_regex -v "$path/stats$","$path/manifest.webapp$","$path/$","$path/d/.*$","$path/m/.*$"
-# 	sudo yunohost app setting $app skipped_regex -v "$domain/$path/[0-9A-Za-z]{8}"
 fi
+
+# Making log symbolic link to /var/log
+sudo touch /var/log/$app/production.log 
+sudo chown www-data: /var/log/$app/production.log
+# sudo rm -f /var/www/$app/log/production.log
+sudo ln -s /var/log/$app/production.log "$final_path/log/production.log"
 
 # Set right permissions
 sudo chown -R www-data: $final_path
@@ -109,6 +123,9 @@ sudo chown -R www-data: $final_path
 sudo /etc/init.d/lutim start
 # Set right permissions on new files created at first start
 sudo chown -R www-data: "$final_path"
+
+# Add lutim as a service
+sudo yunohost service add lutim -l $final_path/log/production.log
 
 # Reload Nginx and regenerate SSOwat conf
 sudo service nginx reload

@@ -17,7 +17,6 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=script/lutim
 NAME=lutim
 DESC=lutim
-LUTIM_DIR=__FINALPATH__
 
 if [ -f "/etc/default/lutim" ]
 then
@@ -50,7 +49,7 @@ do_start()
     # 2 if daemon could not be started
 
     cd $LDIR
-    carton exec hypnotoad $DAEMON >> $LUTIM_DIR/log/production.log 2>&1
+    carton exec hypnotoad $DAEMON >> /var/log/lutim/production.log 2>&1
     return "$?"
 }
 
@@ -63,7 +62,7 @@ do_stop()
     # other if a failure occurred
 
     cd $LDIR
-    carton exec hypnotoad -s $DAEMON >> $LUTIM_DIR/log/production.log 2>&1
+    carton exec hypnotoad -s $DAEMON >> /var/log/lutim/production.log 2>&1
 
     return "$?"
 }
@@ -76,11 +75,14 @@ do_status()
         pgrep -lf $DAEMON >/dev/null 2>&1
         if [ "$?" = "0" ]; then
             log_progress_msg "$NAME is running"
+            log_end_msg 0
         else
             log_progress_msg "$NAME is NOT running"
+            log_end_msg 1
         fi
     else
         log_progress_msg "$NAME is NOT running"
+        log_end_msg 1
     fi
 }
 

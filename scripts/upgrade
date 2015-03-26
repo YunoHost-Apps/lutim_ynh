@@ -1,41 +1,62 @@
 #!/bin/bash
 
+app=lutim
+
 # Retrieve arguments
-domain=$(sudo yunohost app setting leed domain)
-path=$(sudo yunohost app setting leed path)
-is_public=$(sudo yunohost app setting leed is_public)
+domain=$(sudo yunohost app setting $app domain)
+path=$(sudo yunohost app setting $app path)
+is_public=$(sudo yunohost app setting $app is_public)
+port=$(sudo yunohost app setting $app port)
+always_encrypt=$(sudo yunohost app setting $app always_encrypt)
 
 # Copy files to right place
-final_path=/var/www/leed
-sudo mkdir -p $final_path
-sudo cp -a ../sources/* $final_path
-sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/leed.conf
+final_path=/var/www/$app
+# Décompresse la source
+tar -x -f ../sources/lutim.tar.gz
+sudo cp -a lutim/. "$final_path"
+sudo cp -a ../sources/ajouts/. "$final_path"
+sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+
+# Change variables in nginx configuration
+sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/$app.conf
+sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
+
+## Copie et configuration du fichier de conf.
+sudo cp ../conf/lutim.conf.template "$final_path/lutim.conf"
+sudo sed -i "s@__DOMAIN__@$domain@g" "$final_path/lutim.conf"
+sudo sed -i "s@__PATH__@$path@g" "$final_path/lutim.conf"
+sudo sed -i "s@__PORT__@$port@g" "$final_path/lutim.conf"
+if [ "always_encrypt" = "No" ]; then
+	always_encrypt=0
+else
+	always_encrypt=1
+fi
+sudo sed -i "s@__ENCRYPT__@$always_encrypt@g" "$final_path/lutim.conf"
+
+# Mise en place des scripts init
+sudo cp ../conf/lutim.init /etc/init.d/lutim
+sudo sed -i "s@__FINALPATH__@$final_path@g" /etc/init.d/lutim
+sudo cp ../conf/lutim.default /etc/default/lutim
+sudo chmod +x /etc/init.d/lutim
+sudo chown root:root /etc/init.d/lutim /etc/default/lutim
+sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/default/lutim
+
+## Mise en place des crons
+sudo cp ../conf/cron_lutim /etc/cron.d/$app
+sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
+
+# Make app public or private
+sudo yunohost app setting $app skipped_uris -v "/"
+if [ "$is_public" = "No" ];
+then	# Si l'app est privée, seul le visionnage des images reste public
+	sudo yunohost app setting $app protected_regex -v "$path/stats$","$path/manifest.webapp$","$path/$","$path/d/.*$","$path/m/.*$"
+fi
 
 # Set right permissions
 sudo chown -R www-data: $final_path
+# Restart lutim
+sudo /etc/init.d/lutim restart
 
-# Change variables in Leed configuration
-sudo sed -i "s@PATHTOCHANGE@$path@g" /etc/nginx/conf.d/$domain.d/leed.conf
-sudo sed -i "s@ALIASTOCHANGE@$final_path/@g" /etc/nginx/conf.d/$domain.d/leed.conf
-
-# Files owned by root, www-data can just read
-sudo find $final_path -type f | xargs sudo chmod 644
-sudo find $final_path -type d | xargs sudo chmod 755
-sudo chown -R root: $final_path
-# www-data can write on plugins and cache
-sudo chown -R www-data $final_path/cache $final_path/plugins
-
-# Make app private if necessary
-sudo yunohost app setting leed is_public -v "$is_public"
-if [ "$is_public" = "No" ];
-then
-	# Retire l'autorisation d'accès de la page d'install.
-	sudo yunohost app setting leed unprotected_uris -d
-	# Rend la page d'actualisation accessible pour le script cron.
-	sudo yunohost app setting leed skipped_uris -v "/action.php"
-else	# Si l'app est publique
-	sudo yunohost app setting leed unprotected_uris -v "/"
-fi
 
 # Reload Nginx and regenerate SSOwat conf
 sudo service nginx reload
