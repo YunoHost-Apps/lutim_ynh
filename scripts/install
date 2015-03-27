@@ -16,7 +16,7 @@ if [[ ! $? -eq 0 ]]; then
 fi
 
 # Vérifie l'absence du / en fin de path
-echo "$path" | sed 's@/$@@'
+path=$(echo "$path" | sed 's@/$@@')
 
 # Check domain/path availability
 sudo yunohost app checkurl $domain$path -a $app
