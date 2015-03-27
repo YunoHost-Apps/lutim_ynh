@@ -70,7 +70,7 @@ sudo cp ../conf/lutim.conf.template "$final_path/lutim.conf"
 sudo sed -i "s@__DOMAIN__@$domain@g" "$final_path/lutim.conf"
 sudo sed -i "s@__PATH__@$path@g" "$final_path/lutim.conf"
 sudo sed -i "s@__PORT__@$port@g" "$final_path/lutim.conf"
-if [ "always_encrypt" = "No" ]; then
+if [ "$always_encrypt" = "No" ]; then
 	always_encrypt=0
 else
 	always_encrypt=1
