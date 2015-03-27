@@ -22,6 +22,9 @@ fi
 # Vérifie l'absence du / en fin de path
 pathRslash=$(echo "$path" | sed 's@/$@@')
 
+# Modifie le domaine pour qu'il passe dans une regex
+domain_regex=$(echo "$domain" | sed 's@-@.@g')
+
 # Check domain/path availability
 sudo yunohost app checkurl $domain$path -a $app
 if [[ ! $? -eq 0 ]]; then
@@ -112,7 +115,7 @@ sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
 sudo yunohost app setting $app skipped_uris -v "/"
 if [ "$is_public" = "No" ];
 then	# Si l'app est privée, seul le visionnage des images reste public
-	sudo yunohost app setting $app protected_regex -v "$pathRslash/stats$","$pathRslash/manifest.webapp$","$pathRslash/$","$pathRslash/d/.*$","$pathRslash/m/.*$"
+	sudo yunohost app setting $app protected_regex -v "$domain_regex$pathRslash/stats$","$domain_regex$pathRslash/manifest.webapp$","$domain_regex$pathRslash/$","$domain_regex$pathRslash/d/.*$","$domain_regex$pathRslash/m/.*$"
 fi
 
 # Making log symbolic link to /var/log
