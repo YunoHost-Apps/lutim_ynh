@@ -67,10 +67,10 @@ sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 # Installation du module perl carton
 sudo mkdir -p /var/log/$app/
 echo "Installation du module perl carton. Attention, étape très longue..."
-yes | sudo cpan Carton 2>&1 | sudo tee "/var/log/$app/setup_carton.log" > /dev/null
+## yes | sudo cpan Carton 2>&1 | sudo tee "/var/log/$app/setup_carton.log" > /dev/null
 
 # Installation de perlmagick, interface perl pour imagemagick
-sudo apt-get install perlmagick -qy
+sudo apt-get install carton perlmagick -qy
 
 ## Copie et configuration du fichier de conf.
 sudo cp ../conf/lutim.conf.template "$final_path/lutim.conf"
