@@ -1,9 +1,5 @@
 #!/bin/bash
 
-echo "Installation bloquée en raison d'un bug perl à l'installation de carton qui bloque le démarrage de postgrey."
-echo "On cherche la solution..."
-exit 1
-
 # Retrieve arguments
 domain=$1
 path=$2
