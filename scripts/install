@@ -69,6 +69,7 @@ sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 ## yes | sudo cpan Carton 2>&1 | sudo tee "/var/log/$app/setup_carton.log" > /dev/null
 
 # Installation de perlmagick, interface perl pour imagemagick et de carton, gestionnaire de dépendances perl
+sudo apt-get update
 sudo apt-get install carton perlmagick -qy
 
 ## Copie et configuration du fichier de conf.
