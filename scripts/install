@@ -94,6 +94,7 @@ sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/default/lutim
 ## Mise en place des crons
 sudo cp ../conf/cron_lutim /etc/cron.d/$app
 sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
+sudo chmod +x $final_path/script/lutim
 
 # Installation de lutim via carton
 sudo mkdir -p /var/log/$app/
