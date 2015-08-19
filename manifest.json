@@ -2,11 +2,11 @@
     "name": "Lutim",
     "id": "lutim",
     "description": {
-        "en": "Self hosting images and sharing anonymous application",
-        "fr": "Application d'hébergement et de partage d'images anonyme"
+		"en": "Self hosting images and sharing anonymous application",
+		"fr": "Application d'hébergement et de partage d'images anonyme"
     },
-    "version": "0.6",
-    "url": "https://lut.im",
+	"version": "0.6",
+	"url": "https://lut.im",
     "maintainer": {
         "name": "Maniack Crudelis et matlink",
         "email": "maniackc_dev@crudelis.fr matlink@matlink.fr"
@@ -31,32 +31,32 @@
                 "example": "/lutim",
                 "default": "/lutim"
             },
-            {
-                "name": "admin",
-                "ask": {
-                    "en": "Choose the Lutim administrator (must be an existing YunoHost user)",
-                    "fr": "Choisissez un administrateur Lutim (doit être un utilisateur YunoHost)"
-                },
-                "example": "john"
-            },
-            {
-                "name": "is_public",
-                "ask": {
-                    "en": "Uploading images is it public?",
-                    "fr": "L'upload des images est-il public ?"
-                },
-                "choices": ["Yes", "No"],
-                "default": "No"
-            },
-            {
-                "name": "always_encrypt",
-                "ask": {
-                    "en": "Force the encryption of images?",
-                    "fr": "Forcer le chiffrement des images ?"
-            },
-                "choices": ["Yes", "No"],
-                "default": "Yes"
-            }
+			{
+				"name": "admin",
+				"ask": {
+					"en": "Choose the Lutim administrator (must be an existing YunoHost user)",
+					"fr": "Choisissez un administrateur Lutim (doit être un utilisateur YunoHost)"
+				},
+				"example": "john"
+			},
+			{
+				"name": "is_public",
+				"ask": {
+					"en": "Uploading images is it public?",
+					"fr": "L'upload des images est-il public ?"
+				},
+				"choices": ["Yes", "No"],
+				"default": "No"
+			},
+			{
+				"name": "always_encrypt",
+				"ask": {
+					"en": "Force the encryption of images?",
+					"fr": "Forcer le chiffrement des images ?"
+				},
+				"choices": ["Yes", "No"],
+				"default": "Yes"
+			}
         ]
     }
 }
