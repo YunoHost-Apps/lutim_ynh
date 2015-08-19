@@ -50,6 +50,10 @@ sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/default/lutim
 sudo cp ../conf/cron_lutim /etc/cron.d/$app
 sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
 
+# Mise à jour de lutim via carton
+cd $final_path
+sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
+
 # Make app public or private
 sudo yunohost app setting $app skipped_uris -v "/"
 if [ "$is_public" = "No" ];

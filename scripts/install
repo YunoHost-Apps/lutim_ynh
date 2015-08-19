@@ -64,10 +64,6 @@ sudo cp -a lutim/. "$final_path"
 sudo cp -a ../sources/ajouts/. "$final_path"
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
-# Installation du module perl carton
-## echo "Installation du module perl carton. Attention, étape très longue..."
-## yes | sudo cpan Carton 2>&1 | sudo tee "/var/log/$app/setup_carton.log" > /dev/null
-
 # Installation de perlmagick, interface perl pour imagemagick et de carton, gestionnaire de dépendances perl
 sudo apt-get update
 sudo apt-get install carton perlmagick -qy
@@ -104,9 +100,16 @@ sudo mkdir -p /var/log/$app/
 cd $final_path
 sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
 
+# Configure le path du dossier perl en fonction de l'architecture système
+arch_dir=$(ls -1 $final_path/local/lib/perl5/ | grep linux-gnu)
+if [ "$?" -ne 0 ]
+then
+    echo "Impossible de trouver le dossier relatif à l'architecture système." | sudo tee -a "/var/log/$app/setup_carton.log"
+fi
+sudo sed -i "s@__ARCHDIR__@$arch_dir@g" "$final_path/script/lutim"
+
 ## Démarrage auto des scripts init
 sudo update-rc.d lutim defaults
-# sudo update-rc.d -f lutim remove
 
 # Change variables in nginx configuration
 sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/$app.conf
@@ -122,7 +125,6 @@ fi
 # Making log symbolic link to /var/log
 sudo touch /var/log/$app/production.log 
 sudo chown www-data: /var/log/$app/production.log
-# sudo rm -f /var/www/$app/log/production.log
 sudo ln -s /var/log/$app/production.log "$final_path/log/production.log"
 
 # Set right permissions

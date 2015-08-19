@@ -1,5 +1,4 @@
 # Génération des statistiques. Tous les jours, à 5h.
-# 0 5 * * * www-data carton exec script/lutim cron stats && carton exec hypnotoad __FINALPATH__/script/lutim
 0 5 * * * www-data cd "__FINALPATH__" && /usr/local/bin/carton exec script/lutim cron stats
 
 # Suppression des adresses IP obsolètes. Tous les jours, à 6h.
