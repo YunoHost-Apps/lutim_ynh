@@ -1,25 +1,26 @@
 #!/bin/bash
 
+# Récupère les infos de l'application.
 app=lutim
-
-# Retrieve arguments
 domain=$(sudo yunohost app setting $app domain)
 path=$(sudo yunohost app setting $app path)
 is_public=$(sudo yunohost app setting $app is_public)
 port=$(sudo yunohost app setting $app port)
 always_encrypt=$(sudo yunohost app setting $app always_encrypt)
+final_path=$(sudo yunohost app setting $app final_path)
 
 # Vérifie l'absence du / en fin de path
 pathRslash=$(echo "$path" | sed 's@/$@@')
 # Modifie le domaine pour qu'il passe dans une regex
 domain_regex=$(echo "$domain" | sed 's@-@.@g')
 
-# Copy files to right place
-final_path=/var/www/$app
 # Décompresse la source
 tar -x -f ../sources/lutim.tar.gz
+# Copie les fichiers sources
 sudo cp -a lutim/. "$final_path"
+# Copie les fichiers additionnels ou modifiés.
 sudo cp -a ../sources/ajouts/. "$final_path"
+# Et copie le fichier de config nginx
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
 # Change variables in nginx configuration
@@ -61,12 +62,13 @@ then	# Si l'app est privée, seul le visionnage des images reste public
 	sudo yunohost app setting $app protected_regex -v "$domain_regex$pathRslash/stats$","$domain_regex$pathRslash/manifest.webapp$","$domain_regex$pathRslash/$","$domain_regex$pathRslash/d/.*$","$domain_regex$pathRslash/m/.*$"
 fi
 
-# Set right permissions
+# Configure les droits d'accès au fichiers
 sudo chown -R www-data: $final_path
 # Restart lutim
 sudo /etc/init.d/lutim restart
 
 
-# Reload Nginx and regenerate SSOwat conf
+# Recharge la configuration Nginx
 sudo service nginx reload
+# Régénère la configuration de SSOwat
 sudo yunohost app ssowatconf

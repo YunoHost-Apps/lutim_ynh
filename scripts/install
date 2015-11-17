@@ -8,10 +8,24 @@ is_public=$4
 always_encrypt=$5
 app=lutim
 
-# Check if admin exists
+# Vérifie la validité de l'user admin
 sudo yunohost user list --json | grep -q "\"username\": \"$admin\""
 if [[ ! $? -eq 0 ]]; then
     echo "Wrong admin"
+    exit 1
+fi
+
+# Vérifie la disponibilité du path et du domaine.
+sudo yunohost app checkurl $domain$path -a $app
+if [[ ! $? -eq 0 ]]; then
+    exit 1
+fi
+
+# Vérifie que le dossier de destination n'est pas déjà utilisé.
+final_path=/var/www/$app
+if [ -e "$final_path" ]
+then
+    echo "This path already contains a folder"
     exit 1
 fi
 
@@ -25,13 +39,7 @@ pathRslash=$(echo "$path" | sed 's@/$@@')
 # Modifie le domaine pour qu'il passe dans une regex
 domain_regex=$(echo "$domain" | sed 's@-@.@g')
 
-# Check domain/path availability
-sudo yunohost app checkurl $domain$path -a $app
-if [[ ! $? -eq 0 ]]; then
-    exit 1
-fi
-
-# Get an available port
+# Cherche un port libre.
 port=8095
 sudo yunohost app checkport $port
 while [[ ! $? -eq 0 ]]; do
@@ -39,15 +47,7 @@ while [[ ! $? -eq 0 ]]; do
     sudo yunohost app checkport $port
 done
 
-# Check /var/www/$app path is available
-final_path=/var/www/$app
-if [ -e "$final_path" ]
-then
-    echo "This path already contains a folder"
-    exit 1
-fi
-
-# Add settings to YunoHost
+# Enregistre les infos dans la config YunoHost
 sudo yunohost app setting $app admin -v $admin
 sudo yunohost app setting $app domain -v $domain
 sudo yunohost app setting $app is_public -v $is_public
@@ -55,14 +55,19 @@ sudo yunohost app setting $app port -v $port
 sudo yunohost app setting $app always_encrypt -v $always_encrypt
 
 
-# Copy files to right place
-sudo mkdir -p "$final_path"
-# Création archive source: tar -czp -f lutim.tar.gz lutim
+# Créer le repertoire de destination et stocke son emplacement.
+sudo mkdir "$final_path"
+sudo yunohost app setting $app final_path -v $final_path
+
 # Décompresse la source
 tar -x -f ../sources/lutim.tar.gz
+# Copie les fichiers sources
 sudo cp -a lutim/. "$final_path"
+# Copie les fichiers additionnels ou modifiés.
 sudo cp -a ../sources/ajouts/. "$final_path"
+# Et copie le fichier de config nginx
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+
 
 # Installation de perlmagick, interface perl pour imagemagick et de carton, gestionnaire de dépendances perl
 sudo apt-get update
@@ -85,7 +90,6 @@ sudo sed -i "s@__SECRET__@$secret@g" "$final_path/lutim.conf"
 
 # Mise en place des scripts init
 sudo cp ../conf/lutim.init /etc/init.d/lutim
-# sudo sed -i "s@__FINALPATH__@$final_path@g" /etc/init.d/lutim
 sudo cp ../conf/lutim.default /etc/default/lutim
 sudo chmod +x /etc/init.d/lutim
 sudo chown root:root /etc/init.d/lutim /etc/default/lutim
@@ -128,16 +132,19 @@ sudo touch /var/log/$app/production.log
 sudo chown www-data: /var/log/$app/production.log
 sudo ln -s /var/log/$app/production.log "$final_path/log/production.log"
 
-# Set right permissions
+# Configure les droits d'accès au fichiers
 sudo chown -R www-data: $final_path
 # Start lutim
 sudo /etc/init.d/lutim start
 # Set right permissions on new files created at first start
 sudo chown -R www-data: "$final_path"
 
+
 # Add lutim as a service
 sudo yunohost service add lutim -l $final_path/log/production.log
 
-# Reload Nginx and regenerate SSOwat conf
+
+# Recharge la configuration Nginx
 sudo service nginx reload
+# Régénère la configuration de SSOwat
 sudo yunohost app ssowatconf

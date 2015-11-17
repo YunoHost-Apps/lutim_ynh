@@ -5,8 +5,9 @@
 		"en": "Self hosting images and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage d'images anonyme"
     },
-	"version": "0.6",
+	"version": "0.6+",
 	"url": "https://lut.im",
+    "licence": "free",
     "maintainer": {
         "name": "Maniack Crudelis et matlink",
         "email": "maniackc_dev@crudelis.fr matlink@matlink.fr"
