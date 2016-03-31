@@ -9,6 +9,12 @@ port=$(sudo yunohost app setting $app port)
 always_encrypt=$(sudo yunohost app setting $app always_encrypt)
 final_path=$(sudo yunohost app setting $app final_path)
 
+if [ "${#final_path}" -eq 0 ]
+then	# Si final_path n'est pas renseigné dans la config yunohost, cas d'ancien script, code final_path en dur
+	final_path=/var/www/$app
+fi
+
+
 # Vérifie l'absence du / en fin de path
 pathRslash=$(echo "$path" | sed 's@/$@@')
 # Modifie le domaine pour qu'il passe dans une regex
@@ -52,18 +58,19 @@ then	# On utilise le script init pour wheezy.
 	## Démarrage auto du service
 	sudo update-rc.d lutim defaults
 else	# Et le script systemd à partir de jessie
-	# Mise en place du script systemd
-	sudo cp ../conf/lutim.service /etc/systemd/system/lutim.service
-	sudo chown root:root /etc/systemd/system/lutim.service
-	sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/lutim.service
-	## Démarrage auto du service
-	sudo systemctl enable lutim.service
 	if [ -e /etc/init.d/lutim ]
 	then	# Supprime le script init.d si il existe.
 		sudo rm -f /etc/default/lutim
 		sudo rm -f /etc/init.d/lutim
 		sudo update-rc.d -f lutim remove
 	fi
+	# Mise en place du script systemd
+	sudo cp ../conf/lutim.service /etc/systemd/system/lutim.service
+	sudo chown root:root /etc/systemd/system/lutim.service
+	sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/lutim.service
+	## Démarrage auto du service
+	sudo systemctl enable lutim.service
+
 fi
 
 ## Mise en place des crons
