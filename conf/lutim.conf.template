@@ -8,12 +8,6 @@
         # array of IP addresses and ports you want to listen to
         #listen => ['http://127.0.0.1:8080'],
         listen => ['http://127.0.0.1:__PORT__'],
-        # user and group you want for Lutim to run with
-        # be sure that this user/group have rights on the lutim directory
-        # if you launch lutim from a different user, be sure that this user have the right to su this user/group
-        # => if current_user is not the user that you sets here and is not root, there's chances that it will fail (see https://github.com/ldidry/lutim/issues/25)
-        user   => 'www-data',
-        group  => 'www-data'
     },
 
     ################
@@ -31,6 +25,10 @@
     # length of the images random URL
     # optional, default is 8
     #length            => 8,
+
+    # length of the encryption key
+    # optional, default is 8
+    #crypto_key_length => 8,
 
     # how many URLs will be provisioned in a batch ?
     # optional, default is 5
@@ -101,10 +99,16 @@
 
     # URL sub-directory in which you want Lutim to be accessible
     # example: you want to have Lutim under https://example.org/lutim/
-    # => set url_sub_dir to '/lutim' or to '/lutim/', it doesn't matter
+    # => set prefix to '/lutim' or to '/lutim/', it doesn't matter
     # optional, defaut is /
-    #url_sub_dir       => '/',
-    url_sub_dir       => '__PATH__',
+    #prefix            => '/',
+    prefix       => '__PATH__',
+
+    # define a path to the SQLite database
+    # you can define it relative to lutim directory or set an absolute path
+    # remember that it has to be in a directory writable by Lutim user
+    # optional, default is lutim.db
+    #db_path           => 'lutim.db',
 
     ##########################
     # Lutim cron jobs settings
