@@ -87,13 +87,26 @@ sudo sed -i "s@__ENCRYPT__@$always_encrypt@g" "$final_path/lutim.conf"
 secret=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
 sudo sed -i "s@__SECRET__@$secret@g" "$final_path/lutim.conf"
 
-
-# Mise en place des scripts init
-sudo cp ../conf/lutim.init /etc/init.d/lutim
-sudo cp ../conf/lutim.default /etc/default/lutim
-sudo chmod +x /etc/init.d/lutim
-sudo chown root:root /etc/init.d/lutim /etc/default/lutim
-sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/default/lutim
+codename=$(lsb_release -a 2>/dev/null | grep Codename | cut -f 2)
+sudo yunohost app setting $app codename -v $codename
+if [ "$codename" = "wheezy" ]
+then	# On utilise le script init pour wheezy.
+	# Mise en place du script init
+	sudo cp ../conf/lutim.init /etc/init.d/lutim
+	sudo cp ../conf/lutim.default /etc/default/lutim
+	sudo chmod +x /etc/init.d/lutim
+	sudo chown root: /etc/init.d/lutim /etc/default/lutim
+	sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/default/lutim
+	## Démarrage auto du service
+	sudo update-rc.d lutim defaults
+else	# Et le script systemd à partir de jessie
+	# Mise en place du script systemd
+	sudo cp ../conf/lutim.service /etc/systemd/system/lutim.service
+	sudo chown root: /etc/systemd/system/lutim.service
+	sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/lutim.service
+	## Démarrage auto du service
+	sudo systemctl enable lutim.service
+fi
 
 ## Mise en place des crons
 sudo cp ../conf/cron_lutim /etc/cron.d/$app
@@ -113,9 +126,6 @@ then
 fi
 sudo sed -i "s@__ARCHDIR__@$arch_dir@g" "$final_path/script/lutim"
 
-## Démarrage auto des scripts init
-sudo update-rc.d lutim defaults
-
 # Change variables in nginx configuration
 sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/$app.conf
 sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
@@ -134,8 +144,9 @@ sudo ln -s /var/log/$app/production.log "$final_path/log/production.log"
 
 # Configure les droits d'accès au fichiers
 sudo chown -R www-data: $final_path
+
 # Start lutim
-sudo /etc/init.d/lutim start
+sudo service lutim start
 # Set right permissions on new files created at first start
 sudo chown -R www-data: "$final_path"
 

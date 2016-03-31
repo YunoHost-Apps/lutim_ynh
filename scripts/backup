@@ -4,7 +4,7 @@
 app=lutim
 final_path=$(sudo yunohost app setting $app final_path)
 domain=$(sudo yunohost app setting $app domain)
-
+codename=$(sudo yunohost app setting $app codename)
 
 # The parameter $1 is the backup directory location
 # which will be compressed afterward
@@ -18,10 +18,15 @@ sudo cp -a $final_path/. $backup_dir/sources
 sudo cp -a /etc/yunohost/apps/$app/. $backup_dir/yunohost
 sudo cp -a /etc/nginx/conf.d/$domain.d/$app.conf $backup_dir/nginx.conf
 
-
-# Copie des fichiers du script init
-sudo cp -a /etc/init.d/lutim $backup_dir/init.d_lutim
-sudo cp -a /etc/default/lutim $backup_dir/default_lutim
+if [ "$codename" = "wheezy" ]
+then
+	# Copie des fichiers du script init
+	sudo cp -a /etc/init.d/lutim $backup_dir/init.d_lutim
+	sudo cp -a /etc/default/lutim $backup_dir/default_lutim
+else
+	# Copie des fichiers du script systemd
+	sudo cp -a /etc/systemd/system/lutim.service $backup_dir/
+fi
 
 # Copie du fichier du cron
 sudo cp -a /etc/cron.d/$app $backup_dir/cron_$app

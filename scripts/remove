@@ -4,6 +4,7 @@ app=lutim
 
 # Récupère les infos de l'application.
 domain=$(sudo yunohost app setting $app domain)
+codename=$(sudo yunohost app setting $app codename)
 
 # Arrêt du service
 sudo service lutim stop
@@ -11,10 +12,15 @@ sudo service lutim stop
 # Retire le service du monitoring de Yunohost.
 sudo yunohost service remove lutim
 
-# Suppression des fichiers init
-sudo rm -f /etc/default/lutim
-sudo rm -f /etc/init.d/lutim
-sudo update-rc.d -f lutim remove
+if [ "$codename" = "wheezy" ]
+then	# Suppression des fichiers init
+	sudo rm -f /etc/default/lutim
+	sudo rm -f /etc/init.d/lutim
+	sudo update-rc.d -f lutim remove
+else	# Suppression des fichiers systemd
+	sudo systemctl disable lutim.service
+	sudo rm -f /etc/systemd/system/lutim.service
+fi
 
 # Suppression du dossier de l'application
 sudo rm -rf /var/www/$app

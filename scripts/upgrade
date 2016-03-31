@@ -39,13 +39,32 @@ else
 fi
 sudo sed -i "s@__ENCRYPT__@$always_encrypt@g" "$final_path/lutim.conf"
 
-# Mise en place des scripts init
-sudo cp ../conf/lutim.init /etc/init.d/lutim
-sudo sed -i "s@__FINALPATH__@$final_path@g" /etc/init.d/lutim
-sudo cp ../conf/lutim.default /etc/default/lutim
-sudo chmod +x /etc/init.d/lutim
-sudo chown root:root /etc/init.d/lutim /etc/default/lutim
-sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/default/lutim
+codename=$(lsb_release -a 2>/dev/null | grep Codename | cut -f 2)
+sudo yunohost app setting $app codename -v $codename
+if [ "$codename" = "wheezy" ]
+then	# On utilise le script init pour wheezy.
+	# Mise en place du script init
+	sudo cp ../conf/lutim.init /etc/init.d/lutim
+	sudo cp ../conf/lutim.default /etc/default/lutim
+	sudo chmod +x /etc/init.d/lutim
+	sudo chown root: /etc/init.d/lutim /etc/default/lutim
+	sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/default/lutim
+	## Démarrage auto du service
+	sudo update-rc.d lutim defaults
+else	# Et le script systemd à partir de jessie
+	# Mise en place du script systemd
+	sudo cp ../conf/lutim.service /etc/systemd/system/lutim.service
+	sudo chown root:root /etc/systemd/system/lutim.service
+	sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/lutim.service
+	## Démarrage auto du service
+	sudo systemctl enable lutim.service
+	if [ -e /etc/init.d/lutim ]
+	then	# Supprime le script init.d si il existe.
+		sudo rm -f /etc/default/lutim
+		sudo rm -f /etc/init.d/lutim
+		sudo update-rc.d -f lutim remove
+	fi
+fi
 
 ## Mise en place des crons
 sudo cp ../conf/cron_lutim /etc/cron.d/$app
@@ -65,7 +84,7 @@ fi
 # Configure les droits d'accès au fichiers
 sudo chown -R www-data: $final_path
 # Restart lutim
-sudo /etc/init.d/lutim restart
+sudo service lutim restart
 
 
 # Recharge la configuration Nginx
