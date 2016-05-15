@@ -93,6 +93,10 @@ sudo chown -R www-data: $final_path
 # Restart lutim
 sudo service lutim restart
 
+# Configuration de logrotate
+sed -i "s@__FINALPATH__@$final_path@g" ../conf/logrotate
+sudo cp ../conf/logrotate /etc/logrotate.d/$app
+
 
 # Recharge la configuration Nginx
 sudo service nginx reload

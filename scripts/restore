@@ -30,6 +30,9 @@ fi
 # Restauration du fichier du cron
 sudo cp -a $backup_dir/cron_$app /etc/cron.d/$app
 
+# Restaure la configuration de logrotate
+sudo cp -a $backup_dir/logrotate /etc/logrotate.d/$app
+
 
 # Restart webserver
 sudo service nginx reload

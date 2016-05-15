@@ -30,3 +30,6 @@ fi
 
 # Copie du fichier du cron
 sudo cp -a /etc/cron.d/$app $backup_dir/cron_$app
+
+# Copie la configuration de logrotate
+sudo cp -a /etc/logrotate.d/$app $backup_dir/logrotate

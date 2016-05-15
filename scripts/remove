@@ -34,6 +34,9 @@ sudo rm -f /etc/cron.d/$app
 # Suppression des log
 sudo rm -r /var/log/$app/
 
+# Suppression de la configuration de logrotate
+sudo rm /etc/logrotate.d/$app
+
 # Recharge la configuration Nginx
 sudo service nginx reload
 # Régénère la configuration de SSOwat

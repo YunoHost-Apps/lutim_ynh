@@ -1,6 +1,7 @@
 {
     "name": "Lutim",
     "id": "lutim",
+    "packaging_format": 1,
     "description": {
 		"en": "Self hosting images and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage d'images anonyme"
@@ -13,6 +14,9 @@
         "email": "maniackc_dev@crudelis.fr matlink@matlink.fr"
     },
     "multi_instance": "false",
+    "services": [
+        "nginx"
+    ],
     "arguments": {
         "install" : [
             {
