@@ -113,6 +113,10 @@ sudo cp ../conf/cron_lutim /etc/cron.d/$app
 sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
 sudo chmod +x $final_path/script/lutim
 
+# Configuration de logrotate
+sed -i "s@__FINALPATH__@$final_path@g" ../conf/logrotate
+sudo cp ../conf/logrotate /etc/logrotate.d/$app
+
 # Installation de lutim via carton
 sudo mkdir -p /var/log/$app/
 cd $final_path
@@ -153,10 +157,6 @@ sudo chown -R www-data: "$final_path"
 
 # Add lutim as a service
 sudo yunohost service add lutim -l $final_path/log/production.log
-
-# Configuration de logrotate
-sed -i "s@__FINALPATH__@$final_path@g" ../conf/logrotate
-sudo cp ../conf/logrotate /etc/logrotate.d/$app
 
 
 # Recharge la configuration Nginx
