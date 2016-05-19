@@ -1,43 +1,71 @@
 #!/bin/bash
 
-app=lutim
-
 # Récupère les infos de l'application.
+ynh_version=$(sudo yunohost -v | grep "moulinette:" | cut -d' ' -f2 | cut -d'.' -f1,2)
+if [ $ynh_version = "2.4" ]; then
+	app=$YNH_APP_INSTANCE_NAME
+
+	# Source app helpers
+	. /usr/share/yunohost/helpers
+else
+	app=lutim
+fi
 domain=$(sudo yunohost app setting $app domain)
-codename=$(sudo yunohost app setting $app codename)
 
 # Arrêt du service
-sudo service lutim stop
+if [ -e "/etc/init.d/lutim" ]; then
+	echo "Delete init.d script"
+	sudo service lutim stop
+	sudo rm "/etc/init.d/lutim"
+	sudo rm "/etc/default/lutim"
+	sudo update-rc.d -f lutim remove
+fi
+if [ -e "/etc/systemd/system/lutim.service" ]; then
+	echo "Delete systemd script"
+	sudo service lutim stop
+	sudo rm "/etc/systemd/system/lutim.service"
+	sudo systemctl disable lutim.service
+fi
 
 # Retire le service du monitoring de Yunohost.
-sudo yunohost service remove lutim
-
-if [ "$codename" = "wheezy" ]
-then	# Suppression des fichiers init
-	sudo rm -f /etc/default/lutim
-	sudo rm -f /etc/init.d/lutim
-	sudo update-rc.d -f lutim remove
-else	# Suppression des fichiers systemd
-	sudo systemctl disable lutim.service
-	sudo rm -f /etc/systemd/system/lutim.service
+if sudo yunohost service status | grep -q lutim	# Test l'existence du service dans Yunohost
+then
+	echo "Remove lutim service"
+	sudo yunohost service remove lutim
 fi
 
 # Suppression du dossier de l'application
-sudo rm -rf /var/www/$app
+	if [ -e "/var/www/$app" ]; then	# Delete final_path
+		echo "Delete app dir"
+		sudo rm -r "/var/www/$app"
+	fi
 
 # Suppression de la configuration nginx
-sudo rm -f /etc/nginx/conf.d/$domain.d/$app.conf
+if [ -e "/etc/nginx/conf.d/$domain.d/$app.conf" ]; then	# Delete nginx config
+	echo "Delete nginx config"
+	sudo rm "/etc/nginx/conf.d/$domain.d/$app.conf"
+	sudo service nginx reload
+fi
 
 # Retirer le cron
-sudo rm -f /etc/cron.d/$app
+if [ -e "/etc/cron.d/$app" ]; then
+	echo "Delete cron"
+	sudo rm "/etc/cron.d/$app"
+fi
 
 # Suppression des log
-sudo rm -r /var/log/$app/
+if [ -e "/var/log/$app/" ]; then
+	echo "Delete log"
+	sudo rm -r "/var/log/$app/"
+fi
 
 # Suppression de la configuration de logrotate
-sudo rm /etc/logrotate.d/$app
+if [ -e "/etc/logrotate.d/$app" ]; then
+	echo "Delete logrotate config"
+	sudo rm "/etc/logrotate.d/$app"
+fi
 
-# Recharge la configuration Nginx
-sudo service nginx reload
 # Régénère la configuration de SSOwat
 sudo yunohost app ssowatconf
+
+echo -e "\e[0m"	# Restore normal color

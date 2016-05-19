@@ -2,9 +2,6 @@
     "name": "Lutim",
     "id": "lutim",
     "packaging_format": 1,
-    "requirements": {
-        "yunohost": ">= 2.4"
-    },
     "description": {
 		"en": "Self hosting images and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage d'images anonyme"

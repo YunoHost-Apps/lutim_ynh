@@ -1,7 +1,12 @@
 #!/bin/bash
 
 # Récupère les infos de l'application.
-app=lutim
+ynh_version=$(sudo yunohost -v | grep "moulinette:" | cut -d' ' -f2 | cut -d'.' -f1,2)
+if [ $ynh_version = "2.4" ]; then
+	app=$YNH_APP_INSTANCE_NAME
+else
+	app=lutim
+fi
 domain=$(sudo yunohost app setting $app domain)
 path=$(sudo yunohost app setting $app path)
 is_public=$(sudo yunohost app setting $app is_public)
