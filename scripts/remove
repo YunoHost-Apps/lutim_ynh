@@ -6,7 +6,7 @@ if [ $ynh_version = "2.4" ]; then
 	app=$YNH_APP_INSTANCE_NAME
 
 	# Source app helpers
-	. /usr/share/yunohost/helpers
+	source /usr/share/yunohost/helpers
 else
 	app=lutim
 fi

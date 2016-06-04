@@ -13,7 +13,7 @@ then
 	app=$YNH_APP_INSTANCE_NAME
 
 	# Source app helpers
-	. /usr/share/yunohost/helpers
+	source /usr/share/yunohost/helpers
 else
 	domain=$1
 	path=$2
