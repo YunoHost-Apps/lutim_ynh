@@ -24,6 +24,13 @@ else
 fi
 script_dir=$PWD
 
+# Checks variables are not empty
+test -z "$domain" && (echo "domain not set" && touch /force_stop)
+test -z "$path" && (echo "path not set" && touch /force_stop)
+test -z "$admin" && (echo "admin not set" && touch /force_stop)
+test -z "$is_public" && (echo "is_public not set" && touch /force_stop)
+test -z "$always_encrypt" && (echo "always_encrypt not set" && touch /force_stop)
+
 # Delete files and db if exit with an error
 EXIT_PROPERLY () {
 	trap '' ERR
