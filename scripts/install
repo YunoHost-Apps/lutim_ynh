@@ -73,10 +73,8 @@ domain_regex=$(echo "$domain" | sed 's@-@.@g')
 
 # Cherche un port libre.
 port=8095
-sudo yunohost app checkport $port
-while [[ ! $? -eq 0 ]]; do
-    port=$((port+1))
-    sudo yunohost app checkport $port
+while ! sudo yunohost app checkport $port ; do
+	port=$((port+1))
 done
 
 # Enregistre les infos dans la config YunoHost
