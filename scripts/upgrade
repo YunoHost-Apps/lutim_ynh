@@ -25,10 +25,14 @@ pathRslash=$(echo "$path" | sed 's@/$@@')
 # Modifie le domaine pour qu'il passe dans une regex
 domain_regex=$(echo "$domain" | sed 's@-@.@g')
 
+# Télécharge la source
+wget -nv --show-progress -i ../sources/source_url -O lutim.tar.gz
+# Vérifie la somme de contrôle de la source téléchargée.
+md5sum -c ../sources/source_md5 --status || (echo "Corrupt source" && false)
 # Décompresse la source
-tar -x -f ../sources/lutim.tar.gz
+tar -x -f lutim.tar.gz
 # Copie les fichiers sources
-sudo cp -a lutim/. "$final_path"
+sudo cp -a $(cat ../sources/source_dir)/. "$final_path"
 # Copie les fichiers additionnels ou modifiés.
 sudo cp -a ../sources/ajouts/. "$final_path"
 # Et copie le fichier de config nginx
