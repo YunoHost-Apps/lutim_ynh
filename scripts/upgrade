@@ -1,7 +1,9 @@
 #!/bin/bash
 
+source .fonctions	# Charge les fonctions génériques habituellement utilisées dans le script
+
 # Récupère les infos de l'application.
-ynh_version=$(sudo yunohost -v | grep "moulinette:" | cut -d' ' -f2 | cut -d'.' -f1,2)
+YNH_VERSION	# Récupère le numéro de version de Yunohost.
 if [ $ynh_version = "2.4" ]; then
 	app=$YNH_APP_INSTANCE_NAME
 else
@@ -20,21 +22,12 @@ then	# Si final_path n'est pas renseigné dans la config yunohost, cas d'ancien 
 fi
 
 
-# Vérifie l'absence du / en fin de path
-pathRslash=$(echo "$path" | sed 's@/$@@')
+CHECK_PATH	# Vérifie et corrige la syntaxe du path.
 # Modifie le domaine pour qu'il passe dans une regex
 domain_regex=$(echo "$domain" | sed 's@-@.@g')
 
-# Télécharge la source
-wget -nv --show-progress -i ../sources/source_url -O lutim.tar.gz
-# Vérifie la somme de contrôle de la source téléchargée.
-md5sum -c ../sources/source_md5 --status || (echo "Corrupt source" && false)
-# Décompresse la source
-tar -x -f lutim.tar.gz
-# Copie les fichiers sources
-sudo cp -a $(cat ../sources/source_dir)/. "$final_path"
-# Copie les fichiers additionnels ou modifiés.
-sudo cp -a ../sources/ajouts/. "$final_path"
+SETUP_SOURCE "lutim.tar.gz"	# Télécharge la source, décompresse et copie dans $final_path
+
 # Et copie le fichier de config nginx
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
@@ -43,10 +36,7 @@ sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/$app.conf
 sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
 
 ## Copie et configuration du fichier de conf.
-config_file="$final_path/lutim.conf"
-if [ "$(sudo yunohost app setting $app lutim.conf_file_md5)" != $(md5sum "$config_file" | cut -d' ' -f1) ]; then
-	sudo cp -a "$config_file" "$config_file.backup.$(date '+%d.%m.%y_%Hh%M,%Ss')"	# Si le fichier de config a été modifié, créer un backup.
-fi
+CHECK_MD5_CONFIG "lutim.conf" "$final_path/lutim.conf"	# Créé un backup du fichier de config si il a été modifié.
 sudo cp ../conf/lutim.conf.template "$final_path/lutim.conf"
 sudo sed -i "s@__DOMAIN__@$domain@g" "$final_path/lutim.conf"
 sudo sed -i "s@__PATH__@$path@g" "$final_path/lutim.conf"
@@ -57,6 +47,7 @@ else
 	always_encrypt=1
 fi
 sudo sed -i "s@__ENCRYPT__@$always_encrypt@g" "$final_path/lutim.conf"
+STORE_MD5_CONFIG "lutim.conf" "$final_path/lutim.conf"	# Réenregistre la somme de contrôle du fichier de config
 
 codename=$(lsb_release -a 2>/dev/null | grep Codename | cut -f 2)
 sudo yunohost app setting $app codename -v $codename
@@ -102,7 +93,7 @@ sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
 sudo yunohost app setting $app skipped_uris -v "/"
 if [ "$is_public" = "No" ];
 then	# Si l'app est privée, seul le visionnage des images reste public
-	sudo yunohost app setting $app protected_regex -v "$domain_regex$pathRslash/stats$","$domain_regex$pathRslash/manifest.webapp$","$domain_regex$pathRslash/$","$domain_regex$pathRslash/d/.*$","$domain_regex$pathRslash/m/.*$"
+	sudo yunohost app setting $app protected_regex -v "$domain_regex$path/stats$","$domain_regex$path/manifest.webapp$","$domain_regex$path/$","$domain_regex$path/d/.*$","$domain_regex$path/m/.*$"
 fi
 
 # Configure les droits d'accès au fichiers

@@ -1,7 +1,9 @@
 #!/bin/bash
 
+source .fonctions	# Charge les fonctions génériques habituellement utilisées dans le script
+
 # Récupère les infos de l'application.
-ynh_version=$(sudo yunohost -v | grep "moulinette:" | cut -d' ' -f2 | cut -d'.' -f1,2)
+YNH_VERSION	# Récupère le numéro de version de Yunohost.
 if [ $ynh_version = "2.4" ]; then
 	app=$YNH_APP_INSTANCE_NAME
 
@@ -34,18 +36,9 @@ then
 	sudo yunohost service remove lutim
 fi
 
-# Suppression du dossier de l'application
-	if [ -e "/var/www/$app" ]; then	# Delete final_path
-		echo "Delete app dir"
-		sudo rm -r "/var/www/$app"
-	fi
+REMOVE_APP_DIR	# Suppression du dossier de l'application
 
-# Suppression de la configuration nginx
-if [ -e "/etc/nginx/conf.d/$domain.d/$app.conf" ]; then	# Delete nginx config
-	echo "Delete nginx config"
-	sudo rm "/etc/nginx/conf.d/$domain.d/$app.conf"
-	sudo service nginx reload
-fi
+REMOVE_NGINX_CONF	# Suppression de la configuration nginx
 
 # Retirer le cron
 if [ -e "/etc/cron.d/$app" ]; then
@@ -59,11 +52,7 @@ if [ -e "/var/log/$app/" ]; then
 	sudo rm -r "/var/log/$app/"
 fi
 
-# Suppression de la configuration de logrotate
-if [ -e "/etc/logrotate.d/$app" ]; then
-	echo "Delete logrotate config"
-	sudo rm "/etc/logrotate.d/$app"
-fi
+REMOVE_LOGROTATE_CONF	# Suppression de la configuration de logrotate
 
 # Régénère la configuration de SSOwat
 sudo yunohost app ssowatconf
