@@ -17,6 +17,9 @@ EXIT_PROPERLY () {	# Provoque l'arrêt du script en cas d'erreur. Et nettoye les
 
 	CLEAN_SETUP	# Appel la fonction de nettoyage spécifique du script install.
 
+	# Compense le bug de ssowat qui ne supprime pas l'entrée de l'app en cas d'erreur d'installation.
+	sudo sed -i "\@\"$domain$path/\":@d" /etc/ssowat/conf.json
+
 	if [ $ynh_version = "2.2" ]; then
 		/bin/bash $script_dir/remove	# Appel le script remove. En 2.2, ce comportement n'est pas automatique.
 	fi
@@ -63,11 +66,12 @@ CHECK_FINALPATH () {	# Vérifie que le dossier de destination n'est pas déjà u
 }
 
 GENERATE_DB () {	# Créer une base de données et un utilisateur dédié au nom de l'app.
+# $1 = Nom de la base de donnée
 	# Génère un mot de passe aléatoire.
+	db_user=$1
 	db_pwd=$(head -n20 /dev/urandom | tr -c -d 'A-Za-z0-9' | head -c20)
 	CHECK_VAR "$db_pwd" "db_pwd empty"
 	# Utilise '$app' comme nom d'utilisateur et de base de donnée
-	db_user=$app
 	# Initialise la base de donnée et stocke le mot de passe mysql.
 	ynh_mysql_create_db $db_user $db_user $db_pwd
 	sudo yunohost app setting $app mysqlpwd -v $db_pwd
@@ -158,7 +162,7 @@ REMOVE_LOGROTATE_CONF () {	# Suppression de la configuration de logrotate
 }
 
 REMOVE_APP_DIR () {	# Suppression du dossier de l'application
-	if [ test -n "$app" ]
+	if test -n "$app"
 	then	# Supprime le dossier seulement si $app n'est pas vide.
 		if [ -e "/var/www/$app" ]; then	# Delete final_path
 			echo "Delete app dir"
@@ -168,8 +172,9 @@ REMOVE_APP_DIR () {	# Suppression du dossier de l'application
 }
 
 REMOVE_BDD () {	# Suppression de la base de donnée et de l'utilisateur associé.
+# $1 = Nom de la base de donnée
 	# Utilise '$app' comme nom d'utilisateur et de base de donnée
-	db_user=$app
+	db_user=$1
 	if mysqlshow -u root -p$(sudo cat $MYSQL_ROOT_PWD_FILE) | grep -q "^| $db_user"; then
 		echo "Delete db"
 		ynh_mysql_drop_db $db_user
