@@ -1,46 +1,49 @@
 {
-    "name": "Lutim",
-    "id": "lutim",
-    "packaging_format": 1,
-    "requirements": {
-        "yunohost": ">= 2.4"
-    },
-    "description": {
+	"name": "Lutim",
+	"id": "lutim",
+	"packaging_format": 1,
+	"requirements": {
+		"yunohost": ">= 2.4"
+	},
+	"description": {
 		"en": "Self hosting images and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage d'images anonyme"
-    },
+	},
 	"version": "0.6 dev",
 	"url": "https://lut.im",
-    "licence": "free",
-    "maintainer": {
-        "name": "Maniack Crudelis et matlink",
-        "email": "maniackc_dev@crudelis.fr matlink@matlink.fr"
-    },
-    "multi_instance": "false",
-    "services": [
-        "nginx"
-    ],
-    "arguments": {
-        "install" : [
-            {
-                "name": "domain",
-                "ask": {
-                    "en": "Choose a domain for Lutim",
-		    "fr": "Choisissez un domaine pour Lutim"
-                },
-                "example": "domain.org"
-            },
-            {
-                "name": "path",
-                "ask": {
-                    "en": "Choose a path for Lutim",
-		    "fr": "Choisissez un chemin pour Lutim"
-                },
-                "example": "/lutim",
-                "default": "/lutim"
-            },
+	"license": "free",
+	"maintainer": {
+		"name": "Maniack Crudelis et matlink",
+		"email": "maniackc_dev@crudelis.fr matlink@matlink.fr"
+	},
+	"multi_instance": false,
+	"services": [
+		"nginx"
+	],
+	"arguments": {
+		"install" : [
+			{
+				"name": "domain",
+				"type": "domain",
+				"ask": {
+					"en": "Choose a domain for Lutim",
+					"fr": "Choisissez un domaine pour Lutim"
+				},
+				"example": "domain.org"
+			},
+			{
+				"name": "path",
+				"type": "path",
+				"ask": {
+					"en": "Choose a path for Lutim",
+					"fr": "Choisissez un chemin pour Lutim"
+				},
+				"example": "/lutim",
+				"default": "/lutim"
+			},
 			{
 				"name": "admin",
+				"type": "user",
 				"ask": {
 					"en": "Choose the Lutim administrator (must be an existing YunoHost user)",
 					"fr": "Choisissez un administrateur Lutim (doit être un utilisateur YunoHost)"
@@ -65,6 +68,6 @@
 				"choices": ["Yes", "No"],
 				"default": "Yes"
 			}
-        ]
-    }
+		]
+	}
 }
