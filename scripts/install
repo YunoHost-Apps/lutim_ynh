@@ -145,6 +145,9 @@ sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
 sudo yunohost app setting $app skipped_uris -v "/"
 if [ "$is_public" = "No" ];
 then	# Si l'app est privée, seul le visionnage des images reste public
+	if [ "$path" == "/" ]; then
+	    path=""	# Si path correspond à la racine, supprime le / pour éviter une erreur de la regex.
+	fi
 	sudo yunohost app setting $app protected_regex -v "$domain_regex$path/stats$","$domain_regex$path/manifest.webapp$","$domain_regex$path/$","$domain_regex$path/d/.*$","$domain_regex$path/m/.*$"
 fi
 
