@@ -36,7 +36,7 @@ then
 	sudo yunohost service remove lutim
 fi
 
-REMOVE_APP_DIR	# Suppression du dossier de l'application
+SECURE_REMOVE '/var/www/$app'	# Suppression du dossier de l'application
 
 REMOVE_NGINX_CONF	# Suppression de la configuration nginx
 
@@ -46,11 +46,7 @@ if [ -e "/etc/cron.d/$app" ]; then
 	sudo rm "/etc/cron.d/$app"
 fi
 
-# Suppression des log
-if [ -e "/var/log/$app/" ]; then
-	echo "Delete log"
-	sudo rm -r "/var/log/$app/"
-fi
+SECURE_REMOVE '/var/log/$app/'	# Suppression des log
 
 REMOVE_LOGROTATE_CONF	# Suppression de la configuration de logrotate
 
