@@ -3,7 +3,6 @@
 source .fonctions	# Charge les fonctions génériques habituellement utilisées dans le script
 
 # Récupère les infos de l'application.
-YNH_VERSION	# Récupère le numéro de version de Yunohost.
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(sudo yunohost app setting $app domain)

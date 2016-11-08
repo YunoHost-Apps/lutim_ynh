@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Récupère les infos de l'application.
-ynh_version=$(sudo yunohost -v | grep "moulinette:" | cut -d' ' -f2 | cut -d'.' -f1,2)	# Récupère le numéro de version de Yunohost.
 app=$YNH_APP_INSTANCE_NAME
 
 final_path=$(sudo yunohost app setting $app final_path)

@@ -2,8 +2,6 @@
 
 source .fonctions	# Charge les fonctions génériques habituellement utilisées dans le script
 
-YNH_VERSION	# Récupère le numéro de version de Yunohost.
-
 CLEAN_SETUP () {
 # Nettoyage des résidus d'installation non pris en charge par le script remove.
 # Pas de nettoyage supplémentaire nécessaire ici...
