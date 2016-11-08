@@ -4,11 +4,8 @@ source .fonctions	# Charge les fonctions génériques habituellement utilisées 
 
 # Récupère les infos de l'application.
 YNH_VERSION	# Récupère le numéro de version de Yunohost.
-if [ $ynh_version = "2.4" ]; then
-	app=$YNH_APP_INSTANCE_NAME
-else
-	app=lutim
-fi
+app=$YNH_APP_INSTANCE_NAME
+
 domain=$(sudo yunohost app setting $app domain)
 path=$(sudo yunohost app setting $app path)
 is_public=$(sudo yunohost app setting $app is_public)

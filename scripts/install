@@ -12,26 +12,17 @@ CLEAN_SETUP () {
 TRAP_ON	# Active trap pour arrêter le script si une erreur est détectée.
 
 # Retrieve arguments
-if [ $ynh_version = "2.4" ]
-then
-	domain=$YNH_APP_ARG_DOMAIN
-	path=$YNH_APP_ARG_PATH
-	admin=$YNH_APP_ARG_ADMIN
-	is_public=$YNH_APP_ARG_IS_PUBLIC
-	always_encrypt=$YNH_APP_ARG_ALWAYS_ENCRYPT
+domain=$YNH_APP_ARG_DOMAIN
+path=$YNH_APP_ARG_PATH
+admin=$YNH_APP_ARG_ADMIN
+is_public=$YNH_APP_ARG_IS_PUBLIC
+always_encrypt=$YNH_APP_ARG_ALWAYS_ENCRYPT
 
-	app=$YNH_APP_INSTANCE_NAME
+app=$YNH_APP_INSTANCE_NAME
 
-	# Source app helpers
-	source /usr/share/yunohost/helpers
-else
-	domain=$1
-	path=$2
-	admin=$3
-	is_public=$4
-	always_encrypt=$5
-	app=lutim
-fi
+# Source app helpers
+source /usr/share/yunohost/helpers
+
 script_dir=$PWD
 
 # Vérifie que les variables ne sont pas vides.
