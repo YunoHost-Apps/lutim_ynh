@@ -5,12 +5,15 @@ source .fonctions	# Charge les fonctions génériques habituellement utilisées 
 # Récupère les infos de l'application.
 app=$YNH_APP_INSTANCE_NAME
 
-domain=$(sudo yunohost app setting $app domain)
-path=$(sudo yunohost app setting $app path)
-is_public=$(sudo yunohost app setting $app is_public)
-port=$(sudo yunohost app setting $app port)
-always_encrypt=$(sudo yunohost app setting $app always_encrypt)
-final_path=$(sudo yunohost app setting $app final_path)
+# Source app helpers
+source /usr/share/yunohost/helpers
+
+domain=$(ynh_app_setting_get $app domain)
+path=$(ynh_app_setting_get $app path)
+is_public=$(ynh_app_setting_get $app is_public)
+port=$(ynh_app_setting_get $app port)
+always_encrypt=$(ynh_app_setting_get $app always_encrypt)
+final_path=$(ynh_app_setting_get $app final_path)
 
 if [ "${#final_path}" -eq 0 ]
 then	# Si final_path n'est pas renseigné dans la config yunohost, cas d'ancien script, code final_path en dur
@@ -46,7 +49,7 @@ sudo sed -i "s@__ENCRYPT__@$always_encrypt@g" "$final_path/lutim.conf"
 STORE_MD5_CONFIG "lutim.conf" "$final_path/lutim.conf"	# Réenregistre la somme de contrôle du fichier de config
 
 codename=$(lsb_release -a 2>/dev/null | grep Codename | cut -f 2)
-sudo yunohost app setting $app codename -v $codename
+ynh_app_setting_set $app codename $codename
 if [ "$codename" = "wheezy" ]
 then	# On utilise le script init pour wheezy.
 	# Mise en place du script init
@@ -70,7 +73,6 @@ else	# Et le script systemd à partir de jessie
 	sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/lutim.service
 	## Démarrage auto du service
 	sudo systemctl enable lutim.service
-
 fi
 
 ## Mise en place des crons
@@ -86,10 +88,10 @@ cd $final_path
 sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
 
 # Make app public or private
-sudo yunohost app setting $app skipped_uris -v "/"
+ynh_app_setting_set $app skipped_uris "/"
 if [ "$is_public" = "No" ];
 then	# Si l'app est privée, seul le visionnage des images reste public
-	sudo yunohost app setting $app protected_regex -v "$domain_regex$path/stats$","$domain_regex$path/manifest.webapp$","$domain_regex$path/$","$domain_regex$path/d/.*$","$domain_regex$path/m/.*$"
+	ynh_app_setting_set $app protected_regex "$domain_regex$path/stats$","$domain_regex$path/manifest.webapp$","$domain_regex$path/$","$domain_regex$path/d/.*$","$domain_regex$path/m/.*$"
 fi
 
 # Configure les droits d'accès au fichiers

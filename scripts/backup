@@ -3,9 +3,12 @@
 # Récupère les infos de l'application.
 app=$YNH_APP_INSTANCE_NAME
 
-final_path=$(sudo yunohost app setting $app final_path)
-domain=$(sudo yunohost app setting $app domain)
-codename=$(sudo yunohost app setting $app codename)
+# Source app helpers
+source /usr/share/yunohost/helpers
+
+final_path=$(ynh_app_setting_get $app final_path)
+domain=$(ynh_app_setting_get $app domain)
+codename=$(ynh_app_setting_get $app codename)
 
 # The parameter $1 is the backup directory location
 # which will be compressed afterward

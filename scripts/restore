@@ -3,9 +3,12 @@
 # Récupère les infos de l'application.
 app=$YNH_APP_INSTANCE_NAME
 
-final_path=$(sudo yunohost app setting $app final_path)
-domain=$(sudo yunohost app setting $app domain)
-codename=$(sudo yunohost app setting $app codename)
+# Source app helpers
+source /usr/share/yunohost/helpers
+
+final_path=$(ynh_app_setting_get $app final_path)
+domain=$(ynh_app_setting_get $app domain)
+codename=$(ynh_app_setting_get $app codename)
 
 # The parameter $1 is the uncompressed restore directory location
 backup_dir=$1/apps/$app
@@ -16,6 +19,11 @@ sudo cp -a $backup_dir/sources/. $final_path
 # Restore Nginx and YunoHost parameters
 sudo cp -a $backup_dir/yunohost/. /etc/yunohost/apps/$app
 sudo cp -a $backup_dir/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+
+
+# Installation de perlmagick, interface perl pour imagemagick et de carton, gestionnaire de dépendances perl
+sudo apt-get update
+sudo apt-get install carton perlmagick -qy
 
 
 if [ "$codename" = "wheezy" ]

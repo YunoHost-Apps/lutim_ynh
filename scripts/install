@@ -42,16 +42,16 @@ CHECK_VAR "$domain_regex" "domain_regex empty"
 FIND_PORT 8095	# Cherche un port libre.
 
 # Enregistre les infos dans la config YunoHost
-sudo yunohost app setting $app admin -v $admin
-sudo yunohost app setting $app domain -v $domain
-sudo yunohost app setting $app is_public -v $is_public
-sudo yunohost app setting $app port -v $port
-sudo yunohost app setting $app always_encrypt -v $always_encrypt
+ynh_app_setting_set $app admin $admin
+ynh_app_setting_set $app domain $domain
+ynh_app_setting_set $app is_public $is_public
+ynh_app_setting_set $app port $port
+ynh_app_setting_set $app always_encrypt $always_encrypt
 
 
 # Créer le repertoire de destination et stocke son emplacement.
 sudo mkdir "$final_path"
-sudo yunohost app setting $app final_path -v $final_path
+ynh_app_setting_set $app final_path $final_path
 
 SETUP_SOURCE "lutim.tar.gz"	# Télécharge la source, décompresse et copie dans $final_path
 
@@ -82,7 +82,7 @@ STORE_MD5_CONFIG "lutim.conf" "$final_path/lutim.conf"	# Enregistre la somme de 
 
 codename=$(lsb_release -a 2>/dev/null | grep Codename | cut -f 2)
 CHECK_VAR "$codename" "codename empty"
-sudo yunohost app setting $app codename -v $codename
+ynh_app_setting_set $app codename $codename
 if [ "$codename" = "wheezy" ]
 then	# On utilise le script init pour wheezy.
 	# Mise en place du script init
@@ -131,13 +131,13 @@ sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/$app.conf
 sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
 
 # Make app public or private
-sudo yunohost app setting $app skipped_uris -v "/"
+ynh_app_setting_set $app skipped_uris "/"
 if [ "$is_public" = "No" ];
 then	# Si l'app est privée, seul le visionnage des images reste public
 	if [ "$path" == "/" ]; then
 	    path=""	# Si path correspond à la racine, supprime le / pour éviter une erreur de la regex.
 	fi
-	sudo yunohost app setting $app protected_regex -v "$domain_regex$path/stats$","$domain_regex$path/manifest.webapp$","$domain_regex$path/$","$domain_regex$path/d/.*$","$domain_regex$path/m/.*$"
+	ynh_app_setting_set $app protected_regex "$domain_regex$path/stats$","$domain_regex$path/manifest.webapp$","$domain_regex$path/$","$domain_regex$path/d/.*$","$domain_regex$path/m/.*$"
 fi
 
 # Making log symbolic link to /var/log
