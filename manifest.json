@@ -9,12 +9,12 @@
 		"en": "Self hosting images and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage d'images anonyme"
 	},
-	"version": "0.6 dev",
+	"version": "0.6",
 	"url": "https://lut.im",
-	"license": "free",
+	"license": "AGPL-3.0",
 	"maintainer": {
 		"name": "Maniack Crudelis et matlink",
-		"email": "maniackc_dev@crudelis.fr matlink@matlink.fr"
+		"email": "maniackc_dev@crudelis.fr"
 	},
 	"multi_instance": false,
 	"services": [
@@ -52,21 +52,21 @@
 			},
 			{
 				"name": "is_public",
+				"type": "boolean",
 				"ask": {
 					"en": "Uploading images is it public?",
 					"fr": "L'upload des images est-il public ?"
 				},
-				"choices": ["Yes", "No"],
-				"default": "No"
+				"default": false
 			},
 			{
 				"name": "always_encrypt",
+				"type": "boolean",
 				"ask": {
 					"en": "Force the encryption of images?",
 					"fr": "Forcer le chiffrement des images ?"
 				},
-				"choices": ["Yes", "No"],
-				"default": "Yes"
+				"default": true
 			}
 		]
 	}

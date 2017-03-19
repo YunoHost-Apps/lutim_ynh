@@ -1,58 +1,123 @@
 #!/bin/bash
 
-# Récupère les infos de l'application.
-app=$YNH_APP_INSTANCE_NAME
+#=================================================
+# GENERIC STARTING
+#=================================================
+# MANAGE FAILURE OF THE SCRIPT
+#=================================================
 
-# Source app helpers
+# Exit on command errors and treat unset variables as an error
+set -eu
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+if [ ! -e .fonctions ]; then
+	# Rapatrie le fichier de fonctions si il n'est pas dans le dossier courant
+	sudo cp ../settings/scripts/.fonctions ./.fonctions
+	sudo chmod a+rx .fonctions
+fi
+source .fonctions
 source /usr/share/yunohost/helpers
+
+#=================================================
+# LOAD SETTINGS
+#=================================================
+
+app=$YNH_APP_INSTANCE_NAME
 
 final_path=$(ynh_app_setting_get $app final_path)
 domain=$(ynh_app_setting_get $app domain)
-codename=$(ynh_app_setting_get $app codename)
+path_url=$(ynh_app_setting_get $app path)
 
-# The parameter $1 is the uncompressed restore directory location
-backup_dir=$1/apps/$app
+#=================================================
+# CHECK IF THE APP CAN BE RESTORED
+#=================================================
 
-# Restore sources & data
-sudo cp -a $backup_dir/sources/. $final_path
+sudo yunohost app checkurl "${domain}${path_url}" -a "$app" \
+	|| ynh_die "Path not available: ${domain}${path_url}"
+test ! -d $final_path \
+	|| ynh_die "There is already a directory: $final_path "
 
-# Restore Nginx and YunoHost parameters
-sudo cp -a $backup_dir/yunohost/. /etc/yunohost/apps/$app
-sudo cp -a $backup_dir/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+#=================================================
+# STANDARD RESTORE STEPS
+#=================================================
+# RESTORE OF THE NGINX CONFIGURATION
+#=================================================
 
-
-# Installation de perlmagick, interface perl pour imagemagick et de carton, gestionnaire de dépendances perl
-sudo apt-get update
-sudo apt-get install carton perlmagick -qy
-
-
-if [ "$codename" = "wheezy" ]
-then
-	# Restauration des fichiers du script init
-	sudo cp -a $backup_dir/init.d_lutim /etc/init.d/lutim
-	sudo cp -a $backup_dir/default_lutim /etc/default/lutim
-	## Démarrage auto du service
-	sudo update-rc.d lutim defaults
-else
-	# Restauration des fichiers du script systemd
-	sudo cp -a $backup_dir/lutim.service /etc/systemd/system/lutim.service
-	## Démarrage auto du service
-	sudo systemctl enable lutim.service
+conf=/etc/nginx/conf.d/$domain.d/$app.conf
+if [ -f $conf ]; then
+	ynh_die "There is already a nginx conf file at this path: $conf "
 fi
+sudo cp -a ./nginx.conf $conf
 
+#=================================================
+# RESTORE OF THE MAIN DIR OF THE APP
+#=================================================
 
-# Restauration du fichier du cron
-sudo cp -a $backup_dir/cron_$app /etc/cron.d/$app
+sudo cp -a ./sources/. $final_path
+
+#=================================================
+# RECREATE OF THE DEDICATED USER
+#=================================================
+
+ynh_system_user_create $app	# Recreate the dedicated user, if not exist
+
+#=================================================
+# RESTORE USER RIGHTS
+#=================================================
+
+# Les fichiers appartiennent à root
+sudo chown -R $app: $final_path
+
+#=================================================
+# SPECIFIC RESTORE
+#=================================================
+# REINSTALL DEPENDENCIES
+#=================================================
+
+ynh_install_app_dependencies carton perlmagick
+
+#=================================================
+# ENABLE SERVICE IN ADMIN PANEL
+#=================================================
+
+sudo yunohost service add $app --log "/var/log/$app/APP.log"
+
+#=================================================
+# RESTORE SYSTEMD
+#=================================================
+
+sudo cp -a ./systemd /etc/systemd/system/$app.service
+## Démarrage auto du service
+sudo systemctl enable $app.service
+
+#=================================================
+# RESTORE OF THE CRON FILE
+#=================================================
+
+sudo cp -a "cron" "/etc/cron.d/$app"
+
+#=================================================
+# SETUP LOG FILE
+#=================================================
 
 # Making log symbolic link to /var/log
 sudo mkdir -p /var/log/$app/
-sudo touch /var/log/$app/production.log 
-sudo chown www-data: /var/log/$app/production.log
-# Restaure la configuration de logrotate
-sudo cp -a $backup_dir/logrotate /etc/logrotate.d/$app
+sudo touch /var/log/$app/production.log
+sudo chown $app: -R /var/log/$app
 
-# Restart webserver
-sudo service nginx reload
+#=================================================
+# START LUTIM
+#=================================================
 
-# Start lutim
-sudo service lutim start
+sudo systemctl start lutim
+
+#=================================================
+# GENERIC FINALISATION
+#=================================================
+# RELOAD NGINX
+#=================================================
+
+sudo systemctl reload nginx
