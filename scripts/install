@@ -6,7 +6,7 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-source .fonctions
+source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -159,6 +159,7 @@ sudo chown -R $app: $final_path
 sudo systemctl start lutim
 # Set right permissions on new files created at first start
 sudo chown -R $app: $final_path
+sleep 2
 
 #=================================================
 # GENERIC FINALISATION
