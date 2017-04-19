@@ -109,6 +109,12 @@ sudo touch /var/log/$app/production.log
 sudo chown $app: -R /var/log/$app
 
 #=================================================
+# RESTORE THE LOGROTATE CONFIGURATION
+#=================================================
+
+sudo cp -a ./logrotate /etc/logrotate.d/$app
+
+#=================================================
 # START LUTIM
 #=================================================
 
