@@ -37,6 +37,7 @@ fi
 if [ "${#final_path}" -eq 0 ]
 then	# Si final_path n'est pas renseigné dans la config yunohost, cas d'ancien script, code final_path en dur
 	final_path=/var/www/$app
+	ynh_app_setting_set $app final_path $final_path
 fi
 
 if [ "$always_encrypt" = "Yes" ]; then
@@ -69,17 +70,13 @@ path_url=$(ynh_normalize_url_path $path_url)	# Vérifie et corrige la syntaxe du
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
-SETUP_SOURCE	# Télécharge la source, décompresse et copie dans $final_path
+ynh_setup_source "$final_path"	# Télécharge la source, décompresse et copie dans $final_path
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
 
-# Et copie le fichier de config nginx
-sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
-# Change variables in nginx configuration
-sudo sed -i "s@__PATH__@$path_url@g" /etc/nginx/conf.d/$domain.d/$app.conf
-sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
+ynh_nginx_config
 
 #=================================================
 # CREATE DEDICATED USER
@@ -94,33 +91,26 @@ ynh_system_user_create $app	# Create the dedicated user, if not exist
 #=================================================
 
 ## Copie et configuration du fichier de conf.
-CHECK_MD5_CONFIG "lutim.conf" "$final_path/lutim.conf"	# Créé un backup du fichier de config si il a été modifié.
+ynh_backup_if_checksum_is_different "$final_path/lutim.conf"	# Créé un backup du fichier de config si il a été modifié.
 sudo cp ../conf/lutim.conf.template "$final_path/lutim.conf"
-sudo sed -i "s@__DOMAIN__@$domain@g" "$final_path/lutim.conf"
-sudo sed -i "s@__PATH__@$path_url@g" "$final_path/lutim.conf"
-sudo sed -i "s@__PORT__@$port@g" "$final_path/lutim.conf"
-sudo sed -i "s@__ENCRYPT__@$always_encrypt@g" "$final_path/lutim.conf"
-STORE_MD5_CONFIG "lutim.conf" "$final_path/lutim.conf"	# Réenregistre la somme de contrôle du fichier de config
+ynh_replace_string "__DOMAIN__" "$domain" "$final_path/lutim.conf"
+ynh_replace_string "__PATH__" "$path_url" "$final_path/lutim.conf"
+ynh_replace_string "__PORT__" "$port" "$final_path/lutim.conf"
+ynh_replace_string "__ENCRYPT__" "$always_encrypt" "$final_path/lutim.conf"
+ynh_store_file_checksum "$final_path/lutim.conf"	# Réenregistre la somme de contrôle du fichier de config
 
 #=================================================
 # SETUP SYSTEMD
 #=================================================
 
-# Mise en place du script systemd
-sudo systemctl stop $app
-sudo cp ../conf/lutim.service /etc/systemd/system/$app.service
-sudo chown root: /etc/systemd/system/$app.service
-sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/$app.service
-sudo sed -i "s@__APP__@$app@g" /etc/systemd/system/$app.service
-## Démarrage auto du service
-sudo systemctl enable $app
+ynh_systemd_config
 
 #=================================================
 # SETUP CRON
 #=================================================
 
 sudo cp ../conf/cron_lutim /etc/cron.d/$app
-sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
+ynh_replace_string "__FINALPATH__" "$final_path/" /etc/cron.d/$app
 
 #=================================================
 # UPDATE LUTIM WITH CARTON
@@ -135,12 +125,6 @@ popd	# Revient au dossier courant avant pushd
 #=================================================
 
 sudo chown -R $app: $final_path
-
-#=================================================
-# RESTART LUTIM
-#=================================================
-
-sudo systemctl restart lutim
 
 #=================================================
 # GENERIC FINALISATION
@@ -160,7 +144,7 @@ if [ $is_public -eq 0 ]
 then	# Si l'app est privée, seul le visionnage des images reste public
 	# Modifie le domaine pour qu'il passe dans une regex
 	domain_regex=$(echo "$domain" | sed 's@-@.@g')
-	ynh_app_setting_set $app protected_regex "$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"
+	ynh_app_setting_set $app protected_regex "$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"
 fi
 
 #=================================================
@@ -168,3 +152,26 @@ fi
 #=================================================
 
 sudo systemctl reload nginx
+
+#=================================================
+# START AND CHECK LUTIM BOOTING
+#=================================================
+
+tempfile="$(mktemp)"
+tail -f -n1 /var/log/$app/production.log > "$tempfile" &	# Suit le démarrage dans le log
+PID_TAIL=$!	# Récupère le PID de la commande tail, qui est passée en arrière plan.
+sudo systemctl restart $app	# Démarre lutim
+
+for i in `seq 1 60`
+do	# La boucle attend le démarrage de lutim. Ou 1 minute. Cette boucle évite simplement un 502 au début, car le démarrage est parfois long...
+ 	if grep -q "Manager.*started" "$tempfile"; then
+		cat "$tempfile"
+		WARNING echo "Le service $app a démarré correctement."
+		break	# Si le log annonce le démarrage de lutim, sort de la boucle.
+	fi
+	WARNING echo -n "."
+	sleep 1
+done
+echo ""
+QUIET kill -s 15 $PID_TAIL	# Arrête l'exécution de tail.
+ynh_secure_remove "$tempfile"

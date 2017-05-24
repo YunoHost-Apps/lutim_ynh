@@ -46,17 +46,13 @@ test ! -d $final_path \
 # RESTORE OF THE NGINX CONFIGURATION
 #=================================================
 
-conf=/etc/nginx/conf.d/$domain.d/$app.conf
-if [ -f $conf ]; then
-	ynh_die "There is already a nginx conf file at this path: $conf "
-fi
-sudo cp -a ./nginx.conf $conf
+ynh_restore_file nginx.conf
 
 #=================================================
 # RESTORE OF THE MAIN DIR OF THE APP
 #=================================================
 
-sudo cp -a ./sources/. $final_path
+ynh_restore_file sources
 
 #=================================================
 # RECREATE OF THE DEDICATED USER
@@ -89,7 +85,7 @@ sudo yunohost service add $app --log "/var/log/$app/APP.log"
 # RESTORE SYSTEMD
 #=================================================
 
-sudo cp -a ./systemd /etc/systemd/system/$app.service
+ynh_restore_file systemd
 ## Démarrage auto du service
 sudo systemctl enable $app.service
 
@@ -97,7 +93,7 @@ sudo systemctl enable $app.service
 # RESTORE OF THE CRON FILE
 #=================================================
 
-sudo cp -a "cron" "/etc/cron.d/$app"
+ynh_restore_file cron
 
 #=================================================
 # SETUP LOG FILE
@@ -112,13 +108,7 @@ sudo chown $app: -R /var/log/$app
 # RESTORE THE LOGROTATE CONFIGURATION
 #=================================================
 
-sudo cp -a ./logrotate /etc/logrotate.d/$app
-
-#=================================================
-# START LUTIM
-#=================================================
-
-sudo systemctl start lutim
+ynh_restore_file logrotate
 
 #=================================================
 # GENERIC FINALISATION
@@ -127,3 +117,25 @@ sudo systemctl start lutim
 #=================================================
 
 sudo systemctl reload nginx
+
+#=================================================
+# START AND CHECK LUTIM BOOTING
+#=================================================
+
+tempfile="$(mktemp)"
+tail -f -n1 /var/log/$app/production.log > "$tempfile" &	# Suit le démarrage dans le log
+PID_TAIL=$!	# Récupère le PID de la commande tail, qui est passée en arrière plan.
+sudo systemctl restart $app	# Démarre lutim
+
+for i in `seq 1 60`
+do	# La boucle attend le démarrage de lutim. Ou 1 minute. Cette boucle évite simplement un 502 au début, car le démarrage est parfois long...
+ 	if grep -q "Manager.*started" "$tempfile"; then
+		WARNING echo "Le service $app a démarré correctement."
+		break	# Si le log annonce le démarrage de lutim, sort de la boucle.
+	fi
+	WARNING echo -n "."
+	sleep 1
+done
+echo ""
+QUIET kill -s 15 $PID_TAIL	# Arrête l'exécution de tail.
+ynh_secure_remove "$tempfile"

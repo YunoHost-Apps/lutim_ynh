@@ -1,2 +1,6 @@
-SOURCE_URL>https://framagit.org/luc/lutim/repository/archive.tar.gz?ref=dd4ca47ac0ea8e5527364ba9ebddfab0c977f3ea
+SOURCE_URL=https://framagit.org/luc/lutim/repository/archive.tar.gz?ref=dd4ca47ac0ea8e5527364ba9ebddfab0c977f3ea
 SOURCE_SUM=64e86adf69cf63fcf025314a5ee5d30c
+SOURCE_SUM_PRG=md5sum
+SOURCE_FORMAT=tar.gz
+SOURCE_IN_SUBDIR=true
+SOURCE_FILENAME=

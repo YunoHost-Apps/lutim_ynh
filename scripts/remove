@@ -23,12 +23,7 @@ domain=$(ynh_app_setting_get $app domain)
 # STOP AND REMOVE SERVICE
 #=================================================
 
-if [ -e "/etc/systemd/system/$app.service" ]; then
-	echo "Delete systemd script"
-	sudo systemctl stop $app
-	sudo systemctl disable $app.service
-	sudo rm "/etc/systemd/system/$app.service"
-fi
+ynh_remove_systemd_config
 
 #=================================================
 # DISABLE SERVICE IN ADMIN PANEL
@@ -50,13 +45,13 @@ ynh_remove_app_dependencies
 # REMOVE THE MAIN DIR OF THE APP
 #=================================================
 
-SECURE_REMOVE '/var/www/$app'	# Suppression du dossier de l'application
+ynh_secure_remove "/var/www/$app"	# Suppression du dossier de l'application
 
 #=================================================
 # REMOVE THE NGINX CONFIGURATION
 #=================================================
 
-REMOVE_NGINX_CONF	# Suppression de la configuration nginx
+ynh_remove_nginx_config	# Suppression de la configuration nginx
 
 #=================================================
 # REMOVE THE LOGROTATE CONFIG
@@ -70,8 +65,4 @@ ynh_remove_logrotate	# Suppression de la configuration de logrotate
 # REMOVE CRON JOBS
 #=================================================
 
-# Retirer le cron
-if [ -e "/etc/cron.d/$app" ]; then
-	echo "Delete cron"
-	sudo rm "/etc/cron.d/$app"
-fi
+ynh_secure_remove "/etc/cron.d/$app"

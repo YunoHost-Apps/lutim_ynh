@@ -13,3 +13,7 @@ Le script installe le module perl *carton* via cpan et les paquets *fonts-droid*
 sudo yunohost app upgrade lutim -u https://github.com/YunoHost-Apps/lutim_ynh
 
 **Multi-utilisateur:** Non, accessible par tout les utilisateurs.
+
+**Voir l'état du package:**  
+*[Dernier rapport hebdomadaire](https://forum.yunohost.org/t/rapport-hebdomadaire-dintegration-continue/2297)*  
+*[Dernier test d'intégration continue](https://ci-apps.yunohost.org/jenkins/job/lutim%20%28Community%29/lastBuild/consoleFull)*
