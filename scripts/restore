@@ -46,13 +46,13 @@ test ! -d $final_path \
 # RESTORE OF THE NGINX CONFIGURATION
 #=================================================
 
-ynh_restore_file nginx.conf
+ynh_restore_file "/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
 # RESTORE OF THE MAIN DIR OF THE APP
 #=================================================
 
-ynh_restore_file sources
+ynh_restore_file "$final_path"
 
 #=================================================
 # RECREATE OF THE DEDICATED USER
@@ -85,7 +85,7 @@ sudo yunohost service add $app --log "/var/log/$app/APP.log"
 # RESTORE SYSTEMD
 #=================================================
 
-ynh_restore_file systemd
+ynh_restore_file "/etc/systemd/system/$app.service"
 ## Démarrage auto du service
 sudo systemctl enable $app.service
 
@@ -93,7 +93,7 @@ sudo systemctl enable $app.service
 # RESTORE OF THE CRON FILE
 #=================================================
 
-ynh_restore_file cron
+ynh_restore_file "/etc/cron.d/$app"
 
 #=================================================
 # SETUP LOG FILE
@@ -108,7 +108,7 @@ sudo chown $app: -R /var/log/$app
 # RESTORE THE LOGROTATE CONFIGURATION
 #=================================================
 
-ynh_restore_file logrotate
+ynh_restore_file "/etc/logrotate.d/$app"
 
 #=================================================
 # GENERIC FINALISATION

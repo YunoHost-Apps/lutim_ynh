@@ -6,28 +6,6 @@
 #=================================================
 #=================================================
 
-YNH_EXECUTION_DIR="."
-
-ynh_backup_abstract () {
-	# A intégrer à ynh_backup directement.
-	ynh_backup "$@"
-	echo "$2" "$1" >> backup_list
-}
-
-ynh_restore_file () {
-	file_and_dest=$(grep "^$1" backup_list)
-	backup_file=${file_and_dest%% *}
-	backup_dest=${file_and_dest#* }
-	if [ -f "$backup_dest" ]; then
-		ynh_die "There is already a file at this path: $backup_dest"
-	fi
-	if test -d "$backup_file"; then
-		sudo cp -a "$backup_file/." "$backup_dest"
-	else
-		sudo cp -a "$backup_file" "$backup_dest"
-	fi
-}
-
 ynh_fpm_config () {
 	finalphpconf="/etc/php5/fpm/pool.d/$app.conf"
 	ynh_backup_if_checksum_is_different "$finalphpconf" 1
@@ -125,7 +103,16 @@ ynh_remove_systemd_config () {
 #=================================================
 
 CHECK_DOMAINPATH () {	# Vérifie la disponibilité du path et du domaine.
-	sudo yunohost app checkurl $domain$path_url -a $app
+	if sudo yunohost app --help | grep --quiet url-available
+	then
+		# Check availability of a web path
+		ynh_webpath_available $domain $path_url
+		# Register/book a web path for an app
+		ynh_webpath_register $app $domain $path_url
+	else
+		# Use the legacy command
+		sudo yunohost app checkurl $domain$path_url -a $app
+	fi
 }
 
 CHECK_FINALPATH () {	# Vérifie que le dossier de destination n'est pas déjà utilisé.
@@ -210,6 +197,14 @@ CHECK_SIZE () {	# Vérifie avant chaque backup que l'espace est suffisant
 	fi
 }
 
+# Ce helper est temporaire et sert de remplacement à la véritable fonction ynh_restore_file. Le temps qu'elle arrive...
+ynh_restore_file () {
+	if [ -f "$1" ]; then
+		ynh_die "There is already a file at this path: $1"
+	fi
+	sudo cp -a "${YNH_APP_BACKUP_DIR}$1" "$1"
+}
+
 #=================================================
 # PACKAGE CHECK BYPASSING...
 #=================================================
@@ -227,81 +222,88 @@ sudo_path () {
 }
 
 # INFOS
-# nvm utilise la variable PATH pour stocker le path de la version de node à utiliser.
+# n (Node version management) utilise la variable PATH pour stocker le path de la version de node à utiliser.
 # C'est ainsi qu'il change de version
-# En attendant une généralisation de root, il est possible d'utiliser sudo aevc le helper temporaire sudo_path
+# En attendant une généralisation de root, il est possible d'utiliser sudo avec le helper temporaire sudo_path
 # Il permet d'utiliser sudo en gardant le $PATH modifié
-# ynh_install_nodejs installe la version de nodejs demandée en argument, avec nvm
+# ynh_install_nodejs installe la version de nodejs demandée en argument, avec n
 # ynh_use_nodejs active une version de nodejs dans le script courant
 # 3 variables sont mises à disposition, et 2 sont stockées dans la config de l'app
 # - nodejs_path: Le chemin absolu de cette version de node
-# Utilisé pour des appels directs à npm ou node.
+# Utilisé pour des appels directs à node.
 # - nodejs_version: Simplement le numéro de version de nodejs pour cette application
 # - nodejs_use_version: Un alias pour charger une version de node dans le shell courant.
 # Utilisé pour démarrer un service ou un script qui utilise node ou npm
 # Dans ce cas, c'est $PATH qui contient le chemin de la version de node. Il doit être propagé sur les autres shell si nécessaire.
 
-nvm_install_dir="/opt/nvm"
+n_install_dir="/opt/node_n"
 ynh_use_nodejs () {
-	nodejs_path=$(ynh_app_setting_get $app nodejs_path)
 	nodejs_version=$(ynh_app_setting_get $app nodejs_version)
 
-	# And store the command to use a specific version of node. Equal to `nvm use version`
-	nodejs_use_version="source $nvm_install_dir/nvm.sh; nvm use \"$nodejs_version\""
+	load_n_path="[[ :$PATH: == *\":$n_install_dir/bin:\"* ]] || PATH+=\":$n_install_dir/bin\""
 
-	# Desactive set -u for this script.
-	set +u
-	eval $nodejs_use_version
-	set -u
+	nodejs_use_version="n $nodejs_version"
+
+	# "Load" a version of node
+	eval $load_n_path; $nodejs_use_version
+	eval $load_n_path; sudo env "PATH=$PATH" $nodejs_use_version
+
+	# Get the absolute path of this version of node
+	nodejs_path="$(n bin $nodejs_version)"
+
+	# Make an alias for node use
+	ynh_node_exec="eval $load_n_path; n use $nodejs_version"
+	sudo_ynh_node_exec="eval $load_n_path; sudo env \"PATH=$PATH\" n use $nodejs_version"
 }
 
 ynh_install_nodejs () {
+	# Use n, https://github.com/tj/n to manage the nodejs versions
 	local nodejs_version="$1"
-	local nvm_install_script="https://raw.githubusercontent.com/creationix/nvm/v0.33.1/install.sh"
+	local n_install_script="https://git.io/n-install"
 
-	local nvm_exec="source $nvm_install_dir/nvm.sh; nvm"
+	# Create $n_install_dir
+	sudo mkdir -p "$n_install_dir"
 
-	sudo mkdir -p "$nvm_install_dir"
+	# Load n path in PATH
+	PATH+=":$n_install_dir/bin"
 
-	# If nvm is not previously setup, install it
-	"$nvm_exec --version" > /dev/null 2>&1 || \
-	( cd "$nvm_install_dir"
-	echo "Installation of NVM"
-	sudo wget --no-verbose "$nvm_install_script" -O- | sudo NVM_DIR="$nvm_install_dir" bash > /dev/null)
+	# If n is not previously setup, install it
+	n --version > /dev/null 2>&1 || \
+	( echo "Installation of N - Node.js version management" >&2; \
+	curl -sL $n_install_script | sudo N_PREFIX="$n_install_dir" bash -s -- -y $nodejs_version )
 
-	# Install the requested version of nodejs
-	sudo su -c "$nvm_exec install \"$nodejs_version\" > /dev/null"
+	# Install the requested version of nodejs (except for the first installation of n, which installed the requested version of node.)
+	sudo env "PATH=$PATH" n $nodejs_version
+
+	# Use the real installed version. Sometimes slightly different
+	nodejs_version=$(node --version | cut -c2-)
 
 	# Store the ID of this app and the version of node requested for it
-	echo "$YNH_APP_ID:$nodejs_version" | sudo tee --append "$nvm_install_dir/ynh_app_version"
+	echo "$YNH_APP_ID:$nodejs_version" | sudo tee --append "$n_install_dir/ynh_app_version"
 
-	# Get the absolute path of this version of node
-	nodejs_path="$(dirname "$(sudo su -c "$nvm_exec which \"$nodejs_version\"")")"
-
-	# Store nodejs_path and nodejs_version into the config of this app
-	ynh_app_setting_set $app nodejs_path $nodejs_path
+	# Store nodejs_version into the config of this app
 	ynh_app_setting_set $app nodejs_version $nodejs_version
 
 	ynh_use_nodejs
 }
 
 ynh_remove_nodejs () {
-	nodejs_version=$(ynh_app_setting_get $app nodejs_version)
+	ynh_use_nodejs
 
 	# Remove the line for this app
-	sudo sed --in-place "/$YNH_APP_ID:$nodejs_version/d" "$nvm_install_dir/ynh_app_version"
+	sudo sed --in-place "/$YNH_APP_ID:$nodejs_version/d" "$n_install_dir/ynh_app_version"
 
 	# If none another app uses this version of nodejs, remove it.
-	if ! grep --quiet "$nodejs_version" "$nvm_install_dir/ynh_app_version"
+	if ! grep --quiet "$nodejs_version" "$n_install_dir/ynh_app_version"
 	then
-		sudo su -c "source $nvm_install_dir/nvm.sh; nvm deactivate; nvm uninstall \"$nodejs_version\" > /dev/null"
+		n rm $nodejs_version
 	fi
 
-	# If none another app uses nvm, remove nvm and clean the root's bashrc file
-	if [ ! -s "$nvm_install_dir/ynh_app_version" ]
+	# If none another app uses n, remove n
+	if [ ! -s "$n_install_dir/ynh_app_version" ]
 	then
-		ynh_secure_remove "$nvm_install_dir"
-		sudo sed --in-place "/NVM_DIR/d" /root/.bashrc
+		ynh_secure_remove "$n_install_dir"
+		sudo sed --in-place "/N_PREFIX/d" /root/.bashrc
 	fi
 }
 
@@ -343,13 +345,13 @@ ynh_normalize_url_path () {
 # | arg: user - the user for which to check existence
 function ynh_mysql_user_exists()
 {
-	local user=$1
-	if [[ -z $(ynh_mysql_execute_as_root "SELECT User from mysql.user WHERE User = '$user';") ]]
-	then
-		return 1
-	else
-		return 0
-	fi
+   local user=$1
+   if [[ -z $(ynh_mysql_execute_as_root "SELECT User from mysql.user WHERE User = '$user';") ]]
+   then
+      return 1
+   else
+      return 0
+   fi
 }
 
 # Create a database, an user and its password. Then store the password in the app's config
@@ -365,7 +367,7 @@ ynh_mysql_setup_db () {
 	local db_user="$1"
 	local db_name="$2"
 	local new_db_pwd=$(ynh_string_random)	# Generate a random password
-	db_pwd=${3:-$new_db_pwd}
+	db_pwd="${3:-$new_db_pwd}"
 	ynh_mysql_create_db "$db_name" "$db_user" "$db_pwd"	# Create the database
 	ynh_app_setting_set $app mysqlpwd $db_pwd	# Store the password in the app's config
 }
@@ -387,7 +389,7 @@ ynh_mysql_remove_db () {
 	fi
 
 	# Remove mysql user if it exists
-	if $(ynh_mysql_user_exists $db_user); then
+        if $(ynh_mysql_user_exists $db_user); then
 		ynh_mysql_drop_user $db_user
 	fi
 }
@@ -401,8 +403,8 @@ ynh_mysql_remove_db () {
 # usage: ynh_make_valid_dbid name
 # | arg: name - name to correct
 # | ret: the corrected name
-ynh_make_valid_dbid () {
-	dbid=${1//[-.]/_}	# Mariadb doesn't support - and . in the name of databases. It will be replace by _
+ynh_sanitize_dbid () {
+	dbid=${1//[-.]/_}	# We should avoid having - and . in the name of databases. They are replaced by _
 	echo $dbid
 }
 
@@ -512,7 +514,7 @@ ynh_use_logrotate () {
 			logfile=$1/.log	# Else, uses the directory and all logfile into it.
 		fi
 	else
-		logfile="/var/log/${app}/.log" # Without argument, use a defaut directory in /var/log
+		logfile="/var/log/${app}/*.log" # Without argument, use a defaut directory in /var/log
 	fi
 	cat > ./${app}-logrotate << EOF	# Build a config file for logrotate
 $logfile {
@@ -704,81 +706,81 @@ ynh_secure_remove () {
 # usage: ynh_setup_source dest_dir [source_id]
 # | arg: dest_dir  - Directory where to setup sources
 # | arg: source_id - Name of the app, if the package contains more than one app
+YNH_EXECUTION_DIR="."
 ynh_setup_source () {
-	local dest_dir=$1
-	local src_id=${2:-app} # If the argument is not given, source_id equal "app"
+    local dest_dir=$1
+    local src_id=${2:-app} # If the argument is not given, source_id equal "app"
 
-	# Load value from configuration file (see above for a small doc about this file
-	# format)
-	local src_url=$(grep 'SOURCE_URL=' "$YNH_EXECUTION_DIR/../conf/${src_id}.src" | cut -d= -f2-)
-	local src_sum=$(grep 'SOURCE_SUM=' "$YNH_EXECUTION_DIR/../conf/${src_id}.src" | cut -d= -f2-)
-	local src_sumprg=$(grep 'SOURCE_SUM_PRG=' "$YNH_EXECUTION_DIR/../conf/${src_id}.src" | cut -d= -f2-)
-	local src_format=$(grep 'SOURCE_FORMAT=' "$YNH_EXECUTION_DIR/../conf/${src_id}.src" | cut -d= -f2-)
-	local src_in_subdir=$(grep 'SOURCE_IN_SUBDIR=' "$YNH_EXECUTION_DIR/../conf/${src_id}.src" | cut -d= -f2-)
-	local src_filename=$(grep 'SOURCE_FILENAME=' "$YNH_EXECUTION_DIR/../conf/${src_id}.src" | cut -d= -f2-)
+    # Load value from configuration file (see above for a small doc about this file
+    # format)
+    local src_url=$(grep 'SOURCE_URL=' "$YNH_EXECUTION_DIR/../conf/${src_id}.src" | cut -d= -f2-)
+    local src_sum=$(grep 'SOURCE_SUM=' "$YNH_EXECUTION_DIR/../conf/${src_id}.src" | cut -d= -f2-)
+    local src_sumprg=$(grep 'SOURCE_SUM_PRG=' "$YNH_EXECUTION_DIR/../conf/${src_id}.src" | cut -d= -f2-)
+    local src_format=$(grep 'SOURCE_FORMAT=' "$YNH_EXECUTION_DIR/../conf/${src_id}.src" | cut -d= -f2-)
+    local src_in_subdir=$(grep 'SOURCE_IN_SUBDIR=' "$YNH_EXECUTION_DIR/../conf/${src_id}.src" | cut -d= -f2-)
+    local src_filename=$(grep 'SOURCE_FILENAME=' "$YNH_EXECUTION_DIR/../conf/${src_id}.src" | cut -d= -f2-)
 
-	# Default value
-	src_sumprg=${src_sumprg:-sha256sum}
-	src_in_subdir=${src_in_subdir:-true}
-	src_format=${src_format:-tar.gz}
-	src_format=$(echo "$src_format" | tr '[:upper:]' '[:lower:]')
-	if [ "$src_filename" = "" ] ; then
-		src_filename="${src_id}.${src_format}"
-	fi
-	local local_src="/opt/yunohost-apps-src/${YNH_APP_ID}/${src_filename}"
+    # Default value
+    src_sumprg=${src_sumprg:-sha256sum}
+    src_in_subdir=${src_in_subdir:-true}
+    src_format=${src_format:-tar.gz}
+    src_format=$(echo "$src_format" | tr '[:upper:]' '[:lower:]')
+    if [ "$src_filename" = "" ] ; then
+        src_filename="${src_id}.${src_format}"
+    fi
+    local local_src="/opt/yunohost-apps-src/${YNH_APP_ID}/${src_filename}"
 
-	if test -e "$local_src"
-	then    # Use the local source file if it is present
-		sudo cp $local_src $src_filename
-	else    # If not, download the source
-		wget -nv -O $src_filename $src_url
-	fi
+    if test -e "$local_src"
+    then    # Use the local source file if it is present
+        cp $local_src $src_filename
+    else    # If not, download the source
+        wget -nv -O $src_filename $src_url
+    fi
 
-	# Check the control sum
-	echo "${src_sum} ${src_filename}" | ${src_sumprg} -c --status \
-		|| ynh_die "Corrupt source"
+    # Check the control sum
+    echo "${src_sum} ${src_filename}" | ${src_sumprg} -c --status \
+        || ynh_die "Corrupt source"
 
-	# Extract source into the app dir
-	sudo mkdir -p "$dest_dir"
-	if [ "$src_format" = "zip" ]
-	then 
-		# Zip format
-		# Using of a temp directory, because unzip doesn't manage --strip-components
-		if $src_in_subdir ; then
-			local tmp_dir=$(mktemp -d)
-			unzip -quo $src_filename -d "$tmp_dir"
-			sudo cp -a $tmp_dir/*/. "$dest_dir"
-			ynh_secure_remove "$tmp_dir"
-		else
-			sudo unzip -quo $src_filename -d "$dest_dir"
-		fi
-	else
-		local strip=""
-		if $src_in_subdir ; then
-			strip="--strip-components 1"
-		fi
-		if [[ "$src_format" =~ ^tar.gz|tar.bz2|tar.xz$ ]] ; then
-			sudo tar -xf $src_filename -C "$dest_dir" $strip
-		else
-			ynh_die "Archive format unrecognized."
-		fi
-	fi
+    # Extract source into the app dir
+    sudo mkdir -p "$dest_dir"
+    if [ "$src_format" = "zip" ]
+    then 
+        # Zip format
+        # Using of a temp directory, because unzip doesn't manage --strip-components
+        if $src_in_subdir ; then
+            local tmp_dir=$(mktemp -d)
+            sudo unzip -quo $src_filename -d "$tmp_dir"
+            sudo cp -a $tmp_dir/*/. "$dest_dir"
+            ynh_secure_remove "$tmp_dir"
+        else
+            sudo unzip -quo $src_filename -d "$dest_dir"
+        fi
+    else
+        local strip=""
+        if $src_in_subdir ; then
+            strip="--strip-components 1"
+        fi
+        if [[ "$src_format" =~ ^tar.gz|tar.bz2|tar.xz$ ]] ; then
+            sudo tar -xf $src_filename -C "$dest_dir" $strip
+        else
+            ynh_die "Archive format unrecognized."
+        fi
+    fi
 
-	# Apply patches
-	if (( $(find $YNH_EXECUTION_DIR/../sources/patches/ -type f -name "${src_id}-*.patch" 2> /dev/null | wc -l) > "0" )); then
-		local old_dir=$(pwd)
-		(cd "$dest_dir" \
-			&& for p in $YNH_EXECUTION_DIR/../sources/patches/${src_id}-*.patch; do \
-				patch -p1 < $p; done) \
-			|| ynh_die "Unable to apply patches"
-		cd $old_dir
-	fi
+    # Apply patches
+    if (( $(find $YNH_EXECUTION_DIR/../sources/patches/ -type f -name "${src_id}-*.patch" 2> /dev/null | wc -l) > "0" )); then
+        local old_dir=$(pwd)
+        (cd "$dest_dir" \
+            && for p in $YNH_EXECUTION_DIR/../sources/patches/${src_id}-*.patch; do \
+                sudo patch -p1 < $p; done) \
+            || ynh_die "Unable to apply patches"
+        cd $old_dir
+    fi
 
-	# Add supplementary files
-	if test -e "$YNH_EXECUTION_DIR/../sources/extra_files/${src_id}"; then
-		cp -a $YNH_EXECUTION_DIR/../sources/extra_files/$src_id/. "$dest_dir"
-	fi
-
+    # Add supplementary files
+    if test -e "$YNH_EXECUTION_DIR/../sources/extra_files/${src_id}"; then
+        sudo cp -a $YNH_EXECUTION_DIR/../sources/extra_files/$src_id/. "$dest_dir"
+    fi
 }
 
 # Check availability of a web path

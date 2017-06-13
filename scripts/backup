@@ -37,13 +37,13 @@ domain=$(ynh_app_setting_get $app domain)
 #=================================================
 
 CHECK_SIZE "$final_path"
-ynh_backup_abstract "$final_path" "sources"
+ynh_backup "$final_path" "${YNH_APP_BACKUP_DIR}$final_path"
 
 #=================================================
 # BACKUP OF THE NGINX CONFIGURATION
 #=================================================
 
-ynh_backup_abstract "/etc/nginx/conf.d/$domain.d/$app.conf" "nginx.conf"
+ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf" "${YNH_APP_BACKUP_DIR}/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
 # SPECIFIC BACKUP
@@ -51,16 +51,16 @@ ynh_backup_abstract "/etc/nginx/conf.d/$domain.d/$app.conf" "nginx.conf"
 # BACKUP LOGROTATE
 #=================================================
 
-ynh_backup_abstract "/etc/logrotate.d/$app" "logrotate"
+ynh_backup "/etc/logrotate.d/$app" "${YNH_APP_BACKUP_DIR}/etc/logrotate.d/$app"
 
 #=================================================
 # BACKUP SYSTEMD
 #=================================================
 
-ynh_backup_abstract "/etc/systemd/system/$app.service" "systemd"
+ynh_backup "/etc/systemd/system/$app.service" "${YNH_APP_BACKUP_DIR}/etc/systemd/system/$app.service"
 
 #=================================================
 # BACKUP OF THE CRON FILE
 #=================================================
 
-ynh_backup_abstract "/etc/cron.d/$app" "cron"
+ynh_backup "/etc/cron.d/$app" "${YNH_APP_BACKUP_DIR}/etc/cron.d/$app"
