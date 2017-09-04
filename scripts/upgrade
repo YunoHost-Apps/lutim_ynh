@@ -52,11 +52,14 @@ fi
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
 
-BACKUP_BEFORE_UPGRADE	# Backup the current version of the app
+# Backup the current version of the app
+ynh_backup_before_upgrade
 ynh_clean_setup () {
-	BACKUP_FAIL_UPGRADE	# restore it if the upgrade fails
+	# restore it if the upgrade fails
+	ynh_restore_upgradebackup
 }
-ynh_abort_if_errors	# Active trap pour arrêter le script si une erreur est détectée.
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
 
 #=================================================
 # CHECK THE PATH
@@ -76,7 +79,7 @@ ynh_setup_source "$final_path"	# Télécharge la source, décompresse et copie d
 # NGINX CONFIGURATION
 #=================================================
 
-ynh_nginx_config
+ynh_add_nginx_config
 
 #=================================================
 # CREATE DEDICATED USER
@@ -92,7 +95,7 @@ ynh_system_user_create $app	# Create the dedicated user, if not exist
 
 ## Copie et configuration du fichier de conf.
 ynh_backup_if_checksum_is_different "$final_path/lutim.conf"	# Créé un backup du fichier de config si il a été modifié.
-sudo cp ../conf/lutim.conf.template "$final_path/lutim.conf"
+cp ../conf/lutim.conf.template "$final_path/lutim.conf"
 ynh_replace_string "__DOMAIN__" "$domain" "$final_path/lutim.conf"
 ynh_replace_string "__PATH__" "$path_url" "$final_path/lutim.conf"
 ynh_replace_string "__PORT__" "$port" "$final_path/lutim.conf"
@@ -103,13 +106,13 @@ ynh_store_file_checksum "$final_path/lutim.conf"	# Réenregistre la somme de con
 # SETUP SYSTEMD
 #=================================================
 
-ynh_systemd_config
+ynh_add_systemd_config
 
 #=================================================
 # SETUP CRON
 #=================================================
 
-sudo cp ../conf/cron_lutim /etc/cron.d/$app
+cp ../conf/cron_lutim /etc/cron.d/$app
 ynh_replace_string "__FINALPATH__" "$final_path/" /etc/cron.d/$app
 
 #=================================================
@@ -117,14 +120,14 @@ ynh_replace_string "__FINALPATH__" "$final_path/" /etc/cron.d/$app
 #=================================================
 
 pushd $final_path	# cd avec une stack pour revenir en arrière
-sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
+carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log"
 popd	# Revient au dossier courant avant pushd
 
 #=================================================
 # SECURING FILES AND DIRECTORIES
 #=================================================
 
-sudo chown -R $app: $final_path
+chown -R $app: $final_path
 
 #=================================================
 # GENERIC FINALISATION
@@ -133,7 +136,7 @@ sudo chown -R $app: $final_path
 #=================================================
 
 ynh_use_logrotate
-sudo chown $app: -R /var/log/$app
+chown $app: -R /var/log/$app
 
 #=================================================
 # SETUP SSOWAT
@@ -151,7 +154,7 @@ fi
 # RELOAD NGINX
 #=================================================
 
-sudo systemctl reload nginx
+systemctl reload nginx
 
 #=================================================
 # START AND CHECK LUTIM BOOTING
@@ -160,7 +163,7 @@ sudo systemctl reload nginx
 tempfile="$(mktemp)"
 tail -f -n1 /var/log/$app/production.log > "$tempfile" &	# Suit le démarrage dans le log
 PID_TAIL=$!	# Récupère le PID de la commande tail, qui est passée en arrière plan.
-sudo systemctl restart $app	# Démarre lutim
+systemctl restart $app	# Démarre lutim
 
 for i in `seq 1 60`
 do	# La boucle attend le démarrage de lutim. Ou 1 minute. Cette boucle évite simplement un 502 au début, car le démarrage est parfois long...

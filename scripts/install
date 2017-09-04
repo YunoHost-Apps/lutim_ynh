@@ -8,6 +8,8 @@
 
 source _common.sh
 source /usr/share/yunohost/helpers
+# Load common variables for all scripts.
+source _variables
 
 #=================================================
 # MANAGE FAILURE OF THE SCRIPT
@@ -31,9 +33,16 @@ app=$YNH_APP_INSTANCE_NAME
 # CHECK IF THE APP CAN BE INSTALLED WITH THIS ARGS
 #=================================================
 
-path_url=$(ynh_normalize_url_path $path_url)	# Vérifie et corrige la syntaxe du path.
-CHECK_DOMAINPATH	# Vérifie la disponibilité du path et du domaine.
-CHECK_FINALPATH	# Vérifie que le dossier de destination n'est pas déjà utilisé.
+final_path=/var/www/$app
+test ! -e "$final_path" || ynh_die "This path already contains a folder"
+
+# Normalize the url path syntax
+path_url=$(ynh_normalize_url_path $path_url)
+
+# Check web path availability
+ynh_webpath_available $domain $path_url
+# Register (book) web path
+ynh_webpath_register $app $domain $path_url
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
@@ -52,7 +61,7 @@ ynh_app_setting_set $app always_encrypt $always_encrypt
 
 port=$(ynh_find_port 8095)	# Cherche un port libre.
 # Ouvre le port dans le firewall
-ALL_QUIET sudo yunohost firewall allow --no-upnp TCP $port
+ALL_QUIET yunohost firewall allow --no-upnp TCP $port
 ynh_app_setting_set $app port $port
 
 #=================================================
@@ -66,13 +75,13 @@ ynh_setup_source "$final_path"	# Télécharge la source, décompresse et copie d
 # INSTALL DEPENDENCIES
 #=================================================
 
-ynh_install_app_dependencies carton perlmagick
+ynh_install_app_dependencies $app_depencencies
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
 
-ynh_nginx_config
+ynh_add_nginx_config
 
 #=================================================
 # CREATE DEDICATED USER
@@ -87,7 +96,7 @@ ynh_system_user_create $app	# Créer un utilisateur système dédié à l'app
 #=================================================
 
 ## Copie et configuration du fichier de conf.
-sudo cp ../conf/lutim.conf.template "$final_path/lutim.conf"
+cp ../conf/lutim.conf.template "$final_path/lutim.conf"
 ynh_replace_string "__DOMAIN__" "$domain" "$final_path/lutim.conf"
 ynh_replace_string "__PATH__" "$path_url" "$final_path/lutim.conf"
 ynh_replace_string "__PORT__" "$port" "$final_path/lutim.conf"
@@ -100,23 +109,23 @@ ynh_store_file_checksum "$final_path/lutim.conf"	# Enregistre la somme de contr�
 # SETUP SYSTEMD
 #=================================================
 
-ynh_systemd_config
+ynh_add_systemd_config
 
 #=================================================
 # SETUP CRON
 #=================================================
 
-sudo cp ../conf/cron_lutim /etc/cron.d/$app
+cp ../conf/cron_lutim /etc/cron.d/$app
 ynh_replace_string "__FINALPATH__" "$final_path/" /etc/cron.d/$app
-sudo chmod +x $final_path/script/lutim
+chmod +x $final_path/script/lutim
 
 #=================================================
 # INSTALL LUTIM WITH CARTON
 #=================================================
 
-sudo mkdir -p /var/log/$app/
+mkdir -p /var/log/$app/
 pushd $final_path	# cd avec une stack pour revenir en arrière
-sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
+carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log"
 popd	# Revient au dossier courant avant pushd
 
 # Configure le path du dossier perl en fonction de l'architecture système
@@ -132,23 +141,23 @@ ynh_replace_string "__ARCHDIR__" "$arch_dir" "$final_path/script/lutim"
 #=================================================
 
 # Making log symbolic link to /var/log
-sudo touch /var/log/$app/production.log
-sudo chown $app: -R /var/log/$app
-sudo ln -s /var/log/$app/production.log "$final_path/log/production.log"
+touch /var/log/$app/production.log
+chown $app: -R /var/log/$app
+ln -s /var/log/$app/production.log "$final_path/log/production.log"
 
 #=================================================
 # SECURING FILES AND DIRECTORIES
 #=================================================
 
-sudo chown -R $app: $final_path
+chown -R $app: $final_path
 
 #=================================================
 # START LUTIM
 #=================================================
 
-sudo systemctl start lutim
+systemctl start lutim
 # Set right permissions on new files created at first start
-sudo chown -R $app: $final_path
+chown -R $app: $final_path
 
 # Check lutim starting
 tempfile="$(mktemp)"
@@ -167,7 +176,7 @@ ynh_use_logrotate
 # ENABLE SERVICE IN ADMIN PANEL
 #=================================================
 
-sudo yunohost service add lutim -l $final_path/log/production.log
+yunohost service add lutim -l $final_path/log/production.log
 
 #=================================================
 # SETUP SSOWAT
@@ -188,7 +197,7 @@ fi
 # RELOAD NGINX
 #=================================================
 
-sudo systemctl reload nginx
+systemctl reload nginx
 
 #=================================================
 # CHECK LUTIM BOOTING

@@ -1,25 +1,27 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC STARTING
-#=================================================
-# MANAGE FAILURE OF THE SCRIPT
-#=================================================
-
-# Exit on command errors and treat unset variables as an error
-set -eu
-
+# GENERIC START
 #=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
 if [ ! -e _common.sh ]; then
-	# Rapatrie le fichier de fonctions si il n'est pas dans le dossier courant
-	sudo cp ../settings/scripts/_common.sh ./_common.sh
-	sudo chmod a+rx _common.sh
+	# Get the _common.sh file if it's not in the current directory
+	cp ../settings/scripts/_common.sh ./_common.sh
+	chmod a+rx _common.sh
 fi
 source _common.sh
 source /usr/share/yunohost/helpers
+# Load common variables for all scripts.
+source ../settings/scripts/_variables
+
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
 
 #=================================================
 # LOAD SETTINGS
@@ -35,7 +37,7 @@ path_url=$(ynh_app_setting_get $app path)
 # CHECK IF THE APP CAN BE RESTORED
 #=================================================
 
-sudo yunohost app checkurl "${domain}${path_url}" -a "$app" \
+yunohost app checkurl "${domain}${path_url}" -a "$app" \
 	|| ynh_die "Path not available: ${domain}${path_url}"
 test ! -d $final_path \
 	|| ynh_die "There is already a directory: $final_path "
@@ -65,7 +67,7 @@ ynh_system_user_create $app	# Recreate the dedicated user, if not exist
 #=================================================
 
 # Les fichiers appartiennent à root
-sudo chown -R $app: $final_path
+chown -R $app: $final_path
 
 #=================================================
 # SPECIFIC RESTORE
@@ -73,13 +75,13 @@ sudo chown -R $app: $final_path
 # REINSTALL DEPENDENCIES
 #=================================================
 
-ynh_install_app_dependencies carton perlmagick
+ynh_install_app_dependencies $app_depencencies
 
 #=================================================
 # ENABLE SERVICE IN ADMIN PANEL
 #=================================================
 
-sudo yunohost service add $app --log "/var/log/$app/APP.log"
+yunohost service add $app --log "/var/log/$app/APP.log"
 
 #=================================================
 # RESTORE SYSTEMD
@@ -87,7 +89,7 @@ sudo yunohost service add $app --log "/var/log/$app/APP.log"
 
 ynh_restore_file "/etc/systemd/system/$app.service"
 ## Démarrage auto du service
-sudo systemctl enable $app.service
+systemctl enable $app.service
 
 #=================================================
 # RESTORE OF THE CRON FILE
@@ -100,9 +102,9 @@ ynh_restore_file "/etc/cron.d/$app"
 #=================================================
 
 # Making log symbolic link to /var/log
-sudo mkdir -p /var/log/$app/
-sudo touch /var/log/$app/production.log
-sudo chown $app: -R /var/log/$app
+mkdir -p /var/log/$app/
+touch /var/log/$app/production.log
+chown $app: -R /var/log/$app
 
 #=================================================
 # RESTORE THE LOGROTATE CONFIGURATION
@@ -116,7 +118,7 @@ ynh_restore_file "/etc/logrotate.d/$app"
 # RELOAD NGINX
 #=================================================
 
-sudo systemctl reload nginx
+systemctl reload nginx
 
 #=================================================
 # START AND CHECK LUTIM BOOTING
@@ -125,7 +127,7 @@ sudo systemctl reload nginx
 tempfile="$(mktemp)"
 tail -f -n1 /var/log/$app/production.log > "$tempfile" &	# Suit le démarrage dans le log
 PID_TAIL=$!	# Récupère le PID de la commande tail, qui est passée en arrière plan.
-sudo systemctl restart $app	# Démarre lutim
+systemctl restart $app	# Démarre lutim
 
 for i in `seq 1 60`
 do	# La boucle attend le démarrage de lutim. Ou 1 minute. Cette boucle évite simplement un 502 au début, car le démarrage est parfois long...
