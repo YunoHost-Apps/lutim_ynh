@@ -135,8 +135,8 @@ chown -R $app: $final_path
 # SETUP LOGROTATE
 #=================================================
 
-ynh_use_logrotate
-chown $app: -R /var/log/$app
+ynh_use_logrotate --non-append
+chown $app -R /var/log/$app
 
 #=================================================
 # SETUP SSOWAT

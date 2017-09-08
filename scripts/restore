@@ -104,7 +104,7 @@ ynh_restore_file "/etc/cron.d/$app"
 # Making log symbolic link to /var/log
 mkdir -p /var/log/$app/
 touch /var/log/$app/production.log
-chown $app: -R /var/log/$app
+chown $app -R /var/log/$app
 
 #=================================================
 # RESTORE THE LOGROTATE CONFIGURATION
