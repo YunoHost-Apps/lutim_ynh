@@ -8,6 +8,9 @@
 
 source _common.sh
 source /usr/share/yunohost/helpers
+# Load common variables for all scripts.
+source _variables
+source _apt
 
 #=================================================
 # LOAD SETTINGS
@@ -55,6 +58,12 @@ fi
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
+# Nettoyage des résidus d'installation non pris en charge par le script remove.
+	if test -n "$PID_TAIL"
+	then
+		SUPPRESS_WARNING kill -s 15 $PID_TAIL	# Arrête l'exécution de tail.
+		ynh_secure_remove "$tempfile"
+	fi
 	# restore it if the upgrade fails
 	ynh_restore_upgradebackup
 }
@@ -74,6 +83,12 @@ path_url=$(ynh_normalize_url_path $path_url)	# Vérifie et corrige la syntaxe du
 #=================================================
 
 ynh_setup_source "$final_path"	# Télécharge la source, décompresse et copie dans $final_path
+
+#=================================================
+# UPGRADE DEPENDENCIES
+#=================================================
+
+ynh_install_app_dependencies $app_depencencies
 
 #=================================================
 # NGINX CONFIGURATION
@@ -119,9 +134,8 @@ ynh_replace_string "__FINALPATH__" "$final_path/" /etc/cron.d/$app
 # UPDATE LUTIM WITH CARTON
 #=================================================
 
-pushd $final_path	# cd avec une stack pour revenir en arrière
-carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log"
-popd	# Revient au dossier courant avant pushd
+(cd $final_path
+carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
 
 #=================================================
 # SECURING FILES AND DIRECTORIES

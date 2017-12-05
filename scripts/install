@@ -15,7 +15,15 @@ source _variables
 # MANAGE FAILURE OF THE SCRIPT
 #=================================================
 
-ynh_abort_if_errors	# Active trap pour arrêter le script si une erreur est détectée.
+ynh_clean_setup () {
+# Nettoyage des résidus d'installation non pris en charge par le script remove.
+	if test -n "$PID_TAIL"
+	then
+		SUPPRESS_WARNING kill -s 15 $PID_TAIL	# Arrête l'exécution de tail.
+		ynh_secure_remove "$tempfile"
+	fi
+}
+ynh_abort_if_errors
 
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
@@ -23,7 +31,6 @@ ynh_abort_if_errors	# Active trap pour arrêter le script si une erreur est dét
 
 domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
-admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
 always_encrypt=$YNH_APP_ARG_ALWAYS_ENCRYPT
 
@@ -48,7 +55,6 @@ ynh_webpath_register $app $domain $path_url
 # STORE SETTINGS FROM MANIFEST
 #=================================================
 
-ynh_app_setting_set $app admin $admin
 ynh_app_setting_set $app domain $domain
 ynh_app_setting_set $app is_public $is_public
 ynh_app_setting_set $app always_encrypt $always_encrypt
@@ -124,9 +130,8 @@ chmod +x $final_path/script/lutim
 #=================================================
 
 mkdir -p /var/log/$app/
-pushd $final_path	# cd avec une stack pour revenir en arrière
-carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log"
-popd	# Revient au dossier courant avant pushd
+(cd $final_path
+carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
 
 # Configure le path du dossier perl en fonction de l'architecture système
 arch_dir=$(ls -1 $final_path/local/lib/perl5/ | grep linux-gnu)
