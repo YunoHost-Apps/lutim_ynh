@@ -26,6 +26,12 @@ always_encrypt=$(ynh_app_setting_get $app always_encrypt)
 final_path=$(ynh_app_setting_get $app final_path)
 
 #=================================================
+# CHECK VERSION
+#=================================================
+
+ynh_abort_if_up_to_date
+
+#=================================================
 # FIX OLD THINGS
 #=================================================
 
@@ -59,11 +65,7 @@ fi
 ynh_backup_before_upgrade
 ynh_clean_setup () {
 # Nettoyage des résidus d'installation non pris en charge par le script remove.
-	if test -n "$PID_TAIL"
-	then
-		SUPPRESS_WARNING kill -s 15 $PID_TAIL	# Arrête l'exécution de tail.
-		ynh_secure_remove "$tempfile"
-	fi
+	ynh_clean_check_starting
 	# restore it if the upgrade fails
 	ynh_restore_upgradebackup
 }
@@ -174,21 +176,5 @@ systemctl reload nginx
 # START AND CHECK LUTIM BOOTING
 #=================================================
 
-tempfile="$(mktemp)"
-tail -f -n1 /var/log/$app/production.log > "$tempfile" &	# Suit le démarrage dans le log
-PID_TAIL=$!	# Récupère le PID de la commande tail, qui est passée en arrière plan.
-systemctl restart $app	# Démarre lutim
-
-for i in `seq 1 60`
-do	# La boucle attend le démarrage de lutim. Ou 1 minute. Cette boucle évite simplement un 502 au début, car le démarrage est parfois long...
- 	if grep -q "Manager.*started" "$tempfile"; then
-		cat "$tempfile"
-		WARNING echo "Le service $app a démarré correctement."
-		break	# Si le log annonce le démarrage de lutim, sort de la boucle.
-	fi
-	WARNING echo -n "."
-	sleep 1
-done
-echo ""
-QUIET kill -s 15 $PID_TAIL	# Arrête l'exécution de tail.
-ynh_secure_remove "$tempfile"
+# Wait for lutim fully started
+ynh_check_starting "Manager.*started" "/var/log/$app/production.log" "120"

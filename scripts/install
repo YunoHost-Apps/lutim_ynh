@@ -17,11 +17,7 @@ source _variables
 
 ynh_clean_setup () {
 # Nettoyage des résidus d'installation non pris en charge par le script remove.
-	if test -n "$PID_TAIL"
-	then
-		SUPPRESS_WARNING kill -s 15 $PID_TAIL	# Arrête l'exécution de tail.
-		ynh_secure_remove "$tempfile"
-	fi
+	ynh_clean_check_starting
 }
 ynh_abort_if_errors
 
@@ -67,7 +63,7 @@ ynh_app_setting_set $app always_encrypt $always_encrypt
 
 port=$(ynh_find_port 8095)	# Cherche un port libre.
 # Ouvre le port dans le firewall
-ALL_QUIET yunohost firewall allow --no-upnp TCP $port
+ynh_exec_fully_quiet yunohost firewall allow --no-upnp TCP $port
 ynh_app_setting_set $app port $port
 
 #=================================================
@@ -157,19 +153,6 @@ ln -s /var/log/$app/production.log "$final_path/log/production.log"
 chown -R $app: $final_path
 
 #=================================================
-# START LUTIM
-#=================================================
-
-systemctl start lutim
-# Set right permissions on new files created at first start
-chown -R $app: $final_path
-
-# Check lutim starting
-tempfile="$(mktemp)"
-tail -f -n1 /var/log/$app/production.log > "$tempfile" &	# Suit le démarrage dans le log
-PID_TAIL=$!	# Récupère le PID de la commande tail, qui est passée en arrière plan.
-
-#=================================================
 # GENERIC FINALISATION
 #=================================================
 # SETUP LOGROTATE
@@ -208,15 +191,18 @@ systemctl reload nginx
 # CHECK LUTIM BOOTING
 #=================================================
 
-for i in `seq 1 60`
-do	# La boucle attend le démarrage de lutim. Ou 1 minute. Cette boucle évite simplement un 502 au début, car le démarrage est parfois long...
- 	if grep -q "Manager.*started" "$tempfile"; then
-		WARNING echo "Le service $app a démarré correctement."
-		break	# Si le log annonce le démarrage de lutim, sort de la boucle.
-	fi
-	WARNING echo -n "."
-	sleep 1
-done
-echo ""
-QUIET kill -s 15 $PID_TAIL	# Arrête l'exécution de tail.
-ynh_secure_remove "$tempfile"
+# Wait for lutim fully started
+ynh_check_starting "Manager.*started" "/var/log/$app/production.log" "120"
+
+# Set right permissions on new files created at first start
+chown -R $app: $final_path
+
+#=================================================
+# SEND A README FOR THE ADMIN
+#=================================================
+
+message="You can find a config file at $final_path/lutim.conf
+
+If you facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/lutim_ynh"
+
+ynh_send_readme_to_admin "$message" "root"

@@ -20,6 +20,10 @@ source ../settings/scripts/_variables
 # MANAGE SCRIPT FAILURE
 #=================================================
 
+ynh_clean_setup () {
+# Nettoyage des résidus d'installation non pris en charge par le script remove.
+	ynh_clean_check_starting
+}
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
 
@@ -37,7 +41,7 @@ path_url=$(ynh_app_setting_get $app path)
 # CHECK IF THE APP CAN BE RESTORED
 #=================================================
 
-yunohost app checkurl "${domain}${path_url}" -a "$app" \
+ynh_webpath_available $domain $path_url \
 	|| ynh_die "Path not available: ${domain}${path_url}"
 test ! -d $final_path \
 	|| ynh_die "There is already a directory: $final_path "
@@ -124,20 +128,15 @@ systemctl reload nginx
 # START AND CHECK LUTIM BOOTING
 #=================================================
 
-tempfile="$(mktemp)"
-tail -f -n1 /var/log/$app/production.log > "$tempfile" &	# Suit le démarrage dans le log
-PID_TAIL=$!	# Récupère le PID de la commande tail, qui est passée en arrière plan.
-systemctl restart $app	# Démarre lutim
+# Wait for lutim fully started
+ynh_check_starting "Manager.*started" "/var/log/$app/production.log" "120"
 
-for i in `seq 1 60`
-do	# La boucle attend le démarrage de lutim. Ou 1 minute. Cette boucle évite simplement un 502 au début, car le démarrage est parfois long...
- 	if grep -q "Manager.*started" "$tempfile"; then
-		WARNING echo "Le service $app a démarré correctement."
-		break	# Si le log annonce le démarrage de lutim, sort de la boucle.
-	fi
-	WARNING echo -n "."
-	sleep 1
-done
-echo ""
-QUIET kill -s 15 $PID_TAIL	# Arrête l'exécution de tail.
-ynh_secure_remove "$tempfile"
+#=================================================
+# SEND A README FOR THE ADMIN
+#=================================================
+
+message="You can find a config file at $final_path/lutim.conf
+
+If you facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/lutim_ynh"
+
+ynh_send_readme_to_admin "$message" "root"
