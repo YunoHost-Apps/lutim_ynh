@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # Dependencies
-app_depencencies="carton perlmagick"
+app_depencencies="carton perlmagick libpq-dev"

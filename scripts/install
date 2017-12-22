@@ -15,7 +15,11 @@ source _variables
 # MANAGE FAILURE OF THE SCRIPT
 #=================================================
 
-ynh_abort_if_errors	# Active trap pour arrêter le script si une erreur est détectée.
+ynh_clean_setup () {
+# Nettoyage des résidus d'installation non pris en charge par le script remove.
+	ynh_clean_check_starting
+}
+ynh_abort_if_errors
 
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
@@ -23,7 +27,6 @@ ynh_abort_if_errors	# Active trap pour arrêter le script si une erreur est dét
 
 domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
-admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
 always_encrypt=$YNH_APP_ARG_ALWAYS_ENCRYPT
 
@@ -48,7 +51,6 @@ ynh_webpath_register $app $domain $path_url
 # STORE SETTINGS FROM MANIFEST
 #=================================================
 
-ynh_app_setting_set $app admin $admin
 ynh_app_setting_set $app domain $domain
 ynh_app_setting_set $app is_public $is_public
 ynh_app_setting_set $app always_encrypt $always_encrypt
@@ -61,7 +63,7 @@ ynh_app_setting_set $app always_encrypt $always_encrypt
 
 port=$(ynh_find_port 8095)	# Cherche un port libre.
 # Ouvre le port dans le firewall
-ALL_QUIET yunohost firewall allow --no-upnp TCP $port
+ynh_exec_fully_quiet yunohost firewall allow --no-upnp TCP $port
 ynh_app_setting_set $app port $port
 
 #=================================================
@@ -124,9 +126,8 @@ chmod +x $final_path/script/lutim
 #=================================================
 
 mkdir -p /var/log/$app/
-pushd $final_path	# cd avec une stack pour revenir en arrière
-carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log"
-popd	# Revient au dossier courant avant pushd
+(cd $final_path
+carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
 
 # Configure le path du dossier perl en fonction de l'architecture système
 arch_dir=$(ls -1 $final_path/local/lib/perl5/ | grep linux-gnu)
@@ -150,19 +151,6 @@ ln -s /var/log/$app/production.log "$final_path/log/production.log"
 #=================================================
 
 chown -R $app: $final_path
-
-#=================================================
-# START LUTIM
-#=================================================
-
-systemctl start lutim
-# Set right permissions on new files created at first start
-chown -R $app: $final_path
-
-# Check lutim starting
-tempfile="$(mktemp)"
-tail -f -n1 /var/log/$app/production.log > "$tempfile" &	# Suit le démarrage dans le log
-PID_TAIL=$!	# Récupère le PID de la commande tail, qui est passée en arrière plan.
 
 #=================================================
 # GENERIC FINALISATION
@@ -203,15 +191,18 @@ systemctl reload nginx
 # CHECK LUTIM BOOTING
 #=================================================
 
-for i in `seq 1 60`
-do	# La boucle attend le démarrage de lutim. Ou 1 minute. Cette boucle évite simplement un 502 au début, car le démarrage est parfois long...
- 	if grep -q "Manager.*started" "$tempfile"; then
-		WARNING echo "Le service $app a démarré correctement."
-		break	# Si le log annonce le démarrage de lutim, sort de la boucle.
-	fi
-	WARNING echo -n "."
-	sleep 1
-done
-echo ""
-QUIET kill -s 15 $PID_TAIL	# Arrête l'exécution de tail.
-ynh_secure_remove "$tempfile"
+# Wait for lutim fully started
+ynh_check_starting "Manager.*started" "/var/log/$app/production.log" "120"
+
+# Set right permissions on new files created at first start
+chown -R $app: $final_path
+
+#=================================================
+# SEND A README FOR THE ADMIN
+#=================================================
+
+message="You can find a config file at $final_path/lutim.conf
+
+If you facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/lutim_ynh"
+
+ynh_send_readme_to_admin "$message" "root"

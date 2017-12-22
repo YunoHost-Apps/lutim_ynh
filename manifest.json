@@ -6,7 +6,7 @@
 		"en": "Self hosting images and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage d'images anonyme"
 	},
-	"version": "0.7.1",
+	"version": "0.8.6~ynh1",
 	"url": "https://lut.im",
 	"license": "AGPL-3.0",
 	"maintainer": {
@@ -40,15 +40,6 @@
 				},
 				"example": "/lutim",
 				"default": "/lutim"
-			},
-			{
-				"name": "admin",
-				"type": "user",
-				"ask": {
-					"en": "Choose the Lutim administrator (must be an existing YunoHost user)",
-					"fr": "Choisissez un administrateur Lutim (doit être un utilisateur YunoHost)"
-				},
-				"example": "john"
 			},
 			{
 				"name": "is_public",

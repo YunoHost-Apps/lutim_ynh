@@ -8,6 +8,9 @@
 
 source _common.sh
 source /usr/share/yunohost/helpers
+# Load common variables for all scripts.
+source _variables
+source _apt
 
 #=================================================
 # LOAD SETTINGS
@@ -21,6 +24,12 @@ is_public=$(ynh_app_setting_get $app is_public)
 port=$(ynh_app_setting_get $app port)
 always_encrypt=$(ynh_app_setting_get $app always_encrypt)
 final_path=$(ynh_app_setting_get $app final_path)
+
+#=================================================
+# CHECK VERSION
+#=================================================
+
+ynh_abort_if_up_to_date
 
 #=================================================
 # FIX OLD THINGS
@@ -55,6 +64,8 @@ fi
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
+# Nettoyage des résidus d'installation non pris en charge par le script remove.
+	ynh_clean_check_starting
 	# restore it if the upgrade fails
 	ynh_restore_upgradebackup
 }
@@ -74,6 +85,12 @@ path_url=$(ynh_normalize_url_path $path_url)	# Vérifie et corrige la syntaxe du
 #=================================================
 
 ynh_setup_source "$final_path"	# Télécharge la source, décompresse et copie dans $final_path
+
+#=================================================
+# UPGRADE DEPENDENCIES
+#=================================================
+
+ynh_install_app_dependencies $app_depencencies
 
 #=================================================
 # NGINX CONFIGURATION
@@ -119,9 +136,8 @@ ynh_replace_string "__FINALPATH__" "$final_path/" /etc/cron.d/$app
 # UPDATE LUTIM WITH CARTON
 #=================================================
 
-pushd $final_path	# cd avec une stack pour revenir en arrière
-carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log"
-popd	# Revient au dossier courant avant pushd
+(cd $final_path
+carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
 
 #=================================================
 # SECURING FILES AND DIRECTORIES
@@ -160,21 +176,5 @@ systemctl reload nginx
 # START AND CHECK LUTIM BOOTING
 #=================================================
 
-tempfile="$(mktemp)"
-tail -f -n1 /var/log/$app/production.log > "$tempfile" &	# Suit le démarrage dans le log
-PID_TAIL=$!	# Récupère le PID de la commande tail, qui est passée en arrière plan.
-systemctl restart $app	# Démarre lutim
-
-for i in `seq 1 60`
-do	# La boucle attend le démarrage de lutim. Ou 1 minute. Cette boucle évite simplement un 502 au début, car le démarrage est parfois long...
- 	if grep -q "Manager.*started" "$tempfile"; then
-		cat "$tempfile"
-		WARNING echo "Le service $app a démarré correctement."
-		break	# Si le log annonce le démarrage de lutim, sort de la boucle.
-	fi
-	WARNING echo -n "."
-	sleep 1
-done
-echo ""
-QUIET kill -s 15 $PID_TAIL	# Arrête l'exécution de tail.
-ynh_secure_remove "$tempfile"
+# Wait for lutim fully started
+ynh_check_starting "Manager.*started" "/var/log/$app/production.log" "120"
