@@ -13,7 +13,7 @@ Si vous n'avez pas YunoHost, merci de regarder [ici](https://yunohost.org/#/inst
 Lutim stocke les images et vous permet de les voir, de les télécharger ou de les partager sur les réseaux sociaux.
 Les images sont stockées indéfiniment à moins que vous ne demandiez qu'elles soient effacées à la première vue ou après 24 heures / une semaine / un mois / un an.
 
-**Version embarquée:** 0.8.6
+**Version embarquée:** 0.8.7
 
 ## Captures d'écran
 
