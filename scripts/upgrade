@@ -170,7 +170,7 @@ fi
 # RELOAD NGINX
 #=================================================
 
-systemctl reload nginx
+ynh_system_reload nginx
 
 #=================================================
 # START AND CHECK LUTIM BOOTING
