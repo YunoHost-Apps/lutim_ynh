@@ -13,7 +13,7 @@ Si vous n'avez pas YunoHost, merci de regarder [ici](https://yunohost.org/#/inst
 Lutim stocke les images et vous permet de les voir, de les télécharger ou de les partager sur les réseaux sociaux.
 Les images sont stockées indéfiniment à moins que vous ne demandiez qu'elles soient effacées à la première vue ou après 24 heures / une semaine / un mois / un an.
 
-**Version embarquée:** 0.8.8
+**Version embarquée:** 0.9.3
 
 ## Captures d'écran
 
@@ -35,7 +35,8 @@ Non applicable.
 
 #### Architectures supportées.
 
-* Testé sur x86_64
+* x86-64b - [![Build Status](https://ci-apps.yunohost.org/jenkins/job/lutim%20(Community)/badge/icon)](https://ci-apps.yunohost.org/jenkins/job/lutim%20(Community)/)
+* ARMv8-A - [![Build Status](https://ci-apps.yunohost.org/jenkins/job/lutim%20(Community)%20(%7EARM%7E)/badge/icon)](https://ci-apps.yunohost.org/jenkins/job/lutim%20(Community)%20(%7EARM%7E)/)
 
 ## Limitations
 

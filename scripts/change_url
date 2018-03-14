@@ -127,7 +127,7 @@ ynh_replace_string "\(^ *prefix.*=> '\).*" "\1$new_path'," "$final_path/lutim.co
 # RELOAD NGINX
 #=================================================
 
-systemctl reload nginx
+ynh_system_reload nginx
 
 #=================================================
 # START AND CHECK LUTIM BOOTING

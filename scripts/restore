@@ -122,7 +122,7 @@ ynh_restore_file "/etc/logrotate.d/$app"
 # RELOAD NGINX
 #=================================================
 
-systemctl reload nginx
+ynh_system_reload nginx
 
 #=================================================
 # START AND CHECK LUTIM BOOTING
