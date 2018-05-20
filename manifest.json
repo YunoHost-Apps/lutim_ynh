@@ -6,7 +6,7 @@
 		"en": "Self hosting images and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage d'images anonyme"
 	},
-	"version": "0.9.3~ynh1",
+	"version": "0.10.4~ynh1",
 	"url": "https://lut.im",
 	"license": "AGPL-3.0",
 	"maintainer": {
@@ -14,7 +14,7 @@
 		"email": "maniackc_dev@crudelis.fr"
 	},
 	"requirements": {
-        "yunohost": ">= 2.7.2"
+        "yunohost": ">= 2.7.12"
 	},
 	"multi_instance": false,
 	"services": [

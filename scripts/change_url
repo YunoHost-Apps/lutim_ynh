@@ -8,7 +8,6 @@
 
 source _common.sh
 source /usr/share/yunohost/helpers
-source _sed
 
 #=================================================
 # RETRIEVE ARGUMENTS
@@ -37,6 +36,14 @@ test -n "$old_path" || old_path="/"
 test -n "$new_path" || new_path="/"
 new_path=$(ynh_normalize_url_path $new_path)
 old_path=$(ynh_normalize_url_path $old_path)
+
+#=================================================
+# ACTIVATE MAINTENANCE MODE
+#=================================================
+
+path_url=$old_path
+domain=$old_domain
+ynh_maintenance_mode_ON
 
 #=================================================
 # CHECK WHICH PARTS SHOULD BE CHANGED
@@ -135,3 +142,11 @@ ynh_system_reload nginx
 
 # Wait for lutim fully started
 ynh_check_starting "Manager.*started" "/var/log/$app/production.log" "120"
+
+#=================================================
+# DEACTIVE MAINTENANCE MODE
+#=================================================
+
+path_url=$old_path
+domain=$old_domain
+ynh_maintenance_mode_OFF

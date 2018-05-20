@@ -10,7 +10,6 @@ source _common.sh
 source /usr/share/yunohost/helpers
 # Load common variables for all scripts.
 source _variables
-source _apt
 
 #=================================================
 # LOAD SETTINGS
@@ -77,6 +76,12 @@ ynh_abort_if_errors
 #=================================================
 
 path_url=$(ynh_normalize_url_path $path_url)	# Vérifie et corrige la syntaxe du path.
+
+#=================================================
+# ACTIVATE MAINTENANCE MODE
+#=================================================
+
+ynh_maintenance_mode_ON
 
 #=================================================
 # STANDARD UPGRADE STEPS
@@ -178,3 +183,9 @@ ynh_system_reload nginx
 
 # Wait for lutim fully started
 ynh_check_starting "Manager.*started" "/var/log/$app/production.log" "120"
+
+#=================================================
+# DEACTIVE MAINTENANCE MODE
+#=================================================
+
+ynh_maintenance_mode_OFF

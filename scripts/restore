@@ -47,6 +47,12 @@ test ! -d $final_path \
 	|| ynh_die "There is already a directory: $final_path "
 
 #=================================================
+# ACTIVATE MAINTENANCE MODE
+#=================================================
+
+ynh_maintenance_mode_ON
+
+#=================================================
 # STANDARD RESTORE STEPS
 #=================================================
 # RESTORE OF THE NGINX CONFIGURATION
@@ -130,6 +136,12 @@ ynh_system_reload nginx
 
 # Wait for lutim fully started
 ynh_check_starting "Manager.*started" "/var/log/$app/production.log" "120"
+
+#=================================================
+# DEACTIVE MAINTENANCE MODE
+#=================================================
+
+ynh_maintenance_mode_OFF
 
 #=================================================
 # SEND A README FOR THE ADMIN

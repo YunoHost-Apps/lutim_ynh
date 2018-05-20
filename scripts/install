@@ -56,6 +56,12 @@ ynh_app_setting_set $app is_public $is_public
 ynh_app_setting_set $app always_encrypt $always_encrypt
 
 #=================================================
+# ACTIVATE MAINTENANCE MODE
+#=================================================
+
+ynh_maintenance_mode_ON
+
+#=================================================
 # STANDARD MODIFICATIONS
 #=================================================
 # FIND AND OPEN A PORT
@@ -196,6 +202,12 @@ ynh_check_starting "Manager.*started" "/var/log/$app/production.log" "120"
 
 # Set right permissions on new files created at first start
 chown -R $app: $final_path
+
+#=================================================
+# DEACTIVE MAINTENANCE MODE
+#=================================================
+
+ynh_maintenance_mode_OFF
 
 #=================================================
 # SEND A README FOR THE ADMIN

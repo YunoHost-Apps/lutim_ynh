@@ -1,6 +1,6 @@
 # Lutim pour YunoHost
 
-[![Niveau d'intégration](https://dash.yunohost.org/integration/lutim.svg)](https://ci-apps.yunohost.org/jenkins/job/lutim%20%28Community%29/lastBuild/consoleFull)  
+[![Niveau d'intégration](https://dash.yunohost.org/integration/lutim.svg)](https://dash.yunohost.org/appci/app/lutim)  
 [![Installer Lutim avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=lutim)
 
 *[Read this readme in english.](./README.md)*
@@ -13,9 +13,13 @@ Si vous n'avez pas YunoHost, merci de regarder [ici](https://yunohost.org/#/inst
 Lutim stocke les images et vous permet de les voir, de les télécharger ou de les partager sur les réseaux sociaux.
 Les images sont stockées indéfiniment à moins que vous ne demandiez qu'elles soient effacées à la première vue ou après 24 heures / une semaine / un mois / un an.
 
-**Version embarquée:** 0.9.3
+**Version embarquée:** 0.10.4
 
 ## Captures d'écran
+
+## Démo
+
+* [Instance officielle](https://lut.im/)
 
 ## Configuration
 
@@ -36,7 +40,7 @@ Non applicable.
 #### Architectures supportées.
 
 * x86-64b - [![Build Status](https://ci-apps.yunohost.org/jenkins/job/lutim%20(Community)/badge/icon)](https://ci-apps.yunohost.org/jenkins/job/lutim%20(Community)/)
-* ARMv8-A - [![Build Status](https://ci-apps.yunohost.org/jenkins/job/lutim%20(Community)%20(%7EARM%7E)/badge/icon)](https://ci-apps.yunohost.org/jenkins/job/lutim%20(Community)%20(%7EARM%7E)/)
+* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/jenkins/job/lutim%20(Community)%20(%7EARM%7E)/badge/icon)](https://ci-apps-arm.yunohost.org/jenkins/job/lutim%20(Community)%20(%7EARM%7E)/)
 
 ## Limitations
 
