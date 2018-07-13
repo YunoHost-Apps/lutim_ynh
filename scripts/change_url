@@ -27,6 +27,7 @@ app=$YNH_APP_INSTANCE_NAME
 
 final_path=$(ynh_app_setting_get $app final_path)
 is_public=$(ynh_app_setting_get $app is_public)
+port=$(ynh_app_setting_get $app port)
 
 #=================================================
 # CHECK THE SYNTAX OF THE PATHS
@@ -86,12 +87,15 @@ then
 	# Make a backup of the original nginx config file if modified
 	ynh_backup_if_checksum_is_different "$nginx_conf_path"
 
-	# Replace locations starting with old_path
-	# Look for every location possible patterns (see https://nginx.org/en/docs/http/ngx_http_core_module.html#location)
-	ynh_replace_string "location\( \(=\|~\|~\*\|\^~\)\)\? $old_path" "location\1 $new_path"  "$nginx_conf_path"
+	# Set global variables for nginx helper
+	domain="$old_domain"
+	path_url="$new_path"
 
-	# Calculate and store the nginx config file checksum
-	ynh_store_file_checksum "$nginx_conf_path"
+	# Store path_url setting
+	ynh_app_setting_set $app path_url "$path_url"
+
+	# Create a dedicated nginx config
+	ynh_add_nginx_config
 fi
 
 # Change the domain for nginx
@@ -101,9 +105,8 @@ then
 	ynh_delete_file_checksum "$nginx_conf_path"
 	mv $nginx_conf_path /etc/nginx/conf.d/$new_domain.d/$app.conf
 
-	nginx_conf_path=/etc/nginx/conf.d/$new_domain.d/$app.conf
-	# Calculate and store the nginx config file checksum
-	ynh_store_file_checksum "$nginx_conf_path"
+	# Store file checksum for the new config file location
+	ynh_store_file_checksum "/etc/nginx/conf.d/$new_domain.d/$app.conf"
 fi
 
 #=================================================
@@ -134,14 +137,14 @@ ynh_replace_string "\(^ *prefix.*=> '\).*" "\1$new_path'," "$final_path/lutim.co
 # RELOAD NGINX
 #=================================================
 
-ynh_system_reload nginx
+ynh_system_reload --service_name=nginx
 
 #=================================================
 # START AND CHECK LUTIM BOOTING
 #=================================================
 
 # Wait for lutim fully started
-ynh_check_starting "Manager.*started" "/var/log/$app/production.log" "120"
+ynh_check_starting --line_to_match="Manager.*started" --app_log="/var/log/$app/production.log" --timeout="120"
 
 #=================================================
 # DEACTIVE MAINTENANCE MODE

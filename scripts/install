@@ -191,14 +191,14 @@ fi
 # RELOAD NGINX
 #=================================================
 
-ynh_system_reload nginx
+ynh_system_reload --service_name=nginx
 
 #=================================================
 # CHECK LUTIM BOOTING
 #=================================================
 
 # Wait for lutim fully started
-ynh_check_starting "Manager.*started" "/var/log/$app/production.log" "120"
+ynh_check_starting --line_to_match="Manager.*started" --app_log="/var/log/$app/production.log" --timeout="120"
 
 # Set right permissions on new files created at first start
 chown -R $app: $final_path
@@ -217,4 +217,4 @@ message="You can find a config file at $final_path/lutim.conf
 
 If you facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/lutim_ynh"
 
-ynh_send_readme_to_admin "$message" "root"
+ynh_send_readme_to_admin --app_message="$message" --recipients="root"
