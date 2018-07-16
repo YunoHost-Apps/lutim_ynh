@@ -28,7 +28,7 @@ final_path=$(ynh_app_setting_get $app final_path)
 # CHECK VERSION
 #=================================================
 
-ynh_abort_if_up_to_date
+upgrade_type=$(ynh_check_app_version_changed)
 
 #=================================================
 # FIX OLD THINGS
@@ -95,7 +95,10 @@ ynh_setup_source "$final_path"	# Télécharge la source, décompresse et copie d
 # UPGRADE DEPENDENCIES
 #=================================================
 
-ynh_install_app_dependencies $app_depencencies
+if [ "$upgrade_type" == "UPGRADE_APP" ]
+then
+	ynh_install_app_dependencies $app_depencencies
+fi
 
 #=================================================
 # NGINX CONFIGURATION
@@ -141,8 +144,11 @@ ynh_replace_string "__FINALPATH__" "$final_path/" /etc/cron.d/$app
 # UPDATE LUTIM WITH CARTON
 #=================================================
 
-(cd $final_path
-carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
+if [ "$upgrade_type" == "UPGRADE_APP" ]
+then
+	(cd $final_path
+	carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
+fi
 
 #=================================================
 # SECURING FILES AND DIRECTORIES
@@ -175,14 +181,14 @@ fi
 # RELOAD NGINX
 #=================================================
 
-ynh_system_reload nginx
+ynh_system_reload --service_name=nginx
 
 #=================================================
 # START AND CHECK LUTIM BOOTING
 #=================================================
 
 # Wait for lutim fully started
-ynh_check_starting "Manager.*started" "/var/log/$app/production.log" "120"
+ynh_check_starting --line_to_match="Manager.*started" --app_log="/var/log/$app/production.log" --timeout="120"
 
 #=================================================
 # DEACTIVE MAINTENANCE MODE
