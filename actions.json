@@ -1,0 +1,64 @@
+[{
+		"id": "clean_ip",
+		"name": "Clean old ip from database",
+		"command": "/bin/bash scripts/actions/clean_ip",
+		"user": "root",
+		"accepted_return_codes": [0],
+		"description": {
+			"en": "Remove obsolete IP from the database.",
+			"fr": "Supprime les IP obsolètes de la base de donnée."
+		}
+},
+{
+		"id": "clean_images",
+		"name": "Clean old images",
+		"command": "/bin/bash scripts/actions/clean_images",
+		"user": "root",
+		"accepted_return_codes": [0],
+		"description": {
+			"en": "Remove expired images.",
+			"fr": "Supprime les images dont le délai a expiré."
+		}
+},
+{
+		"id": "check_quota",
+		"name": "Check disk quota",
+		"command": "/bin/bash scripts/actions/check_quota",
+		"user": "root",
+		"accepted_return_codes": [0],
+		"description": {
+			"en": "Check the disk quota for images stored by Lutim.",
+			"fr": "Vérifie l'occupation de l'espace du dossier des images."
+		}
+},
+{
+		"id": "reset_default_config",
+		"name": "Reset the config file and restore a default one.",
+		"command": "/bin/bash scripts/actions/reset_default_config \"lutim.conf\"",
+		"user": "root",
+		"accepted_return_codes": [0],
+		"description": {
+			"en": "Reset the config file lutim.conf.",
+			"fr": "Réinitialise le fichier de configuration lutim.conf."
+		}
+},
+{
+		"id": "public_private",
+		"name": "Move to public or private",
+		"command": "/bin/bash scripts/actions/public_private",
+		"user": "root",
+		"accepted_return_codes": [0],
+		"description": {
+			"en": "Change the public access of the app."
+		},
+		"arguments": [
+			{
+				"name": "is_public",
+				"type": "boolean",
+				"ask": {
+					"en": "Is it a public app ?"
+				},
+				"default": true
+			}
+		]
+}]
