@@ -54,6 +54,9 @@ ynh_webpath_register $app $domain $path_url
 ynh_app_setting_set $app domain $domain
 ynh_app_setting_set $app is_public $is_public
 ynh_app_setting_set $app always_encrypt $always_encrypt
+ynh_app_setting_set $app overwrite_settings "1"
+ynh_app_setting_set $app overwrite_nginx "1"
+ynh_app_setting_set $app overwrite_systemd "1"
 
 #=================================================
 # ACTIVATE MAINTENANCE MODE
@@ -111,6 +114,7 @@ ynh_replace_string "__PORT__" "$port" "$final_path/lutim.conf"
 ynh_replace_string "__ENCRYPT__" "$always_encrypt" "$final_path/lutim.conf"
 secret=$(ynh_string_random)
 ynh_replace_string "__SECRET__" "$secret" "$final_path/lutim.conf"
+ynh_app_setting_set $app secret "$secret"
 ynh_store_file_checksum "$final_path/lutim.conf"	# Enregistre la somme de contrôle du fichier de config
 
 #=================================================
