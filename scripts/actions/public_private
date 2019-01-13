@@ -6,6 +6,7 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
+source scripts/_common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -63,4 +64,4 @@ ynh_app_setting_set $app is_public $is_public
 # RELOAD NGINX
 #=================================================
 
-systemctl reload nginx
+ynh_systemd_action --action=reload --service_name=nginx

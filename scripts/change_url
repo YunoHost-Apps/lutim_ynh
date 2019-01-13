@@ -137,14 +137,14 @@ ynh_replace_string "\(^ *prefix.*=> '\).*" "\1$new_path'," "$final_path/lutim.co
 # RELOAD NGINX
 #=================================================
 
-ynh_system_reload --service_name=nginx
+ynh_systemd_action --action=reload --service_name=nginx
 
 #=================================================
 # START AND CHECK LUTIM BOOTING
 #=================================================
 
 # Wait for lutim fully started
-ynh_check_starting --line_to_match="Manager.*started" --app_log="/var/log/$app/production.log" --timeout="120"
+ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 
 #=================================================
 # DEACTIVE MAINTENANCE MODE

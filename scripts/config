@@ -151,7 +151,7 @@ apply_config() {
 	if [ $restart_lutim -eq 1 ]
 	then
 		# Wait for lutim to be fully started
-		ynh_check_starting --line_to_match="Manager.*started" --app_log="/var/log/$app/production.log" --timeout="120"
+		ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 	fi
 
 	# Change public accessibility

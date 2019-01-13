@@ -121,16 +121,16 @@ ynh_maintenance_mode_ON
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
-ynh_setup_source "$final_path"	# Télécharge la source, décompresse et copie dans $final_path
+if [ "$upgrade_type" == "UPGRADE_APP" ]
+then
+	ynh_setup_source "$final_path"	# Télécharge la source, décompresse et copie dans $final_path
+fi
 
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
 
-if [ "$upgrade_type" == "UPGRADE_APP" ]
-then
-	ynh_install_app_dependencies $app_depencencies
-fi
+ynh_install_app_dependencies $app_depencencies
 
 #=================================================
 # NGINX CONFIGURATION
@@ -238,14 +238,14 @@ fi
 # RELOAD NGINX
 #=================================================
 
-ynh_system_reload --service_name=nginx
+ynh_systemd_action --action=reload --service_name=nginx
 
 #=================================================
 # START AND CHECK LUTIM BOOTING
 #=================================================
 
 # Wait for lutim fully started
-ynh_check_starting --line_to_match="Manager.*started" --app_log="/var/log/$app/production.log" --timeout="120"
+ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 
 #=================================================
 # DEACTIVE MAINTENANCE MODE
