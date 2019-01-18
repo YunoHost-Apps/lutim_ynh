@@ -42,22 +42,25 @@ upgrade_type=$(ynh_check_app_version_changed)
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
 
+# Fix is_public as a boolean
 if [ "$is_public" = "Yes" ]; then
-	ynh_app_setting_set $app is_public 1	# Fixe is_public en booléen
+	ynh_app_setting_set $app is_public 1
 	is_public=1
 elif [ "$is_public" = "No" ]; then
 	ynh_app_setting_set $app is_public 0
 	is_public=0
 fi
 
+# if final_path isn't set, which can happens with old scripts, set final_path.
 if [ "${#final_path}" -eq 0 ]
-then	# Si final_path n'est pas renseigné dans la config yunohost, cas d'ancien script, code final_path en dur
+then
 	final_path=/var/www/$app
 	ynh_app_setting_set $app final_path $final_path
 fi
 
+# Fix always_encrypt as a boolean
 if [ "$always_encrypt" = "Yes" ]; then
-	ynh_app_setting_set $app always_encrypt 1	# Fixe always_encrypt en booléen
+	ynh_app_setting_set $app always_encrypt 1
 	always_encrypt=1
 elif [ "$always_encrypt" = "No" ]; then
 	ynh_app_setting_set $app always_encrypt 0
@@ -95,7 +98,7 @@ fi
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
-# Nettoyage des résidus d'installation non pris en charge par le script remove.
+# Clean installation remaining that are not handle by the remove script.
 	ynh_clean_check_starting
 	# restore it if the upgrade fails
 	ynh_restore_upgradebackup
@@ -107,7 +110,8 @@ ynh_abort_if_errors
 # CHECK THE PATH
 #=================================================
 
-path_url=$(ynh_normalize_url_path $path_url)	# Vérifie et corrige la syntaxe du path.
+# Normalize the URL path syntax
+path_url=$(ynh_normalize_url_path $path_url)
 
 #=================================================
 # ACTIVATE MAINTENANCE MODE
@@ -123,7 +127,8 @@ ynh_maintenance_mode_ON
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-	ynh_setup_source "$final_path"	# Télécharge la source, décompresse et copie dans $final_path
+	# Download, check integrity, uncompress and patch the source from app.src
+	ynh_setup_source "$final_path"
 fi
 
 #=================================================
@@ -146,7 +151,8 @@ fi
 # CREATE DEDICATED USER
 #=================================================
 
-ynh_system_user_create $app	# Create the dedicated user, if not exist
+# Create a dedicated user (if not existing)
+ynh_system_user_create $app
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -157,15 +163,17 @@ ynh_system_user_create $app	# Create the dedicated user, if not exist
 # Overwrite the settings config file only if it's allowed
 if [ $overwrite_settings -eq 1 ]
 then
-	## Copie et configuration du fichier de conf.
-	ynh_backup_if_checksum_is_different "$final_path/lutim.conf"	# Créé un backup du fichier de config si il a été modifié.
+	# Configure Lutim
+	# Verify the checksum of a file, stored by `ynh_store_file_checksum` in the install script.
+	ynh_backup_if_checksum_is_different "$final_path/lutim.conf"
 	cp ../conf/lutim.conf.template "$final_path/lutim.conf"
 	ynh_replace_string "__DOMAIN__" "$domain" "$final_path/lutim.conf"
 	ynh_replace_string "__PATH__" "$path_url" "$final_path/lutim.conf"
 	ynh_replace_string "__PORT__" "$port" "$final_path/lutim.conf"
 	ynh_replace_string "__ENCRYPT__" "$always_encrypt" "$final_path/lutim.conf"
 	ynh_replace_string "__SECRET__" "$secret" "$final_path/lutim.conf"
-	ynh_store_file_checksum "$final_path/lutim.conf"	# Réenregistre la somme de contrôle du fichier de config
+	# Recalculate and store the checksum of the file for the next upgrade.
+	ynh_store_file_checksum "$final_path/lutim.conf"
 
 	# Optional parameters from config-panel feature
 	if [ -n "$antiflood" ]; then
@@ -211,6 +219,7 @@ fi
 # SECURING FILES AND DIRECTORIES
 #=================================================
 
+# Set permissions on app files
 chown -R $app: $final_path
 
 #=================================================
@@ -228,8 +237,9 @@ chown $app -R /var/log/$app
 
 ynh_app_setting_set $app skipped_uris "/"
 if [ $is_public -eq 0 ]
-then	# Si l'app est privée, seul le visionnage des images reste public
-	# Modifie le domaine pour qu'il passe dans une regex
+then
+	# If the app is private, viewing images stays publicly accessible.
+	# Modify the domain to be used in a regex
 	domain_regex=$(echo "$domain" | sed 's@-@.@g')
 	ynh_app_setting_set $app protected_regex "$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"
 fi
@@ -244,7 +254,7 @@ ynh_systemd_action --action=reload --service_name=nginx
 # START AND CHECK LUTIM BOOTING
 #=================================================
 
-# Wait for lutim fully started
+# Wait for lutim to be fully started
 ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 
 #=================================================

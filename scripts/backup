@@ -28,14 +28,14 @@ domain=$(ynh_app_setting_get $app domain)
 #=================================================
 # STANDARD BACKUP STEPS
 #=================================================
-# BACKUP OF THE MAIN DIR OF THE APP
+# BACKUP THE APP MAIN DIR
 #=================================================
 
 CHECK_SIZE "$final_path"
 ynh_backup "$final_path"
 
 #=================================================
-# BACKUP OF THE NGINX CONFIGURATION
+# BACKUP NGINX CONFIGURATION
 #=================================================
 
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
@@ -55,7 +55,7 @@ ynh_backup "/etc/logrotate.d/$app"
 ynh_backup "/etc/systemd/system/$app.service"
 
 #=================================================
-# BACKUP OF THE CRON FILE
+# BACKUP A CRON FILE
 #=================================================
 
 ynh_backup "/etc/cron.d/$app"
