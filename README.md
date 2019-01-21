@@ -13,7 +13,7 @@ If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to
 Lutim stores images and allows you to see them, download them or share them on social networks.
 Images are indefinitely stored unless you request that they will be deleted at first view or after 24 hours / one week / one month / one year.
 
-**Shipped version:** 0.10.4
+**Shipped version:** 0.11.4
 
 ## Screenshots
 
@@ -39,9 +39,9 @@ Not relevant.
 
 #### Supported architectures
 
-* x86-64b - [![Build Status](https://ci-apps.yunohost.org/jenkins/job/lutim%20(Community)/badge/icon)](https://ci-apps.yunohost.org/jenkins/job/lutim%20(Community)/)
-* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/jenkins/job/lutim%20(Community)%20(%7EARM%7E)/badge/icon)](https://ci-apps-arm.yunohost.org/jenkins/job/lutim%20(Community)%20(%7EARM%7E)/)
-* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/jenkins/job/lutim%20(Community)/badge/icon)](https://ci-stretch.nohost.me/jenkins/job/lutim%20(Community)/)
+* x86-64b - [![](https://ci-apps.yunohost.org/ci/logs/lutim%20%28Community%29.svg)](https://ci-apps.yunohost.org/ci/apps/lutim/)
+* ARMv8-A - [![](https://ci-apps-arm.yunohost.org/ci/logs/lutim%20%28Community%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lutim/)
+* Jessie x86-64b - [![](https://ci-stretch.nohost.me/ci/logs/lutim%20%28Community%29.svg)](https://ci-stretch.nohost.me/ci/apps/lutim/)
 
 ## Limitations
 
@@ -62,7 +62,7 @@ Please do your pull request to the [testing branch](https://github.com/YunoHost-
 
 To try the testing branch, please proceed like that.
 ```
-sudo yunohost app install https://github.com/YunoHost-Apps/lutim_ynh/tree/testing --verbose
+sudo yunohost app install https://github.com/YunoHost-Apps/lutim_ynh/tree/testing --debug
 or
-sudo yunohost app upgrade lutim -u https://github.com/YunoHost-Apps/lutim_ynh/tree/testing --verbose
+sudo yunohost app upgrade lutim -u https://github.com/YunoHost-Apps/lutim_ynh/tree/testing --debug
 ```

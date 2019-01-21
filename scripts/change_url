@@ -67,7 +67,7 @@ fi
 #=================================================
 
 ynh_clean_setup () {
-# Nettoyage des résidus d'installation non pris en charge par le script remove.
+# Clean installation remaining that are not handle by the remove script.
 	ynh_clean_check_starting
 }
 # Exit if an error occurs during the execution of the script
@@ -114,11 +114,13 @@ fi
 #=================================================
 
 if [ $is_public -eq 0 ]
-then	# Si l'app est privée, seul le visionnage des images reste public
+then
+	# If the app is private, viewing images stays publicly accessible.
 	if [ "$new_path" == "/" ]; then
-	    new_path=""	# Si path correspond à la racine, supprime le / pour éviter une erreur de la regex.
+	    # If the path is /, clear it to prevent any error with the regex.
+	    new_path=""
 	fi
-	# Modifie le domaine pour qu'il passe dans une regex
+	# Modify the domain to be used in a regex
 	domain_regex=$(echo "$new_domain" | sed 's@-@.@g')
 	ynh_app_setting_set $app protected_regex "$domain_regex$new_path/stats$","$domain_regex$new_path/manifest.webapp$","$domain_regex$new_path/$","$domain_regex$new_path/d/.*$","$domain_regex$new_path/m/.*$"
 fi
@@ -137,14 +139,14 @@ ynh_replace_string "\(^ *prefix.*=> '\).*" "\1$new_path'," "$final_path/lutim.co
 # RELOAD NGINX
 #=================================================
 
-ynh_system_reload --service_name=nginx
+ynh_systemd_action --action=reload --service_name=nginx
 
 #=================================================
 # START AND CHECK LUTIM BOOTING
 #=================================================
 
-# Wait for lutim fully started
-ynh_check_starting --line_to_match="Manager.*started" --app_log="/var/log/$app/production.log" --timeout="120"
+# Wait for lutim to be fully started
+ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 
 #=================================================
 # DEACTIVE MAINTENANCE MODE

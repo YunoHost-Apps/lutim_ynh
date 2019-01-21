@@ -23,13 +23,15 @@ domain=$(ynh_app_setting_get $app domain)
 # STOP AND REMOVE SERVICE
 #=================================================
 
+# Remove the dedicated systemd config
 ynh_remove_systemd_config
 
 #=================================================
-# DISABLE SERVICE IN ADMIN PANEL
+# REMOVE SERVICE FROM ADMIN PANEL
 #=================================================
 
-if yunohost service status | grep -q $app	# Test l'existence du service dans Yunohost
+# Check if the service is declared in YunoHost
+if yunohost service status | grep -q $app
 then
 	ynh_print_info "Remove $app service" >&2
 	yunohost service remove $app
@@ -39,30 +41,34 @@ fi
 # REMOVE DEPENDENCIES
 #=================================================
 
+# Remove metapackage and its dependencies
 ynh_remove_app_dependencies
 
 #=================================================
-# REMOVE THE MAIN DIR OF THE APP
+# REMOVE APP MAIN DIR
 #=================================================
 
-ynh_secure_remove "/var/www/$app"	# Suppression du dossier de l'application
+# Remove the app directory securely
+ynh_secure_remove "/var/www/$app"
 
 #=================================================
-# REMOVE THE NGINX CONFIGURATION
+# REMOVE NGINX CONFIGURATION
 #=================================================
 
-ynh_remove_nginx_config	# Suppression de la configuration nginx
+# Remove the dedicated nginx config
+ynh_remove_nginx_config
 
 #=================================================
-# REMOVE THE LOGROTATE CONFIG
+# REMOVE LOGROTATE CONFIGURATION
 #=================================================
 
-ynh_remove_logrotate	# Suppression de la configuration de logrotate
+# Remove the app-specific logrotate config
+ynh_remove_logrotate
 
 #=================================================
 # SPECIFIC REMOVE
 #=================================================
-# REMOVE CRON JOBS
+# REMOVE CRON JOB
 #=================================================
 
 ynh_secure_remove "/etc/cron.d/$app"

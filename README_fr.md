@@ -13,7 +13,7 @@ Si vous n'avez pas YunoHost, merci de regarder [ici](https://yunohost.org/#/inst
 Lutim stocke les images et vous permet de les voir, de les télécharger ou de les partager sur les réseaux sociaux.
 Les images sont stockées indéfiniment à moins que vous ne demandiez qu'elles soient effacées à la première vue ou après 24 heures / une semaine / un mois / un an.
 
-**Version embarquée:** 0.10.4
+**Version embarquée:** 0.11.4
 
 ## Captures d'écran
 
@@ -39,9 +39,9 @@ Non applicable.
 
 #### Architectures supportées.
 
-* x86-64b - [![Build Status](https://ci-apps.yunohost.org/jenkins/job/lutim%20(Community)/badge/icon)](https://ci-apps.yunohost.org/jenkins/job/lutim%20(Community)/)
-* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/jenkins/job/lutim%20(Community)%20(%7EARM%7E)/badge/icon)](https://ci-apps-arm.yunohost.org/jenkins/job/lutim%20(Community)%20(%7EARM%7E)/)
-* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/jenkins/job/lutim%20(Community)/badge/icon)](https://ci-stretch.nohost.me/jenkins/job/lutim%20(Community)/)
+* x86-64b - [![](https://ci-apps.yunohost.org/ci/logs/lutim%20%28Community%29.svg)](https://ci-apps.yunohost.org/ci/apps/lutim/)
+* ARMv8-A - [![](https://ci-apps-arm.yunohost.org/ci/logs/lutim%20%28Community%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lutim/)
+* Jessie x86-64b - [![](https://ci-stretch.nohost.me/ci/logs/lutim%20%28Community%29.svg)](https://ci-stretch.nohost.me/ci/apps/lutim/)
 
 ## Limitations
 
@@ -62,7 +62,7 @@ Merci de faire vos pull request sur la [branche testing](https://github.com/Yuno
 
 Pour tester la branche testing, merci de procéder ainsi.
 ```
-sudo yunohost app install https://github.com/YunoHost-Apps/lutim_ynh/tree/testing --verbose
+sudo yunohost app install https://github.com/YunoHost-Apps/lutim_ynh/tree/testing --debug
 ou
-sudo yunohost app upgrade lutim -u https://github.com/YunoHost-Apps/lutim_ynh/tree/testing --verbose
+sudo yunohost app upgrade lutim -u https://github.com/YunoHost-Apps/lutim_ynh/tree/testing --debug
 ```

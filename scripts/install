@@ -16,7 +16,7 @@ source _variables
 #=================================================
 
 ynh_clean_setup () {
-# Nettoyage des résidus d'installation non pris en charge par le script remove.
+# Clean installation remaining that are not handle by the remove script.
 	ynh_clean_check_starting
 }
 ynh_abort_if_errors
@@ -42,8 +42,6 @@ test ! -e "$final_path" || ynh_die "This path already contains a folder"
 # Normalize the url path syntax
 path_url=$(ynh_normalize_url_path $path_url)
 
-# Check web path availability
-ynh_webpath_available $domain $path_url
 # Register (book) web path
 ynh_webpath_register $app $domain $path_url
 
@@ -59,19 +57,14 @@ ynh_app_setting_set $app overwrite_nginx "1"
 ynh_app_setting_set $app overwrite_systemd "1"
 
 #=================================================
-# ACTIVATE MAINTENANCE MODE
-#=================================================
-
-ynh_maintenance_mode_ON
-
-#=================================================
 # STANDARD MODIFICATIONS
 #=================================================
 # FIND AND OPEN A PORT
 #=================================================
 
-port=$(ynh_find_port 8095)	# Cherche un port libre.
-# Ouvre le port dans le firewall
+# Find a free port
+port=$(ynh_find_port 8095)
+# Open this port
 ynh_exec_fully_quiet yunohost firewall allow --no-upnp TCP $port
 ynh_app_setting_set $app port $port
 
@@ -80,7 +73,8 @@ ynh_app_setting_set $app port $port
 #=================================================
 
 ynh_app_setting_set $app final_path $final_path
-ynh_setup_source "$final_path"	# Télécharge la source, décompresse et copie dans $final_path
+# Download, check integrity and uncompress the source from app.src
+ynh_setup_source "$final_path"
 
 #=================================================
 # INSTALL DEPENDENCIES
@@ -92,13 +86,15 @@ ynh_install_app_dependencies $app_depencencies
 # NGINX CONFIGURATION
 #=================================================
 
+# Create a dedicated nginx config
 ynh_add_nginx_config
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
 
-ynh_system_user_create $app	# Créer un utilisateur système dédié à l'app
+# Create a dedicated system user
+ynh_system_user_create $app
 
 #=================================================
 # SPECIFIC SETUP
@@ -106,7 +102,7 @@ ynh_system_user_create $app	# Créer un utilisateur système dédié à l'app
 # SETUP LUTIM
 #=================================================
 
-## Copie et configuration du fichier de conf.
+# Configure Lutim
 cp ../conf/lutim.conf.template "$final_path/lutim.conf"
 ynh_replace_string "__DOMAIN__" "$domain" "$final_path/lutim.conf"
 ynh_replace_string "__PATH__" "$path_url" "$final_path/lutim.conf"
@@ -115,12 +111,14 @@ ynh_replace_string "__ENCRYPT__" "$always_encrypt" "$final_path/lutim.conf"
 secret=$(ynh_string_random)
 ynh_replace_string "__SECRET__" "$secret" "$final_path/lutim.conf"
 ynh_app_setting_set $app secret "$secret"
-ynh_store_file_checksum "$final_path/lutim.conf"	# Enregistre la somme de contrôle du fichier de config
+# Calculate and store the config file checksum into the app settings
+ynh_store_file_checksum "$final_path/lutim.conf"
 
 #=================================================
 # SETUP SYSTEMD
 #=================================================
 
+# Create a dedicated systemd config
 ynh_add_systemd_config
 
 #=================================================
@@ -139,11 +137,11 @@ mkdir -p /var/log/$app/
 (cd $final_path
 carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
 
-# Configure le path du dossier perl en fonction de l'architecture système
+# Use a perl path adapted to the system architecture
 arch_dir=$(ls -1 $final_path/local/lib/perl5/ | grep linux-gnu)
 if [ "$?" -ne 0 ]
 then
-	ynh_die "Impossible de trouver le dossier relatif à l'architecture système."
+	ynh_die "Unable to find the perl directory for your architecture."
 fi
 ynh_replace_string "__ARCHDIR__" "$arch_dir" "$final_path/script/lutim"
 
@@ -151,7 +149,7 @@ ynh_replace_string "__ARCHDIR__" "$arch_dir" "$final_path/script/lutim"
 # SETUP LOG FILE
 #=================================================
 
-# Making log symbolic link to /var/log
+# Making log a symbolic link to /var/log
 touch /var/log/$app/production.log
 chown $app -R /var/log/$app
 ln -s /var/log/$app/production.log "$final_path/log/production.log"
@@ -160,6 +158,7 @@ ln -s /var/log/$app/production.log "$final_path/log/production.log"
 # SECURING FILES AND DIRECTORIES
 #=================================================
 
+# Set permissions to app files
 chown -R $app: $final_path
 
 #=================================================
@@ -168,10 +167,11 @@ chown -R $app: $final_path
 # SETUP LOGROTATE
 #=================================================
 
+# Use logrotate to manage application logfile(s)
 ynh_use_logrotate
 
 #=================================================
-# ENABLE SERVICE IN ADMIN PANEL
+# ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
 yunohost service add lutim -l $final_path/log/production.log
@@ -182,11 +182,13 @@ yunohost service add lutim -l $final_path/log/production.log
 
 ynh_app_setting_set $app skipped_uris "/"
 if [ $is_public -eq 0 ]
-then	# Si l'app est privée, seul le visionnage des images reste public
+then
+	# If the app is private, viewing images stays publicly accessible.
 	if [ "$path_url" == "/" ]; then
-	    path_url=""	# Si path correspond à la racine, supprime le / pour éviter une erreur de la regex.
+	    # If the path is /, clear it to prevent any error with the regex.
+	    path_url=""
 	fi
-	# Modifie le domaine pour qu'il passe dans une regex
+	# Modify the domain to be used in a regex
 	domain_regex=$(echo "$domain" | sed 's@-@.@g')
 	ynh_app_setting_set $app protected_regex "$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"
 fi
@@ -195,30 +197,30 @@ fi
 # RELOAD NGINX
 #=================================================
 
-ynh_system_reload --service_name=nginx
+ynh_systemd_action --action=reload --service_name=nginx
 
 #=================================================
 # CHECK LUTIM BOOTING
 #=================================================
 
-# Wait for lutim fully started
-ynh_check_starting --line_to_match="Manager.*started" --app_log="/var/log/$app/production.log" --timeout="120"
+# Wait for lutim to be fully started
+ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 
 # Set right permissions on new files created at first start
 chown -R $app: $final_path
 
 #=================================================
-# DEACTIVE MAINTENANCE MODE
-#=================================================
-
-ynh_maintenance_mode_OFF
-
-#=================================================
 # SEND A README FOR THE ADMIN
 #=================================================
 
+# Get main domain and buid the url of the admin panel of the app.
+admin_panel="https://$(grep portal_domain /etc/ssowat/conf.json | cut -d'"' -f4)/yunohost/admin/#/apps/$app"
+
 message="You can find a config file at $final_path/lutim.conf
 
-If you facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/lutim_ynh"
+You can configure this app easily by using the experimental config-panel feature: $admin_panel/config-panel.
+You can also find some specific actions for this app by using the experimental action feature: $admin_panel/actions.
 
-ynh_send_readme_to_admin --app_message="$message" --recipients="root"
+If you're facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/lutim_ynh"
+
+ynh_send_readme_to_admin --app_message="$message" --recipients="root" --type="install"
