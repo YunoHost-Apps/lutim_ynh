@@ -6,7 +6,7 @@
 		"en": "Self hosting images and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage d'images anonyme"
 	},
-	"version": "0.10.4~ynh3",
+	"version": "0.11.4~ynh1",
 	"url": "https://lut.im",
 	"license": "AGPL-3.0",
 	"maintainer": {

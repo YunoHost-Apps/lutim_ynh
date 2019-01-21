@@ -1,5 +1,5 @@
-SOURCE_URL=https://framagit.org/luc/lutim/repository/0.10.4/archive.tar.gz
-SOURCE_SUM=aca9466fc49729a58e055e1a0fb1b8b0
+SOURCE_URL=https://framagit.org/fiat-tux/hat-softwares/lutim/-/archive/0.11.4/lutim-0.11.4.tar.gz
+SOURCE_SUM=56f34c4eadb476049175724b3a6f5505
 SOURCE_SUM_PRG=md5sum
 SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=true
