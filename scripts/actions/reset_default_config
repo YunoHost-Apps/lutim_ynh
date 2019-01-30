@@ -12,6 +12,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # RETRIEVE ARGUMENTS
 #=================================================
+ynh_script_progression --message="Retrieve arguments from the manifest" --weight=3
 
 app=${YNH_APP_INSTANCE_NAME:-$YNH_APP_ID}
 final_path=$(ynh_app_setting_get $app final_path)
@@ -36,6 +37,7 @@ fi
 #=================================================
 # RESET THE CONFIG FILE
 #=================================================
+ynh_script_progression --message="Reset the config file $config_file" --weight=9
 
 # Verify the checksum and backup the file if it's different
 ynh_backup_if_checksum_is_different "$config_file"
@@ -56,5 +58,14 @@ fi
 # Calculate and store the config file checksum into the app settings
 ynh_store_file_checksum "$config_file"
 
+ynh_script_progression --message="Restart Lutim" --weight=5
+
 # Wait for lutim to be fully started
 ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Execution completed" --last
+
