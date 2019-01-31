@@ -70,8 +70,6 @@ ynh_script_progression --message="Find a free port" --weight=3
 
 # Find a free port
 port=$(ynh_find_port 8095)
-# Open this port
-ynh_exec_fully_quiet yunohost firewall allow --no-upnp TCP $port
 ynh_app_setting_set $app port $port
 
 #=================================================
