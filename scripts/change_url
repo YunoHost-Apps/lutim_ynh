@@ -159,7 +159,7 @@ ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="
 #=================================================
 # DEACTIVE MAINTENANCE MODE
 #=================================================
-ynh_script_progression --message="Deactive maintenance mode" --weight=5
+ynh_script_progression --message="Disable maintenance mode" --weight=5
 
 path_url=$old_path
 domain=$old_domain

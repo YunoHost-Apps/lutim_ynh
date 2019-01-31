@@ -143,7 +143,7 @@ ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="
 #=================================================
 # DEACTIVE MAINTENANCE MODE
 #=================================================
-ynh_script_progression --message="Deactive maintenance mode" --weight=7
+ynh_script_progression --message="Disable maintenance mode" --weight=7
 
 ynh_maintenance_mode_OFF
 
