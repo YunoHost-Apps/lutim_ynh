@@ -80,6 +80,16 @@ ynh_remove_logrotate
 ynh_secure_remove "/etc/cron.d/$app"
 
 #=================================================
+# GENERIC FINALISATION
+#=================================================
+# REMOVE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Remove the dedicated user" --weight=5
+
+# Delete dedicated system user
+ynh_system_user_delete $app
+
+#=================================================
 # END OF SCRIPT
 #=================================================
 
