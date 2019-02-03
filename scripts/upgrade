@@ -14,6 +14,7 @@ source _variables
 #=================================================
 # LOAD SETTINGS
 #=================================================
+ynh_script_progression --message="Load settings" --weight=4
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -41,6 +42,7 @@ upgrade_type=$(ynh_check_app_version_changed)
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
+ynh_script_progression --message="Ensure downward compatibility" --weight=2
 
 # Fix is_public as a boolean
 if [ "$is_public" = "Yes" ]; then
@@ -91,9 +93,16 @@ if [ -z "$secret" ]; then
 	ynh_app_setting_set $app secret $secret
 fi
 
+# Close opened port
+if yunohost firewall list | grep -q "\- $port$"
+then
+	ynh_exec_quiet yunohost firewall disallow TCP $port
+fi
+
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
+ynh_script_progression --message="Backup the app before upgrading" --weight=15
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -116,6 +125,7 @@ path_url=$(ynh_normalize_url_path $path_url)
 #=================================================
 # ACTIVATE MAINTENANCE MODE
 #=================================================
+ynh_script_progression --message="Activate maintenance mode" --weight=2
 
 ynh_maintenance_mode_ON
 
@@ -127,6 +137,7 @@ ynh_maintenance_mode_ON
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
+	ynh_script_progression --message="Download, check and unpack source"
 	# Download, check integrity, uncompress and patch the source from app.src
 	ynh_setup_source "$final_path"
 fi
@@ -134,6 +145,7 @@ fi
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
+ynh_script_progression --message="Upgrade dependencies" --weight=9
 
 ynh_install_app_dependencies $app_depencencies
 
@@ -144,12 +156,14 @@ ynh_install_app_dependencies $app_depencencies
 # Overwrite the nginx configuration only if it's allowed
 if [ $overwrite_nginx -eq 1 ]
 then
+	ynh_script_progression --message="Reconfigure nginx" --weight=2
 	ynh_add_nginx_config
 fi
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
+ynh_script_progression --message="Create a dedicated user"
 
 # Create a dedicated user (if not existing)
 ynh_system_user_create $app
@@ -159,6 +173,7 @@ ynh_system_user_create $app
 #=================================================
 # SETUP LUTIM
 #=================================================
+ynh_script_progression --message="Reconfigure Lutim"
 
 # Overwrite the settings config file only if it's allowed
 if [ $overwrite_settings -eq 1 ]
@@ -195,6 +210,7 @@ fi
 # Overwrite the systemd configuration only if it's allowed
 if [ $overwrite_systemd -eq 1 ]
 then
+	ynh_script_progression --message="Reconfigure systemd" --weight=2
 	ynh_add_systemd_config
 fi
 
@@ -211,6 +227,7 @@ ynh_replace_string "__FINALPATH__" "$final_path/" /etc/cron.d/$app
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
+	ynh_script_progression --message="Upgrade Lutim with carton" --weight=4
 	(cd $final_path
 	carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
 fi
@@ -227,6 +244,7 @@ chown -R $app: $final_path
 #=================================================
 # SETUP LOGROTATE
 #=================================================
+ynh_script_progression --message="Reconfigure logrotate"
 
 ynh_use_logrotate --non-append
 chown $app -R /var/log/$app
@@ -234,6 +252,7 @@ chown $app -R /var/log/$app
 #=================================================
 # SETUP SSOWAT
 #=================================================
+ynh_script_progression --message="Reconfigure SSOwat"
 
 ynh_app_setting_set $app skipped_uris "/"
 if [ $is_public -eq 0 ]
@@ -247,12 +266,14 @@ fi
 #=================================================
 # RELOAD NGINX
 #=================================================
+ynh_script_progression --message="Reload nginx"
 
 ynh_systemd_action --action=reload --service_name=nginx
 
 #=================================================
 # START AND CHECK LUTIM BOOTING
 #=================================================
+ynh_script_progression --message="Restart Lutim" --weight=4
 
 # Wait for lutim to be fully started
 ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
@@ -260,6 +281,7 @@ ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="
 #=================================================
 # DEACTIVE MAINTENANCE MODE
 #=================================================
+ynh_script_progression --message="Disable maintenance mode" --weight=7
 
 ynh_maintenance_mode_OFF
 
@@ -270,11 +292,25 @@ ynh_maintenance_mode_OFF
 # Get main domain and buid the url of the admin panel of the app.
 admin_panel="https://$(grep portal_domain /etc/ssowat/conf.json | cut -d'"' -f4)/yunohost/admin/#/apps/$app"
 
-message="You can find a config file at $final_path/lutim.conf
+# Build the changelog
+ynh_app_changelog || true
 
-You can configure this app easily by using the experimental config-panel feature: $admin_panel/config-panel.
-You can also find some specific actions for this app by using the experimental action feature: $admin_panel/actions.
+echo "You can find a config file at $final_path/lutim.conf
 
-If you're facing an issue or want to improve this app, please open a new issue in this project: https://github.com/YunoHost-Apps/lutim_ynh"
+You can configure this app easily by using the experimental __URL_TAG1__config-panel feature__URL_TAG2__$admin_panel/config-panel__URL_TAG3__.
+You can also find some specific actions for this app by using the experimental __URL_TAG1__action feature__URL_TAG2__$admin_panel/actions__URL_TAG3__.
 
-ynh_send_readme_to_admin --app_message="$message" --recipients="root" --type="upgrade"
+If you're facing an issue or want to improve this app, please open a new issue in this __URL_TAG1__project__URL_TAG2__https://github.com/YunoHost-Apps/lutim_ynh__URL_TAG3__.
+
+---
+
+Changelog since your last upgrade:
+$(cat changelog)" > mail_to_send
+
+ynh_send_readme_to_admin --app_message="mail_to_send" --recipients="root" --type="upgrade"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Upgrade completed" --last
