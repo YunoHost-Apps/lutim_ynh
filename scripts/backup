@@ -70,4 +70,4 @@ ynh_backup "/etc/cron.d/$app"
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Backup completed" --last
+ynh_script_progression --message="Backup script completed. Please wait for YunoHost to create the backup." --last
