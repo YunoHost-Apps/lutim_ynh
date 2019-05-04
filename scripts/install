@@ -119,6 +119,12 @@ ynh_replace_string "__ENCRYPT__" "$always_encrypt" "$final_path/lutim.conf"
 secret=$(ynh_string_random)
 ynh_replace_string "__SECRET__" "$secret" "$final_path/lutim.conf"
 ynh_app_setting_set $app secret "$secret"
+if [ $is_public -eq 0 ];
+then
+	ynh_replace_string "__IS_PUBLIC__" "" "$final_path/lutim.conf"
+else
+	ynh_replace_string "__IS_PUBLIC__" "#" "$final_path/lutim.conf"
+fi
 # Calculate and store the config file checksum into the app settings
 ynh_store_file_checksum "$final_path/lutim.conf"
 

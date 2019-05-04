@@ -20,6 +20,7 @@ is_public=${YNH_ACTION_IS_PUBLIC}
 app=${YNH_APP_INSTANCE_NAME:-$YNH_APP_ID}
 domain=$(ynh_app_setting_get $app domain)
 path_url=$(ynh_app_setting_get $app path)
+final_path=$(ynh_app_setting_get $app final_path)
 
 #=================================================
 # CHECK IF ARGUMENTS ARE CORRECT
@@ -50,6 +51,8 @@ ynh_script_progression --message="Move the application to $public_private" --wei
 
 if [ $is_public -eq 0 ]
 then
+	# If the app is private, uncomment the ldap conf
+	sed -i '/BEGIN_LDAP/,/END_LDAP/{/BEGIN_LDAP/n;/END_LDAP/!{s/\(\s\+\)#\(.*\)/\1\2/}}' "$final_path/lutim.conf"
 	# If the app is private, viewing images stays publicly accessible.
 	if [ "$path_url" == "/" ]; then
 	    # If the path is /, clear it to prevent any error with the regex.
@@ -59,6 +62,8 @@ then
 	domain_regex=$(echo "$domain" | sed 's@-@.@g')
 	ynh_app_setting_set $app protected_regex "$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"	
 else
+	# If the app is public, comment the ldap conf
+	sed -i '/BEGIN_LDAP/,/END_LDAP/{/BEGIN_LDAP/n;/END_LDAP/!{s/\(\s\+\)\(.*\)/\1#\2/}}' "$final_path/lutim.conf"
 	ynh_app_setting_delete $app protected_regex
 fi
 
@@ -74,6 +79,14 @@ ynh_app_setting_set $app is_public $is_public
 ynh_script_progression --message="Reload nginx"
 
 ynh_systemd_action --action=reload --service_name=nginx
+
+#=================================================
+# START AND CHECK LUTIM BOOTING
+#=================================================
+ynh_script_progression --message="Restart Lutim"
+
+# Wait for lutim to be fully started
+ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 
 #=================================================
 # END OF SCRIPT

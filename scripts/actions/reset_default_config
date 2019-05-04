@@ -21,6 +21,7 @@ path_url=$(ynh_app_setting_get $app path)
 port=$(ynh_app_setting_get $app port)
 always_encrypt=$(ynh_app_setting_get $app always_encrypt)
 secret=$(ynh_app_setting_get $app secret)
+is_public=$(ynh_app_setting_get $app is_public)
 
 #=================================================
 # SORT OUT THE CONFIG FILE TO HANDLE
@@ -53,6 +54,12 @@ then
 	ynh_replace_string "__PORT__" "$port" "$config_file"
 	ynh_replace_string "__ENCRYPT__" "$always_encrypt" "$config_file"
 	ynh_replace_string "__SECRET__" "$secret" "$config_file"
+	if [ $is_public -eq 0 ];
+	then
+		ynh_replace_string "__IS_PUBLIC__" "" "$config_file"
+	else
+		ynh_replace_string "__IS_PUBLIC__" "#" "$config_file"
+	fi
 fi
 
 # Calculate and store the config file checksum into the app settings
