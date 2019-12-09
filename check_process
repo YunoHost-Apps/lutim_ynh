@@ -15,7 +15,6 @@
 		upgrade=1	from_commit=4c29aa94f9d9048411c6e165e122e03574fb9b8d
 		backup_restore=1
 		multi_instance=0
-		incorrect_path=1
 		port_already_use=1	(8095)
 		change_url=1
 ;;; Levels
