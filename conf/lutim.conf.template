@@ -72,7 +72,6 @@
     # here's an example to put the logo of your hoster
     # optional, no default
     #hosted_by         => 'My super hoster <img src="http://hoster.example.com" alt="Hoster logo">',
-    hosted_by         => '<a href="stats">Statistiques</a>',
 
     # DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED DEPRECATED
     # Lutim now checks if the X-Forwarded-Proto header is present and equal to https.
