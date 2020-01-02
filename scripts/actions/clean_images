@@ -12,11 +12,10 @@ source /usr/share/yunohost/helpers
 #=================================================
 # RETRIEVE ARGUMENTS
 #=================================================
-ynh_script_progression --message="Retrieve arguments from the manifest"
 
 app=${YNH_APP_INSTANCE_NAME:-$YNH_APP_ID}
 
-final_path=$(ynh_app_setting_get $app final_path)
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
 #=================================================
 # CHECK IF ARGUMENTS ARE CORRECT
@@ -31,9 +30,9 @@ final_path=$(ynh_app_setting_get $app final_path)
 #=================================================
 # REMOVE EXPIRED IMAGES
 #=================================================
-ynh_script_progression --message="Remove expired images" --weight=9
+ynh_script_progression --message="Removing expired images..." --weight=9
 
-(cd "$final_path" && $(which carton) exec script/lutim cron cleanfiles)
+(cd "$final_path" && exec_as $app $(which carton) exec script/lutim cron cleanfiles)
 
 #=================================================
 # END OF SCRIPT

@@ -13,7 +13,7 @@ If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to
 Lutim stores images and allows you to see them, download them or share them on social networks.
 Images are indefinitely stored unless you request that they will be deleted at first view or after 24 hours / one week / one month / one year.
 
-**Shipped version:** 0.11.5
+**Shipped version:** 0.11.6
 
 ## Screenshots
 
@@ -39,9 +39,9 @@ Not relevant.
 
 #### Supported architectures
 
-* x86-64b - [![](https://ci-apps.yunohost.org/ci/logs/lutim%20%28Community%29.svg)](https://ci-apps.yunohost.org/ci/apps/lutim/)
-* ARMv8-A - [![](https://ci-apps-arm.yunohost.org/ci/logs/lutim%20%28Community%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lutim/)
-* Jessie x86-64b - [![](https://ci-stretch.nohost.me/ci/logs/lutim%20%28Community%29.svg)](https://ci-stretch.nohost.me/ci/apps/lutim/)
+* x86-64b - [![](https://ci-apps.yunohost.org/ci/logs/lutim%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/lutim/)
+* ARMv8-A - [![](https://ci-apps-arm.yunohost.org/ci/logs/lutim%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lutim/)
+* Jessie x86-64b - [![](https://ci-stretch.nohost.me/ci/logs/lutim%20%28Apps%29.svg)](https://ci-stretch.nohost.me/ci/apps/lutim/)
 
 ## Limitations
 
@@ -51,6 +51,7 @@ Not relevant.
 
  * Report a bug: https://github.com/YunoHost-Apps/lutim_ynh/issues
  * Lutim website: https://lut.im/
+ * Dépôt de Lutim: https://framagit.org/fiat-tux/hat-softwares/lutim
  * YunoHost website: https://yunohost.org/
 
 ---

@@ -13,7 +13,7 @@ Si vous n'avez pas YunoHost, merci de regarder [ici](https://yunohost.org/#/inst
 Lutim stocke les images et vous permet de les voir, de les télécharger ou de les partager sur les réseaux sociaux.
 Les images sont stockées indéfiniment à moins que vous ne demandiez qu'elles soient effacées à la première vue ou après 24 heures / une semaine / un mois / un an.
 
-**Version embarquée:** 0.11.5
+**Version embarquée:** 0.11.6
 
 ## Captures d'écran
 
@@ -23,7 +23,7 @@ Les images sont stockées indéfiniment à moins que vous ne demandiez qu'elles 
 
 ## Configuration
 
-Editez le fichier `/var/www/lutim/lutim. conf` pour éditer la configuration de Lutim.
+Editez le fichier `/var/www/lutim/lutim.conf` pour éditer la configuration de Lutim.
 Rechargez ensuite le service lutim.
 
 ## Documentation
@@ -39,9 +39,9 @@ Non applicable.
 
 #### Architectures supportées.
 
-* x86-64b - [![](https://ci-apps.yunohost.org/ci/logs/lutim%20%28Community%29.svg)](https://ci-apps.yunohost.org/ci/apps/lutim/)
-* ARMv8-A - [![](https://ci-apps-arm.yunohost.org/ci/logs/lutim%20%28Community%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lutim/)
-* Jessie x86-64b - [![](https://ci-stretch.nohost.me/ci/logs/lutim%20%28Community%29.svg)](https://ci-stretch.nohost.me/ci/apps/lutim/)
+* x86-64b - [![](https://ci-apps.yunohost.org/ci/logs/lutim%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/lutim/)
+* ARMv8-A - [![](https://ci-apps-arm.yunohost.org/ci/logs/lutim%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lutim/)
+* Jessie x86-64b - [![](https://ci-stretch.nohost.me/ci/logs/lutim%20%28Apps%29.svg)](https://ci-stretch.nohost.me/ci/apps/lutim/)
 
 ## Limitations
 
@@ -51,6 +51,7 @@ Non applicable.
 
  * Reporter un bug: https://github.com/YunoHost-Apps/lutim_ynh/issues
  * Site de Lutim: https://lut.im/
+ * Dépôt de Lutim: https://framagit.org/fiat-tux/hat-softwares/lutim
  * Site de YunoHost: https://yunohost.org/
 
 ---

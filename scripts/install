@@ -24,7 +24,6 @@ ynh_abort_if_errors
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
-ynh_script_progression --message="Retrieve arguments from the manifest"
 
 domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
@@ -36,61 +35,59 @@ app=$YNH_APP_INSTANCE_NAME
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THIS ARGS
 #=================================================
-ynh_script_progression --message="Check if the app can be installed" --weight=2
+ynh_script_progression --message="Validating installation parameters..." --weight=2
 
 final_path=/var/www/$app
-test ! -e "$final_path" || ynh_die "This path already contains a folder"
-
-# Normalize the url path syntax
-path_url=$(ynh_normalize_url_path $path_url)
+test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
 
 # Register (book) web path
-ynh_webpath_register $app $domain $path_url
+ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_script_progression --message="Store settings from manifest" --weight=2
+ynh_script_progression --message="Storing installation settings..." --weight=2
 
-ynh_app_setting_set $app domain $domain
-ynh_app_setting_set $app is_public $is_public
-ynh_app_setting_set $app always_encrypt $always_encrypt
+ynh_app_setting_set --app=$app --key=domain --value=$domain
+ynh_app_setting_set --app=$app --key=is_public --value=$is_public
+ynh_app_setting_set --app=$app --key=always_encrypt --value=$always_encrypt
 
-ynh_app_setting_set $app overwrite_settings "1"
-ynh_app_setting_set $app overwrite_nginx "1"
-ynh_app_setting_set $app overwrite_systemd "1"
-ynh_app_setting_set $app admin_mail_html "1"
+ynh_app_setting_set --app=$app --key=overwrite_settings --value=1
+ynh_app_setting_set --app=$app --key=overwrite_nginx --value=1
+ynh_app_setting_set --app=$app --key=overwrite_systemd --value=1
+ynh_app_setting_set --app=$app --key=admin_mail_html --value=1
 
 #=================================================
 # STANDARD MODIFICATIONS
 #=================================================
 # FIND AND OPEN A PORT
 #=================================================
-ynh_script_progression --message="Find a free port" --weight=3
+ynh_script_progression --message="Configuring firewall..." --weight=3
 
 # Find a free port
-port=$(ynh_find_port 8095)
-ynh_app_setting_set $app port $port
+port=$(ynh_find_port --port=8095)
+ynh_app_setting_set --app=$app --key=port --value=$port
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
+ynh_script_progression --message="Setting up source files..."
 
-ynh_app_setting_set $app final_path $final_path
-# Download, check integrity and uncompress the source from app.src
-ynh_setup_source "$final_path"
+ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source --dest_dir="$final_path"
 
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Install dependencies" --weight=60
+ynh_script_progression --message="Installing dependencies..." --weight=60
 
 ynh_install_app_dependencies $app_depencencies
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configure nginx" --weight=2
+ynh_script_progression --message="Configuring nginx web server..." --weight=2
 
 # Create a dedicated nginx config
 ynh_add_nginx_config
@@ -98,7 +95,7 @@ ynh_add_nginx_config
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Create a dedicated user" --weight=2
+ynh_script_progression --message="Configuring system user..." --weight=2
 
 # Create a dedicated system user
 ynh_system_user_create $app
@@ -112,20 +109,22 @@ ynh_script_progression --message="Configure Lutim" --weight=2
 
 # Configure Lutim
 cp ../conf/lutim.conf.template "$final_path/lutim.conf"
-ynh_replace_string "__DOMAIN__" "$domain" "$final_path/lutim.conf"
-ynh_replace_string "__PATH__" "$path_url" "$final_path/lutim.conf"
-ynh_replace_string "__PORT__" "$port" "$final_path/lutim.conf"
-ynh_replace_string "__ENCRYPT__" "$always_encrypt" "$final_path/lutim.conf"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$final_path/lutim.conf"
+ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="$final_path/lutim.conf"
+ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$final_path/lutim.conf"
+ynh_replace_string --match_string="__ENCRYPT__" --replace_string="$always_encrypt" --target_file="$final_path/lutim.conf"
 secret=$(ynh_string_random)
-ynh_replace_string "__SECRET__" "$secret" "$final_path/lutim.conf"
-ynh_app_setting_set $app secret "$secret"
+ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$final_path/lutim.conf"
+ynh_app_setting_set --app=$app --key=secret --value="$secret"
+# Set the number of process for Lutim to twice the number of CPU core.
+ynh_replace_string --match_string="__WORKERS__" --replace_string="$(( $(nproc) * 2 ))" --target_file="$final_path/lutim.conf"
 # Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum "$final_path/lutim.conf"
+ynh_store_file_checksum --file="$final_path/lutim.conf"
 
 #=================================================
 # SETUP SYSTEMD
 #=================================================
-ynh_script_progression --message="Configure systemd" --weight=2
+ynh_script_progression --message="Configuring a systemd service..." --weight=2
 
 # Create a dedicated systemd config
 ynh_add_systemd_config
@@ -135,13 +134,14 @@ ynh_add_systemd_config
 #=================================================
 
 cp ../conf/cron_lutim /etc/cron.d/$app
-ynh_replace_string "__FINALPATH__" "$final_path/" /etc/cron.d/$app
+ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file=/etc/cron.d/$app
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file=/etc/cron.d/$app
 chmod +x $final_path/script/lutim
 
 #=================================================
 # INSTALL LUTIM WITH CARTON
 #=================================================
-ynh_script_progression --message="Install Lutim with Carton" --weight=60
+ynh_script_progression --message="Installing Lutim with Carton..." --weight=60
 
 mkdir -p /var/log/$app/
 (cd $final_path
@@ -151,9 +151,9 @@ carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
 arch_dir=$(ls -1 $final_path/local/lib/perl5/ | grep linux-gnu)
 if [ "$?" -ne 0 ]
 then
-	ynh_die "Unable to find the perl directory for your architecture."
+	ynh_die --message="Unable to find the perl directory for your architecture."
 fi
-ynh_replace_string "__ARCHDIR__" "$arch_dir" "$final_path/script/lutim"
+ynh_replace_string --match_string="__ARCHDIR__" --replace_string="$arch_dir" --target_file="$final_path/script/lutim"
 
 #=================================================
 # SETUP LOG FILE
@@ -176,7 +176,7 @@ chown -R $app: $final_path
 #=================================================
 # SETUP LOGROTATE
 #=================================================
-ynh_script_progression --message="Configure logrotate" --weight=2
+ynh_script_progression --message="Configuring log rotation..." --weight=2
 
 # Use logrotate to manage application logfile(s)
 ynh_use_logrotate
@@ -185,14 +185,14 @@ ynh_use_logrotate
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add lutim -l $final_path/log/production.log
+yunohost service add $app --log $final_path/log/production.log
 
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Setup SSOwat"
+ynh_script_progression --message="Configuring SSOwat..."
 
-ynh_app_setting_set $app skipped_uris "/"
+ynh_app_setting_set --app=$app --key=skipped_uris --value="/"
 if [ $is_public -eq 0 ]
 then
 	# If the app is private, viewing images stays publicly accessible.
@@ -202,20 +202,20 @@ then
 	fi
 	# Modify the domain to be used in a regex
 	domain_regex=$(echo "$domain" | sed 's@-@.@g')
-	ynh_app_setting_set $app protected_regex "$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
+    ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
 fi
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reload nginx" --weight=2
+ynh_script_progression --message="Reloading nginx web server..." --weight=2
 
-ynh_systemd_action --action=reload --service_name=nginx
+ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # CHECK LUTIM BOOTING
 #=================================================
-ynh_script_progression --message="Restart Lutim" --weight=6
+ynh_script_progression --message="Restarting Lutim..." --weight=6
 
 # Wait for lutim to be fully started
 ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
@@ -237,10 +237,10 @@ You can also find some specific actions for this app by using the experimental _
 
 If you're facing an issue or want to improve this app, please open a new issue in this __URL_TAG1__project__URL_TAG2__https://github.com/YunoHost-Apps/lutim_ynh__URL_TAG3__." > mail_to_send
 
-ynh_send_readme_to_admin --app_message="mail_to_send" --recipients="root" --type="install"
+ynh_send_readme_to_admin --app_message="mail_to_send" --recipients="root" --type=install
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation completed" --last
+ynh_script_progression --message="Installation of $app completed" --time --last
