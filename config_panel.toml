@@ -1,0 +1,63 @@
+version = "0.1"
+name = "Lutim configuration panel"
+
+[main]
+name = "Lutim configuration"
+
+    [main.configuration]
+    name = "Lutim configuration"
+
+        [main.configuration.always_encrypt]
+        ask = "Force the encryption of images ?"
+        type = "boolean"
+        default = true
+
+        [main.configuration.antiflood]
+        ask = "Anti-flood protection delay (seconds)"
+        type = "number"
+        default = 0
+        help = "Users won't be able to ask Lutim to download images more than one per anti_flood_delay seconds."
+
+        [main.configuration.delay]
+        ask = "Default time limit for files"
+        choices = ["None", "Day", "Week", "Month", "Year"]
+        default = "Year"
+        help = "Users won't be able to ask Lutim to download images more than one per anti_flood_delay seconds."
+
+    [main.is_public]
+    name = "Public access"
+
+        [main.is_public.is_public]
+        ask = "Is it a public website?"
+        type = "boolean"
+        default = true
+
+    [main.overwrite_files]
+    name = "Overwriting config files"
+
+        [main.overwrite_files.overwrite_settings]
+        ask = "Overwrite the config file lutim.conf ?"
+        type = "boolean"
+        default = true
+        help = "If the file is overwritten, a backup will be created."
+
+        [main.overwrite_files.overwrite_nginx]
+        ask = "Overwrite the nginx config file ?"
+        type = "boolean"
+        default = true
+        help = "If the file is overwritten, a backup will be created."
+
+        [main.overwrite_files.overwrite_systemd]
+        ask = "Overwrite the systemd config file ?"
+        type = "boolean"
+        default = true
+        help = "If the file is overwritten, a backup will be created."
+
+    [main.global_config]
+    name = "Global configuration"
+
+        [main.global_config.email_type]
+        ask = "Send HTML email to admin ?"
+        type = "boolean"
+        default = true
+        help = "Allow app scripts to send HTML mails instead of plain text."
