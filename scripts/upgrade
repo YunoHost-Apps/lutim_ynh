@@ -188,6 +188,8 @@ then
 	ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$final_path/lutim.conf"
 	ynh_replace_string --match_string="__ENCRYPT__" --replace_string="$always_encrypt" --target_file="$final_path/lutim.conf"
 	ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$final_path/lutim.conf"
+    # Set the number of process for Lutim to twice the number of CPU core.
+    ynh_replace_string --match_string="__WORKERS__" --replace_string="$(( $(nproc) * 2 ))" --target_file="$final_path/lutim.conf"
 	# Recalculate and store the checksum of the file for the next upgrade.
 	ynh_store_file_checksum --file="$final_path/lutim.conf"
 

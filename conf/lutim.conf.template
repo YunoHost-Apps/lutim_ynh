@@ -11,6 +11,9 @@
         # if you use Lutim behind a reverse proxy like Nginx, you want to set proxy to 1
         # if you use Lutim directly, let it commented
         proxy  => 1,
+
+        # Number of worker processes
+        workers => __WORKERS__,
     },
 
     ################
