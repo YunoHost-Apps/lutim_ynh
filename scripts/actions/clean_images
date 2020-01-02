@@ -32,7 +32,7 @@ final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 #=================================================
 ynh_script_progression --message="Removing expired images..." --weight=9
 
-(cd "$final_path" && $(which carton) exec script/lutim cron cleanfiles)
+(cd "$final_path" && exec_as $app $(which carton) exec script/lutim cron cleanfiles)
 
 #=================================================
 # END OF SCRIPT

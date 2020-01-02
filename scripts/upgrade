@@ -223,6 +223,7 @@ fi
 
 cp ../conf/cron_lutim /etc/cron.d/$app
 ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file=/etc/cron.d/$app
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file=/etc/cron.d/$app
 
 #=================================================
 # UPDATE LUTIM WITH CARTON

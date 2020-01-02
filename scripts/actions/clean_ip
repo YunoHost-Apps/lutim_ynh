@@ -32,7 +32,7 @@ final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 #=================================================
 ynh_script_progression --message="Removing obsolete ip from the database..." --weight=9
 
-(cd "$final_path" && $(which carton) exec script/lutim cron cleanbdd)
+(cd "$final_path" && exec_as $app $(which carton) exec script/lutim cron cleanbdd)
 
 #=================================================
 # END OF SCRIPT

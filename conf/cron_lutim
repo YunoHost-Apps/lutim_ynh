@@ -1,11 +1,11 @@
 # Génération des statistiques. Tous les jours, à 5h.
-0 5 * * * www-data cd "__FINALPATH__" && $(which carton) exec script/lutim cron stats
+0 5 * * * __APP__ cd "__FINALPATH__" && $(which carton) exec script/lutim cron stats
 
 # Suppression des adresses IP obsolètes. Tous les jours, à 6h.
-0 6 * * * www-data cd "__FINALPATH__" && $(which carton) exec script/lutim cron cleanbdd
+0 6 * * * __APP__ cd "__FINALPATH__" && $(which carton) exec script/lutim cron cleanbdd
 
 # Suppression des images dont le délai a expiré. Tous les jours, à 6h.
-0 6 * * * www-data cd "__FINALPATH__" && $(which carton) exec script/lutim cron cleanfiles
+0 6 * * * __APP__ cd "__FINALPATH__" && $(which carton) exec script/lutim cron cleanfiles
 
 # Vérification de l'occupation du dossier des images. Tous les jours, à 7h.
-0 7 * * * www-data cd "__FINALPATH__" && $(which carton) exec script/lutim cron watch
+0 7 * * * __APP__ cd "__FINALPATH__" && $(which carton) exec script/lutim cron watch
