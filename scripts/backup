@@ -19,55 +19,55 @@ ynh_abort_if_errors
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Load settings" --weight=2
+ynh_script_progression --message="Loading installation settings..." --weight=2
 
 app=$YNH_APP_INSTANCE_NAME
 
-final_path=$(ynh_app_setting_get $app final_path)
-domain=$(ynh_app_setting_get $app domain)
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+domain=$(ynh_app_setting_get --app=$app --key=domain)
 
 #=================================================
 # STANDARD BACKUP STEPS
 #=================================================
 # BACKUP THE APP MAIN DIR
 #=================================================
-ynh_script_progression --message="Backup the app main dir" --weight=4
+ynh_script_progression --message="Backing up the main app directory..."
 
 CHECK_SIZE "$final_path"
-ynh_backup "$final_path"
+ynh_backup --src_path="$final_path"
 
 #=================================================
 # BACKUP NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Backup nginx configuration"
+ynh_script_progression --message="Backing up nginx web server configuration..."
 
-ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
+ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
 # SPECIFIC BACKUP
 #=================================================
 # BACKUP LOGROTATE
 #=================================================
-ynh_script_progression --message="Backup logrotate configuration"
+ynh_script_progression --message="Backing up logrotate configuration"
 
-ynh_backup "/etc/logrotate.d/$app"
+ynh_backup --src_path="/etc/logrotate.d/$app"
 
 #=================================================
 # BACKUP SYSTEMD
 #=================================================
-ynh_script_progression --message="Backup systemd configuration"
+ynh_script_progression --message="Backing up systemd configuration"
 
-ynh_backup "/etc/systemd/system/$app.service"
+ynh_backup --src_path="/etc/systemd/system/$app.service"
 
 #=================================================
 # BACKUP A CRON FILE
 #=================================================
-ynh_script_progression --message="Backup cron file"
+ynh_script_progression --message="Backing up cron file"
 
-ynh_backup "/etc/cron.d/$app"
+ynh_backup --src_path="/etc/cron.d/$app"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Backup script completed. Please wait for YunoHost to create the backup." --last
+ynh_script_progression --message="Backup script completed for $app. (YunoHost will then actually copy those files to the archive)." --last

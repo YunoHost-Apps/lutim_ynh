@@ -12,14 +12,13 @@ source /usr/share/yunohost/helpers
 #=================================================
 # RETRIEVE ARGUMENTS
 #=================================================
-ynh_script_progression --message="Retrieve arguments from the manifest"
 
 # Get is_public
 is_public=${YNH_ACTION_IS_PUBLIC}
 
 app=${YNH_APP_INSTANCE_NAME:-$YNH_APP_ID}
-domain=$(ynh_app_setting_get $app domain)
-path_url=$(ynh_app_setting_get $app path)
+domain=$(ynh_app_setting_get --app=$app --key=domain)
+path_url=$(ynh_app_setting_get --app=$app --key=path)
 
 #=================================================
 # CHECK IF ARGUMENTS ARE CORRECT
@@ -29,11 +28,11 @@ path_url=$(ynh_app_setting_get $app path)
 # CHECK IF AN ACTION HAS TO BE DONE
 #=================================================
 
-is_public_old=$(ynh_app_setting_get $app is_public)
+is_public_old=$(ynh_app_setting_get --app=$app --key=is_public)
 
 if [ $is_public -eq $is_public_old ]
 then
-	ynh_die "is_public is already set as $is_public." 0
+	ynh_die --message="is_public is already set as $is_public." --ret_code=0
 fi
 
 #=================================================
@@ -41,12 +40,13 @@ fi
 #=================================================
 # MOVE TO PUBLIC OR PRIVATE
 #=================================================
+
 if [ $is_public -eq 0 ]; then
 	public_private="private"
 else
 	public_private="public"
 fi
-ynh_script_progression --message="Move the application to $public_private" --weight=3
+ynh_script_progression --message="Moving the application to $public_private..." --weight=3
 
 if [ $is_public -eq 0 ]
 then
@@ -57,23 +57,24 @@ then
 	fi
 	# Modify the domain to be used in a regex
 	domain_regex=$(echo "$domain" | sed 's@-@.@g')
-	ynh_app_setting_set $app protected_regex "$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"	
+    ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
 else
-	ynh_app_setting_delete $app protected_regex
+	ynh_app_setting_delete --app=$app --key=protected_regex
 fi
 
+ynh_script_progression --message="Upgrading SSOwat configuration..."
 # Regen ssowat configuration
 yunohost app ssowatconf
 
 # Update the config of the app
-ynh_app_setting_set $app is_public $is_public
+ynh_app_setting_set --app=$app --key=is_public --value=$is_public
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reload nginx"
+ynh_script_progression --message="Reloading nginx web server..."
 
-ynh_systemd_action --action=reload --service_name=nginx
+ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT

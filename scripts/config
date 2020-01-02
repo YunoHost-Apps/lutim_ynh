@@ -15,7 +15,7 @@ source /usr/share/yunohost/helpers
 
 app=${YNH_APP_INSTANCE_NAME:-$YNH_APP_ID}
 
-final_path=$(ynh_app_setting_get $app final_path)
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
 #=================================================
 # SPECIFIC CODE
@@ -42,7 +42,6 @@ get_config_value() {
 
 # always_encrypt
 old_always_encrypt="$(get_config_value always_encrypt)"
-old_always_encrypt=$(bool_to_true_false $old_always_encrypt)
 always_encrypt="${YNH_CONFIG_MAIN_CONFIGURATION_ALWAYS_ENCRYPT:-$old_always_encrypt}"
 # antiflood
 old_antiflood="$(get_config_value anti_flood_delay)"
@@ -63,28 +62,23 @@ fi
 delay="${YNH_CONFIG_MAIN_CONFIGURATION_DELAY:-$old_delay}"
 
 # is_public
-old_is_public="$(ynh_app_setting_get $app is_public)"
-old_is_public=$(bool_to_true_false $old_is_public)
+old_is_public="$(ynh_app_setting_get --app=$app --key=is_public)"
 is_public="${YNH_CONFIG_MAIN_IS_PUBLIC_IS_PUBLIC:-$old_is_public}"
 
 # Overwrite settings.json file
-old_overwrite_settings="$(ynh_app_setting_get $app overwrite_settings)"
-old_overwrite_settings=$(bool_to_true_false $old_overwrite_settings)
+old_overwrite_settings="$(ynh_app_setting_get --app=$app --key=overwrite_settings)"
 overwrite_settings="${YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_SETTINGS:-$old_overwrite_settings}"
 
 # Overwrite nginx configuration
-old_overwrite_nginx="$(ynh_app_setting_get $app overwrite_nginx)"
-old_overwrite_nginx=$(bool_to_true_false $old_overwrite_nginx)
+old_overwrite_nginx="$(ynh_app_setting_get --app=$app --key=overwrite_nginx)"
 overwrite_nginx="${YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_NGINX:-$old_overwrite_nginx}"
 
 # Overwrite systemd configuration
-old_overwrite_systemd="$(ynh_app_setting_get $app overwrite_systemd)"
-old_overwrite_systemd=$(bool_to_true_false $old_overwrite_systemd)
+old_overwrite_systemd="$(ynh_app_setting_get --app=$app --key=overwrite_systemd)"
 overwrite_systemd="${YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_SYSTEMD:-$old_overwrite_systemd}"
 
 # Type of admin mail configuration
-old_admin_mail_html="$(ynh_app_setting_get $app admin_mail_html)"
-old_admin_mail_html=$(bool_to_true_false $old_admin_mail_html)
+old_admin_mail_html="$(ynh_app_setting_get --app=$app --key=admin_mail_html)"
 admin_mail_html="${YNH_CONFIG_MAIN_GLOBAL_CONFIG_EMAIL_TYPE:-$old_admin_mail_html}"
 
 #=================================================
@@ -119,20 +113,19 @@ apply_config() {
 	# always_encrypt
 	if [ "$always_encrypt" != "$old_always_encrypt" ]
 	then
-		always_encrypt=$(bool_to_01 $always_encrypt)
-		ynh_replace_string ".*always_encrypt *=>.*" "    always_encrypt    => $always_encrypt," "$config_file"
+		ynh_replace_string --match_string=".*always_encrypt *=>.*" --replace_string="    always_encrypt    => $always_encrypt," --target_file="$config_file"
 		restart_lutim=1
 	fi
 
 	# antiflood
 	if [ "$antiflood" != "$old_antiflood" ]
 	then
-		ynh_replace_string ".*anti_flood_delay *=>.*" "    anti_flood_delay  => $antiflood," "$config_file"
+		ynh_replace_string --match_string=".*anti_flood_delay *=>.*" --replace_string="    anti_flood_delay  => $antiflood," --target_file="$config_file"
 		# Disable anti_flood_delay if the delay is 0
 		if [ $antiflood = 0 ]; then
-			ynh_replace_string "\(anti_flood_delay *=>.*\)" "#\1" "$config_file"
+			ynh_replace_string --match_string="\(anti_flood_delay *=>.*\)" --replace_string="#\1" --target_file="$config_file"
 		fi
-		ynh_app_setting_set $app antiflood "$antiflood"
+		ynh_app_setting_set --app=$app --key=antiflood --value="$antiflood"
 		restart_lutim=1
 	fi
 
@@ -150,8 +143,8 @@ apply_config() {
 		else
 			delay=360
 		fi
-		ynh_replace_string ".*default_delay *=>.*" "    default_delay     => $delay," "$config_file"
-		ynh_app_setting_set $app delay "$delay"
+		ynh_replace_string --match_string=".*default_delay *=>.*" --replace_string="    default_delay     => $delay," --target_file="$config_file"
+		ynh_app_setting_set --app=$app --key=delay --value="$delay"
 		restart_lutim=1
 	fi
 
@@ -170,18 +163,14 @@ apply_config() {
 	fi
 
 	# Set overwrite_settings
-	overwrite_settings=$(bool_to_01 $overwrite_settings)
-	ynh_app_setting_set $app overwrite_settings "$overwrite_settings"
+	ynh_app_setting_set --app=$app --key=overwrite_settings --value="$overwrite_settings"
 	# Set overwrite_nginx
-	overwrite_nginx=$(bool_to_01 $overwrite_nginx)
-	ynh_app_setting_set $app overwrite_nginx "$overwrite_nginx"
+	ynh_app_setting_set --app=$app --key=overwrite_nginx --value="$overwrite_nginx"
 	# Set overwrite_systemd
-	overwrite_systemd=$(bool_to_01 $overwrite_systemd)
-	ynh_app_setting_set $app overwrite_systemd "$overwrite_systemd"
+	ynh_app_setting_set --app=$app --key=overwrite_systemd --value="$overwrite_systemd"
 
 	# Set admin_mail_html
-	admin_mail_html=$(bool_to_01 $admin_mail_html)
-	ynh_app_setting_set $app admin_mail_html "$admin_mail_html"
+	ynh_app_setting_set --app=$app --key=admin_mail_html --value="$admin_mail_html"
 }
 
 #=================================================

@@ -12,15 +12,14 @@ source /usr/share/yunohost/helpers
 #=================================================
 # RETRIEVE ARGUMENTS
 #=================================================
-ynh_script_progression --message="Retrieve arguments from the manifest" --weight=3
 
 app=${YNH_APP_INSTANCE_NAME:-$YNH_APP_ID}
-final_path=$(ynh_app_setting_get $app final_path)
-domain=$(ynh_app_setting_get $app domain)
-path_url=$(ynh_app_setting_get $app path)
-port=$(ynh_app_setting_get $app port)
-always_encrypt=$(ynh_app_setting_get $app always_encrypt)
-secret=$(ynh_app_setting_get $app secret)
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+domain=$(ynh_app_setting_get --app=$app --key=domain)
+path_url=$(ynh_app_setting_get --app=$app --key=path)
+port=$(ynh_app_setting_get --app=$app --key=port)
+always_encrypt=$(ynh_app_setting_get --app=$app --key=always_encrypt)
+secret=$(ynh_app_setting_get --app=$app --key=secret)
 
 #=================================================
 # SORT OUT THE CONFIG FILE TO HANDLE
@@ -37,10 +36,10 @@ fi
 #=================================================
 # RESET THE CONFIG FILE
 #=================================================
-ynh_script_progression --message="Reset the config file $config_file" --weight=9
+ynh_script_progression --message="Resetting the config file $config_file..." --weight=9
 
 # Verify the checksum and backup the file if it's different
-ynh_backup_if_checksum_is_different "$config_file"
+ynh_backup_if_checksum_is_different --file="$config_file"
 
 if [ "$file" = "lutim.conf" ]
 then
@@ -48,17 +47,17 @@ then
 	cp /etc/yunohost/apps/$app/conf/lutim.conf.template "$config_file"
 
 	# Recreate the default config
-	ynh_replace_string "__DOMAIN__" "$domain" "$config_file"
-	ynh_replace_string "__PATH__" "$path_url" "$config_file"
-	ynh_replace_string "__PORT__" "$port" "$config_file"
-	ynh_replace_string "__ENCRYPT__" "$always_encrypt" "$config_file"
-	ynh_replace_string "__SECRET__" "$secret" "$config_file"
+	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config_file"
+	ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="$config_file"
+	ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$config_file"
+	ynh_replace_string --match_string="__ENCRYPT__" --replace_string="$always_encrypt" --target_file="$config_file"
+	ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$config_file"
 fi
 
 # Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum "$config_file"
+ynh_store_file_checksum --file="$config_file"
 
-ynh_script_progression --message="Restart Lutim" --weight=5
+ynh_script_progression --message="Restarting Lutim..." --weight=5
 
 # Wait for lutim to be fully started
 ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
