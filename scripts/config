@@ -87,19 +87,19 @@ admin_mail_html="${YNH_CONFIG_MAIN_GLOBAL_CONFIG_EMAIL_TYPE:-$old_admin_mail_htm
 
 show_config() {
 	# here you are supposed to read some config file/database/other then print the values
-	# echo "YNH_CONFIG_${PANEL_ID}_${SECTION_ID}_${OPTION_ID}=value"
+	# ynh_return "YNH_CONFIG_${PANEL_ID}_${SECTION_ID}_${OPTION_ID}=value"
 
-	echo "YNH_CONFIG_MAIN_CONFIGURATION_ALWAYS_ENCRYPT=$always_encrypt"
-	echo "YNH_CONFIG_MAIN_CONFIGURATION_ANTIFLOOD=$antiflood"
-	echo "YNH_CONFIG_MAIN_CONFIGURATION_DELAY=$delay"
+	ynh_return "YNH_CONFIG_MAIN_CONFIGURATION_ALWAYS_ENCRYPT=$always_encrypt"
+	ynh_return "YNH_CONFIG_MAIN_CONFIGURATION_ANTIFLOOD=$antiflood"
+	ynh_return "YNH_CONFIG_MAIN_CONFIGURATION_DELAY=$delay"
 
-	echo "YNH_CONFIG_MAIN_IS_PUBLIC_IS_PUBLIC=$is_public"
+	ynh_return "YNH_CONFIG_MAIN_IS_PUBLIC_IS_PUBLIC=$is_public"
 
-	echo "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_SETTINGS=$overwrite_settings"
-	echo "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_NGINX=$overwrite_nginx"
-	echo "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_SYSTEMD=$overwrite_systemd"
+	ynh_return "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_SETTINGS=$overwrite_settings"
+	ynh_return "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_NGINX=$overwrite_nginx"
+	ynh_return "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_SYSTEMD=$overwrite_systemd"
 
-	echo "YNH_CONFIG_MAIN_GLOBAL_CONFIG_EMAIL_TYPE=$admin_mail_html"
+	ynh_return "YNH_CONFIG_MAIN_GLOBAL_CONFIG_EMAIL_TYPE=$admin_mail_html"
 }
 
 #=================================================
