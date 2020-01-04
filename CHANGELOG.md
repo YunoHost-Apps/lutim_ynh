@@ -4,6 +4,12 @@ Changelog
 ## Unreleased
 - Nothing for now...
 
+## [0.11.6~ynh2](https://github.com/YunoHost-Apps/lutim_ynh/pull/43) - 2020-01-04
+
+#### Fixed
+- [Fix config-panel](https://github.com/YunoHost-Apps/lutim_ynh/pull/43/commits/a549f8139737d0ed3f641a8b0425dfdeefb50ef4)
+
+
 ## [0.11.6~ynh1](https://github.com/YunoHost-Apps/lutim_ynh/pull/42) - 2020-01-02
 
 #### Added
