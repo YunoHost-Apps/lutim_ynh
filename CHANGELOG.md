@@ -4,6 +4,21 @@ Changelog
 ## Unreleased
 - Nothing for now...
 
+## [0.11.6~ynh1](https://github.com/YunoHost-Apps/lutim_ynh/pull/42) - 2020-01-02
+
+#### Added
+* [Set workers according to cpu](https://github.com/YunoHost-Apps/lutim_ynh/pull/42/commits/58e291949769d678ec48306199bcc03e3be20631)
+- [Add changelog](https://github.com/YunoHost-Apps/lutim_ynh/pull/42/commits/b0859ab1612c22d210321d6302cad7872ec17abd)
+
+#### Fixed
+- [Fix cron tasks](https://github.com/YunoHost-Apps/lutim_ynh/pull/42/commits/dec8d0820fb46e984b2ca65e1012f5f737861965)
+
+#### Changed
+- [Update to last standard](https://github.com/YunoHost-Apps/lutim_ynh/pull/42/commits/5e5bf7c7a8f68b0768555005797ec3024a223299) [(twice)](https://github.com/YunoHost-Apps/lutim_ynh/pull/42/commits/51113ba7544991a3400abc9a78258ba594d58b4b)
+- [Use toml for actions and config-panel](https://github.com/YunoHost-Apps/lutim_ynh/pull/42/commits/4f7bac24481138654e3e3128ba6637cdf8855855)
+* [Update to 0.11.6](https://github.com/YunoHost-Apps/lutim_ynh/pull/42/commits/4b50a261fb4515aa2a32b7ca20c750c322bfd5c0)
+
+
 ## [0.11.5~ynh1](https://github.com/YunoHost-Apps/lutim_ynh/pull/35) - 2019-05-06
 
 #### Changed
