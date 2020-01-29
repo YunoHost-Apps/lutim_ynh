@@ -20,7 +20,6 @@ app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
-is_public=$(ynh_app_setting_get --app=$app --key=is_public)
 port=$(ynh_app_setting_get --app=$app --key=port)
 always_encrypt=$(ynh_app_setting_get --app=$app --key=always_encrypt)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
@@ -35,6 +34,8 @@ admin_mail_html=$(ynh_app_setting_get --app=$app --key=admin_mail_html)
 antiflood=$(ynh_app_setting_get --app=$app --key=antiflood)
 delay=$(ynh_app_setting_get --app=$app --key=delay)
 
+skipped_uris=$(ynh_app_setting_get --app=$app --key=skipped_uris)
+
 #=================================================
 # CHECK VERSION
 #=================================================
@@ -46,13 +47,9 @@ upgrade_type=$(ynh_check_app_version_changed)
 #=================================================
 ynh_script_progression --message="Ensuring downward compatibility..." --weight=2
 
-# Fix is_public as a boolean
-if [ "$is_public" = "Yes" ]; then
-	ynh_app_setting_set --app=$app --key=is_public --value=1
-	is_public=1
-elif [ "$is_public" = "No" ]; then
-	ynh_app_setting_set --app=$app --key=is_public --value=0
-	is_public=0
+if [ ! -z "$skipped_uris" ]; then
+	ynh_app_setting_delete --app=$app --key=skipped_uris
+	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 fi
 
 # if final_path isn't set, which can happens with old scripts, set final_path.
@@ -207,6 +204,13 @@ then
 fi
 
 #=================================================
+# SETUP HOOKS FILE
+#=================================================
+
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="../hooks/post_app_addaccess"
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="../hooks/post_app_removeaccess"
+
+#=================================================
 # SETUP SYSTEMD
 #=================================================
 
@@ -256,16 +260,9 @@ chown $app -R /var/log/$app
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Upgrading SSOwat configuration..."
+ynh_script_progression --message="Upgrading permission..."
 
-ynh_app_setting_set --app=$app --key=skipped_uris --value="/"
-if [ $is_public -eq 0 ]
-then
-	# If the app is private, viewing images stays publicly accessible.
-	# Modify the domain to be used in a regex
-	domain_regex=$(echo "$domain" | sed 's@-@.@g')
-    ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
-fi
+ynh_permission_url --permission="main"
 
 #=================================================
 # RELOAD NGINX

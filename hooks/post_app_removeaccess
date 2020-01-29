@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Source app helpers
+source /usr/share/yunohost/helpers
+
+app=$1
+removed_users=$2
+permission=$3
+removed_groups=$4
+
+if [ "$app" == __APP__ ]; then
+    if [ "$removed_groups" = "visitors" ]; then
+        domain=$(ynh_app_setting_get --app=$app --key=domain)
+        path_url=$(ynh_app_setting_get --app=$app --key=path)
+        domain_regex=$(echo "$domain" | sed 's@-@.@g')
+        ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
+    fi
+fi

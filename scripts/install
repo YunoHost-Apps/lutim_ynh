@@ -49,7 +49,6 @@ ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 ynh_script_progression --message="Storing installation settings..." --weight=2
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
-ynh_app_setting_set --app=$app --key=is_public --value=$is_public
 ynh_app_setting_set --app=$app --key=always_encrypt --value=$always_encrypt
 
 ynh_app_setting_set --app=$app --key=overwrite_settings --value=1
@@ -122,6 +121,13 @@ ynh_replace_string --match_string="__WORKERS__" --replace_string="$(( $(nproc) *
 ynh_store_file_checksum --file="$final_path/lutim.conf"
 
 #=================================================
+# SETUP HOOKS FILE
+#=================================================
+
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="../hooks/post_app_addaccess"
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="../hooks/post_app_removeaccess"
+
+#=================================================
 # SETUP SYSTEMD
 #=================================================
 ynh_script_progression --message="Configuring a systemd service..." --weight=2
@@ -192,8 +198,11 @@ yunohost service add $app --log $final_path/log/production.log
 #=================================================
 ynh_script_progression --message="Configuring SSOwat..."
 
-ynh_app_setting_set --app=$app --key=skipped_uris --value="/"
-if [ $is_public -eq 0 ]
+ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+
+ynh_permission_url --permission="main"
+
+if [ $fis_public -eq 0 ]
 then
 	# If the app is private, viewing images stays publicly accessible.
 	if [ "$path_url" == "/" ]; then
