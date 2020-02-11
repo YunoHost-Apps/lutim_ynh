@@ -198,11 +198,11 @@ yunohost service add $app --log $final_path/log/production.log
 #=================================================
 ynh_script_progression --message="Configuring SSOwat..."
 
-ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+ynh_permission_update --permission="main" --add="visitors"
 
-ynh_permission_url --permission="main"
+ynh_permission_create --permission="upload images" --allowed="visitors"
 
-if [ $fis_public -eq 0 ]
+if [ $is_public -eq 0 ]
 then
 	# If the app is private, viewing images stays publicly accessible.
 	if [ "$path_url" == "/" ]; then
@@ -212,6 +212,8 @@ then
 	# Modify the domain to be used in a regex
 	domain_regex=$(echo "$domain" | sed 's@-@.@g')
     ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
+
+	ynh_permission_update --permission="upload images" --remove="visitors"
 fi
 
 #=================================================

@@ -49,7 +49,6 @@ ynh_script_progression --message="Ensuring downward compatibility..." --weight=2
 
 if [ ! -z "$skipped_uris" ]; then
 	ynh_app_setting_delete --app=$app --key=skipped_uris
-	ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 fi
 
 # if final_path isn't set, which can happens with old scripts, set final_path.
@@ -262,7 +261,15 @@ chown $app -R /var/log/$app
 #=================================================
 ynh_script_progression --message="Upgrading permission..."
 
-ynh_permission_url --permission="main"
+if ! ynh_permission_exists --permission="upload images"
+then
+	if [ -z $(ynh_app_setting_get --app=$app --key=protected_regex) ] # Everyone can upload image
+	then
+		ynh_permission_create --permission="upload images" --allowed="visitors"
+	else # Only user with a yunohost account can upload an image
+		ynh_permission_create --permission="upload images" --allowed="all_users"
+	fi
+fi
 
 #=================================================
 # RELOAD NGINX

@@ -9,7 +9,13 @@ permission=$3
 added_groups=$4
 
 if [ "$app" == __APP__ ]; then
-    if [ "$added_groups" = "visitors" ]; then
-        ynh_app_setting_delete --app=$app --key=protected_regex
+    if [ "$permission" = "upload images" ]; then
+        if [ "$added_groups" = "visitors" ]; then
+            ynh_app_setting_delete --app=$app --key=protected_regex
+
+            yunohost app ssowatconf
+        else
+            ynh_print_warn --message="This app doesn't support this authorisation, you can only add or remove visitors group."
+        fi
     fi
 fi
