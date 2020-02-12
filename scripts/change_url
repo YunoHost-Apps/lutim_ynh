@@ -27,6 +27,7 @@ app=$YNH_APP_INSTANCE_NAME
 ynh_script_progression --message="Loading installation settings..." --weight=2
 
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+is_public=$(ynh_app_setting_get --app=$app --key=is_public)
 port=$(ynh_app_setting_get --app=$app --key=port)
 
 #=================================================
@@ -121,7 +122,7 @@ fi
 #=================================================
 ynh_script_progression --message="Reconfiguring SSOwat..."
 
-if [ ! -z $(ynh_app_setting_get --app=$app --key=protected_regex) ] # Only user with a yunohost account can upload an image
+if [ $is_public -eq 0 ] # Only user with a yunohost account can upload an image
 then
 	# If the app is private, viewing images stays publicly accessible.
 	if [ "$new_path" == "/" ]; then

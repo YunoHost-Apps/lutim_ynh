@@ -15,6 +15,7 @@ if [ "$app" == __APP__ ]; then
             path_url=$(ynh_app_setting_get --app=$app --key=path)
             domain_regex=$(echo "$domain" | sed 's@-@.@g')
             ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
+            ynh_app_setting_set --app=$app --key=is_public --value=0
 
             yunohost app ssowatconf
         else

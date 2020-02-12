@@ -20,6 +20,7 @@ app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
+is_public=$(ynh_app_setting_get --app=$app --key=is_public)
 port=$(ynh_app_setting_get --app=$app --key=port)
 always_encrypt=$(ynh_app_setting_get --app=$app --key=always_encrypt)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
@@ -46,6 +47,15 @@ upgrade_type=$(ynh_check_app_version_changed)
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
 ynh_script_progression --message="Ensuring downward compatibility..." --weight=2
+
+# Fix is_public as a boolean
+if [ "$is_public" = "Yes" ]; then
+	ynh_app_setting_set --app=$app --key=is_public --value=1
+	is_public=1
+elif [ "$is_public" = "No" ]; then
+	ynh_app_setting_set --app=$app --key=is_public --value=0
+	is_public=0
+fi
 
 if [ ! -z "$skipped_uris" ]; then
 	ynh_app_setting_delete --app=$app --key=skipped_uris
@@ -263,7 +273,7 @@ ynh_script_progression --message="Upgrading permission..."
 
 if ! ynh_permission_exists --permission="upload images"
 then
-	if [ -z $(ynh_app_setting_get --app=$app --key=protected_regex) ] # Everyone can upload image
+	if [ $is_public -eq 1 ] # Everyone can upload image
 	then
 		ynh_permission_create --permission="upload images" --allowed="visitors"
 	else # Only user with a yunohost account can upload an image
