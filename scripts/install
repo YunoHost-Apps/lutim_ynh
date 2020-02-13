@@ -201,6 +201,9 @@ ynh_script_progression --message="Configuring SSOwat..."
 
 ynh_permission_update --permission="main" --add="visitors"
 
+# This is a fake permission without any URL.
+# The purpose of this permission is only to trigger hooks post_app_add/removeaccess when it's modified.
+# We can't use a real permission for now because the actual permision system doesn't support regex.
 ynh_permission_create --permission="upload images" --allowed="visitors"
 
 if [ $is_public -eq 0 ]
@@ -214,6 +217,7 @@ then
 	domain_regex=$(echo "$domain" | sed 's@-@.@g')
     ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
 
+	# If the app is not public, then the "visitors" group doesn't have this permission
 	ynh_permission_update --permission="upload images" --remove="visitors"
 fi
 

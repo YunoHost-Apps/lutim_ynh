@@ -35,8 +35,6 @@ admin_mail_html=$(ynh_app_setting_get --app=$app --key=admin_mail_html)
 antiflood=$(ynh_app_setting_get --app=$app --key=antiflood)
 delay=$(ynh_app_setting_get --app=$app --key=delay)
 
-skipped_uris=$(ynh_app_setting_get --app=$app --key=skipped_uris)
-
 #=================================================
 # CHECK VERSION
 #=================================================
@@ -57,8 +55,35 @@ elif [ "$is_public" = "No" ]; then
 	is_public=0
 fi
 
+skipped_uris=$(ynh_app_setting_get --app=$app --key=skipped_uris)
+
+# Unused with the permission system
 if [ ! -z "$skipped_uris" ]; then
 	ynh_app_setting_delete --app=$app --key=skipped_uris
+fi
+
+# Create the permission "upload images" only if it doesn't exist.
+if ! ynh_permission_exists --permission="upload images"
+then
+	# This is a fake permission without any URL.
+	# The purpose of this permission is only to trigger hooks post_app_add/removeaccess when it's modified.
+	# We can't use a real permission for now because the actual permision system doesn't support regex.
+	ynh_permission_create --permission="upload images" --allowed="visitors"
+
+	if [ $is_public -eq 0 ]
+	then
+		# If the app is private, viewing images stays publicly accessible.
+		if [ "$path_url" == "/" ]; then
+			# If the path is /, clear it to prevent any error with the regex.
+			path_url=""
+		fi
+		# Modify the domain to be used in a regex
+		domain_regex=$(echo "$domain" | sed 's@-@.@g')
+		ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
+
+		# If the app is not public, then the "visitors" group doesn't have this permission
+		ynh_permission_update --permission="upload images" --remove="visitors"
+	fi
 fi
 
 # if final_path isn't set, which can happens with old scripts, set final_path.
@@ -265,21 +290,6 @@ ynh_script_progression --message="Upgrading logrotate configuration..."
 
 ynh_use_logrotate --non-append
 chown $app -R /var/log/$app
-
-#=================================================
-# SETUP SSOWAT
-#=================================================
-ynh_script_progression --message="Upgrading permission..."
-
-if ! ynh_permission_exists --permission="upload images"
-then
-	if [ $is_public -eq 1 ] # Everyone can upload image
-	then
-		ynh_permission_create --permission="upload images" --allowed="visitors"
-	else # Only user with a yunohost account can upload an image
-		ynh_permission_create --permission="upload images" --allowed="all_users"
-	fi
-fi
 
 #=================================================
 # RELOAD NGINX
