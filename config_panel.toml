@@ -24,14 +24,6 @@ name = "Lutim configuration"
         default = "Year"
         help = "Users won't be able to ask Lutim to download images more than one per anti_flood_delay seconds."
 
-    [main.is_public]
-    name = "Public access"
-
-        [main.is_public.is_public]
-        ask = "Is it a public website?"
-        type = "boolean"
-        default = true
-
     [main.overwrite_files]
     name = "Overwriting config files"
 
