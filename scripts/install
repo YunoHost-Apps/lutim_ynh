@@ -192,7 +192,7 @@ yunohost service add $app --log $final_path/log/production.log
 #=================================================
 ynh_script_progression --message="Configuring SSOwat..."
 
-ynh_app_setting_set --app=$app --key=skipped_uris --value="/"
+ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 if [ $is_public -eq 0 ]
 then
 	# If the app is private, viewing images stays publicly accessible.
