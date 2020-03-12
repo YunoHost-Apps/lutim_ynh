@@ -100,6 +100,10 @@ then
 	ynh_exec_quiet yunohost firewall disallow TCP $port
 fi
 
+# Replace skipped_uris by unprotected_uris for the migration to the new permission system.
+ynh_app_setting_delete --app=$app --key=skipped_uris
+ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
@@ -258,7 +262,7 @@ chown $app -R /var/log/$app
 #=================================================
 ynh_script_progression --message="Upgrading SSOwat configuration..."
 
-ynh_app_setting_set --app=$app --key=skipped_uris --value="/"
+ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 if [ $is_public -eq 0 ]
 then
 	# If the app is private, viewing images stays publicly accessible.
