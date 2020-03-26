@@ -4,6 +4,11 @@ Changelog
 ## Unreleased
 - Nothing for now...
 
+## [0.11.6~ynh3](https://github.com/YunoHost-Apps/lutim_ynh/pull/45) - 2020-03-12
+
+#### Changed
+- [ Fix migration to new permission system](https://github.com/YunoHost-Apps/lutim_ynh/pull/45/commits/e0d3764ffbcde3d354b7c27154f829cad8172e2e)
+
 ## [0.11.6~ynh2](https://github.com/YunoHost-Apps/lutim_ynh/pull/43) - 2020-01-04
 
 #### Fixed
