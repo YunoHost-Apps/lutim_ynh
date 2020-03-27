@@ -122,7 +122,7 @@ fi
 #=================================================
 ynh_script_progression --message="Reconfiguring SSOwat..."
 
-if [ $is_public -eq 0 ]
+if [ $is_public -eq 0 ] # Only user with a yunohost account can upload an image
 then
 	# If the app is private, viewing images stays publicly accessible.
 	if [ "$new_path" == "/" ]; then

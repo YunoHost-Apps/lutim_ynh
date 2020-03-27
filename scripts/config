@@ -61,10 +61,6 @@ else
 fi
 delay="${YNH_CONFIG_MAIN_CONFIGURATION_DELAY:-$old_delay}"
 
-# is_public
-old_is_public="$(ynh_app_setting_get --app=$app --key=is_public)"
-is_public="${YNH_CONFIG_MAIN_IS_PUBLIC_IS_PUBLIC:-$old_is_public}"
-
 # Overwrite settings.json file
 old_overwrite_settings="$(ynh_app_setting_get --app=$app --key=overwrite_settings)"
 overwrite_settings="${YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_SETTINGS:-$old_overwrite_settings}"
@@ -92,8 +88,6 @@ show_config() {
 	ynh_return "YNH_CONFIG_MAIN_CONFIGURATION_ALWAYS_ENCRYPT=$always_encrypt"
 	ynh_return "YNH_CONFIG_MAIN_CONFIGURATION_ANTIFLOOD=$antiflood"
 	ynh_return "YNH_CONFIG_MAIN_CONFIGURATION_DELAY=$delay"
-
-	ynh_return "YNH_CONFIG_MAIN_IS_PUBLIC_IS_PUBLIC=$is_public"
 
 	ynh_return "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_SETTINGS=$overwrite_settings"
 	ynh_return "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_NGINX=$overwrite_nginx"
@@ -152,14 +146,6 @@ apply_config() {
 	then
 		# Wait for lutim to be fully started
 		ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
-	fi
-
-	# Change public accessibility
-	if [ "$is_public" = "1" ]
-	then
-		yunohost app action run $app public_private --args is_public=1
-	else
-		yunohost app action run $app public_private --args is_public=0
 	fi
 
 	# Set overwrite_settings

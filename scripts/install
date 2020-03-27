@@ -122,6 +122,13 @@ ynh_replace_string --match_string="__WORKERS__" --replace_string="$(( $(nproc) *
 ynh_store_file_checksum --file="$final_path/lutim.conf"
 
 #=================================================
+# SETUP HOOKS FILE
+#=================================================
+
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="../hooks/post_app_addaccess"
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="../hooks/post_app_removeaccess"
+
+#=================================================
 # SETUP SYSTEMD
 #=================================================
 ynh_script_progression --message="Configuring a systemd service..." --weight=2
@@ -192,7 +199,13 @@ yunohost service add $app --log $final_path/log/production.log
 #=================================================
 ynh_script_progression --message="Configuring SSOwat..."
 
-ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+ynh_permission_update --permission="main" --add="visitors"
+
+# This is a fake permission without any URL.
+# The purpose of this permission is only to trigger hooks post_app_add/removeaccess when it's modified.
+# We can't use a real permission for now because the actual permision system doesn't support regex.
+ynh_permission_create --permission="upload images" --allowed="visitors"
+
 if [ $is_public -eq 0 ]
 then
 	# If the app is private, viewing images stays publicly accessible.
@@ -203,6 +216,9 @@ then
 	# Modify the domain to be used in a regex
 	domain_regex=$(echo "$domain" | sed 's@-@.@g')
     ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
+
+	# If the app is not public, then the "visitors" group doesn't have this permission
+	ynh_permission_update --permission="upload images" --remove="visitors"
 fi
 
 #=================================================
