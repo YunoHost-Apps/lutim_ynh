@@ -49,6 +49,9 @@
                     "fr": "L'upload des images est-il public ?"
                 },
                 "default": false,
+                "help": {
+                    "en": "If you set Lutim as public, everyone will be able to upload images and share them.<br>But even if not public, everyone can see an image from a link shared with your Lutim."
+                }
             },
             {
                 "name": "always_encrypt",

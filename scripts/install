@@ -6,10 +6,11 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-source _common.sh
-source /usr/share/yunohost/helpers
 # Load common variables for all scripts.
 source _variables
+
+source _common.sh
+source /usr/share/yunohost/helpers
 
 #=================================================
 # MANAGE FAILURE OF THE SCRIPT
@@ -259,4 +260,4 @@ ynh_send_readme_to_admin --app_message="mail_to_send" --recipients="root" --type
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed" --time --last
+ynh_script_progression --message="Installation of $app completed" --last

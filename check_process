@@ -18,11 +18,10 @@
         port_already_use=1	(8095)
         change_url=1
 ;;; Levels
-# Level 5: https://github.com/YunoHost/package_linter/issues/36
-	Level 5=1
+    Level 5=auto
 ;;; Options
 Email=
-Notification=down
+Notification=change
 ;;; Upgrade options
     ; commit=4c29aa94f9d9048411c6e165e122e03574fb9b8d
         name=08 Sep 2017 4c29aa94f9d9048411c6e165e122e03574fb9b8d

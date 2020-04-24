@@ -13,7 +13,7 @@ source /usr/share/yunohost/helpers
 # RETRIEVE ARGUMENTS
 #=================================================
 
-app=${YNH_APP_INSTANCE_NAME:-$YNH_APP_ID}
+app=$YNH_APP_INSTANCE_NAME
 
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
@@ -43,9 +43,11 @@ get_config_value() {
 # always_encrypt
 old_always_encrypt="$(get_config_value always_encrypt)"
 always_encrypt="${YNH_CONFIG_MAIN_CONFIGURATION_ALWAYS_ENCRYPT:-$old_always_encrypt}"
+
 # antiflood
 old_antiflood="$(get_config_value anti_flood_delay)"
 antiflood="${YNH_CONFIG_MAIN_CONFIGURATION_ANTIFLOOD:-$old_antiflood}"
+
 # delay
 old_delay="$(get_config_value default_delay)"
 if [ $old_delay -eq 0 ]; then
@@ -101,62 +103,75 @@ show_config() {
 #=================================================
 
 apply_config() {
-	restart_lutim=0
 
-	# Change configuration if needed
-	# always_encrypt
-	if [ "$always_encrypt" != "$old_always_encrypt" ]
-	then
-		ynh_replace_string --match_string=".*always_encrypt *=>.*" --replace_string="    always_encrypt    => $always_encrypt," --target_file="$config_file"
-		restart_lutim=1
-	fi
+    #=================================================
+    # MODIFY LUTIM CONFIGURATION
+    #=================================================
 
-	# antiflood
-	if [ "$antiflood" != "$old_antiflood" ]
-	then
-		ynh_replace_string --match_string=".*anti_flood_delay *=>.*" --replace_string="    anti_flood_delay  => $antiflood," --target_file="$config_file"
-		# Disable anti_flood_delay if the delay is 0
-		if [ $antiflood = 0 ]; then
-			ynh_replace_string --match_string="\(anti_flood_delay *=>.*\)" --replace_string="#\1" --target_file="$config_file"
-		fi
-		ynh_app_setting_set --app=$app --key=antiflood --value="$antiflood"
-		restart_lutim=1
-	fi
+    restart_lutim=0
 
-	# delay
-	if [ "$delay" != "$old_delay" ]
-	then
-		if [ $delay = None ]; then
-			delay=0
-		elif [ $delay = Day ]; then
-			delay=1
-		elif [ $delay = Week ]; then
-			delay=7
-		elif [ $delay = Month ]; then
-			delay=30
-		else
-			delay=360
-		fi
-		ynh_replace_string --match_string=".*default_delay *=>.*" --replace_string="    default_delay     => $delay," --target_file="$config_file"
-		ynh_app_setting_set --app=$app --key=delay --value="$delay"
-		restart_lutim=1
-	fi
+    # Change configuration if needed
+    # always_encrypt
+    if [ "$always_encrypt" != "$old_always_encrypt" ]
+    then
+        ynh_replace_string --match_string=".*always_encrypt *=>.*" --replace_string="    always_encrypt    => $always_encrypt," --target_file="$config_file"
+        restart_lutim=1
+    fi
 
-	if [ $restart_lutim -eq 1 ]
-	then
-		# Wait for lutim to be fully started
-		ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
-	fi
+    # antiflood
+    if [ "$antiflood" != "$old_antiflood" ]
+    then
+        ynh_replace_string --match_string=".*anti_flood_delay *=>.*" --replace_string="    anti_flood_delay  => $antiflood," --target_file="$config_file"
+        # Disable anti_flood_delay if the delay is 0
+        if [ $antiflood = 0 ]; then
+            ynh_replace_string --match_string="\(anti_flood_delay *=>.*\)" --replace_string="#\1" --target_file="$config_file"
+        fi
+        ynh_app_setting_set --app=$app --key=antiflood --value="$antiflood"
+        restart_lutim=1
+    fi
 
-	# Set overwrite_settings
-	ynh_app_setting_set --app=$app --key=overwrite_settings --value="$overwrite_settings"
-	# Set overwrite_nginx
-	ynh_app_setting_set --app=$app --key=overwrite_nginx --value="$overwrite_nginx"
-	# Set overwrite_systemd
-	ynh_app_setting_set --app=$app --key=overwrite_systemd --value="$overwrite_systemd"
+    # delay
+    if [ "$delay" != "$old_delay" ]
+    then
+        if [ $delay = None ]; then
+            delay=0
+        elif [ $delay = Day ]; then
+            delay=1
+        elif [ $delay = Week ]; then
+            delay=7
+        elif [ $delay = Month ]; then
+            delay=30
+        else
+            delay=360
+        fi
+        ynh_replace_string --match_string=".*default_delay *=>.*" --replace_string="    default_delay     => $delay," --target_file="$config_file"
+        ynh_app_setting_set --app=$app --key=delay --value="$delay"
+        restart_lutim=1
+    fi
 
-	# Set admin_mail_html
-	ynh_app_setting_set --app=$app --key=admin_mail_html --value="$admin_mail_html"
+    if [ $restart_lutim -eq 1 ]
+    then
+        # Wait for lutim to be fully started
+        ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
+    fi
+
+    #=================================================
+    # MODIFY OVERWRITTING SETTINGS
+    #=================================================
+
+    # Set overwrite_settings
+    ynh_app_setting_set --app=$app --key=overwrite_settings --value="$overwrite_settings"
+    # Set overwrite_nginx
+    ynh_app_setting_set --app=$app --key=overwrite_nginx --value="$overwrite_nginx"
+    # Set overwrite_systemd
+    ynh_app_setting_set --app=$app --key=overwrite_systemd --value="$overwrite_systemd"
+
+    #=================================================
+    # MODIFY EMAIL SETTING
+    #=================================================
+
+    # Set admin_mail_html
+    ynh_app_setting_set --app=$app --key=admin_mail_html --value="$admin_mail_html"
 }
 
 #=================================================
