@@ -236,9 +236,13 @@ ynh_script_progression --message="Restarting Lutim..." --weight=6
 
 # Wait for lutim to be fully started
 ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
+ynh_systemd_action --action=stop
 
 # Set right permissions on new files created at first start
 chown -R $app: $final_path
+
+# Wait for lutim to be fully started
+ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 
 #=================================================
 # SEND A README FOR THE ADMIN
