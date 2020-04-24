@@ -26,9 +26,9 @@ final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 config_file="$final_path/lutim.conf"
 
 get_config_value() {
-	option_name="$1"
-	# Get the value of this option in the config file
-	grep "$option_name *=>" "$config_file" | cut -d'>' -f2 | sed s'/ //g' | cut -d',' -f1
+    option_name="$1"
+    # Get the value of this option in the config file
+    grep "$option_name *=>" "$config_file" | cut -d'>' -f2 | sed s'/ //g' | cut -d',' -f1
 }
 
 #=================================================
@@ -49,15 +49,15 @@ antiflood="${YNH_CONFIG_MAIN_CONFIGURATION_ANTIFLOOD:-$old_antiflood}"
 # delay
 old_delay="$(get_config_value default_delay)"
 if [ $old_delay -eq 0 ]; then
-	old_delay=None
+    old_delay=None
 elif [ $old_delay -eq 1 ]; then
-	old_delay=Day
+    old_delay=Day
 elif [ $old_delay -eq 7 ]; then
-	old_delay=Week
+    old_delay=Week
 elif [ $old_delay -eq 30 ]; then
-	old_delay=Month
+    old_delay=Month
 else
-	old_delay=Year
+    old_delay=Year
 fi
 delay="${YNH_CONFIG_MAIN_CONFIGURATION_DELAY:-$old_delay}"
 
@@ -82,18 +82,18 @@ admin_mail_html="${YNH_CONFIG_MAIN_GLOBAL_CONFIG_EMAIL_TYPE:-$old_admin_mail_htm
 #=================================================
 
 show_config() {
-	# here you are supposed to read some config file/database/other then print the values
-	# ynh_return "YNH_CONFIG_${PANEL_ID}_${SECTION_ID}_${OPTION_ID}=value"
+    # here you are supposed to read some config file/database/other then print the values
+    # ynh_return "YNH_CONFIG_${PANEL_ID}_${SECTION_ID}_${OPTION_ID}=value"
 
-	ynh_return "YNH_CONFIG_MAIN_CONFIGURATION_ALWAYS_ENCRYPT=$always_encrypt"
-	ynh_return "YNH_CONFIG_MAIN_CONFIGURATION_ANTIFLOOD=$antiflood"
-	ynh_return "YNH_CONFIG_MAIN_CONFIGURATION_DELAY=$delay"
+    ynh_return "YNH_CONFIG_MAIN_CONFIGURATION_ALWAYS_ENCRYPT=$always_encrypt"
+    ynh_return "YNH_CONFIG_MAIN_CONFIGURATION_ANTIFLOOD=$antiflood"
+    ynh_return "YNH_CONFIG_MAIN_CONFIGURATION_DELAY=$delay"
 
-	ynh_return "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_SETTINGS=$overwrite_settings"
-	ynh_return "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_NGINX=$overwrite_nginx"
-	ynh_return "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_SYSTEMD=$overwrite_systemd"
+    ynh_return "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_SETTINGS=$overwrite_settings"
+    ynh_return "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_NGINX=$overwrite_nginx"
+    ynh_return "YNH_CONFIG_MAIN_OVERWRITE_FILES_OVERWRITE_SYSTEMD=$overwrite_systemd"
 
-	ynh_return "YNH_CONFIG_MAIN_GLOBAL_CONFIG_EMAIL_TYPE=$admin_mail_html"
+    ynh_return "YNH_CONFIG_MAIN_GLOBAL_CONFIG_EMAIL_TYPE=$admin_mail_html"
 }
 
 #=================================================
@@ -166,6 +166,6 @@ apply_config() {
 #=================================================
 
 case $1 in
-  show) show_config;;
-  apply) apply_config;;
+    show) show_config;;
+    apply) apply_config;;
 esac

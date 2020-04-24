@@ -17,7 +17,7 @@ source _variables
 
 ynh_clean_setup () {
 # Clean installation remaining that are not handle by the remove script.
-	ynh_clean_check_starting
+    ynh_clean_check_starting
 }
 ynh_abort_if_errors
 
@@ -158,7 +158,7 @@ carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
 arch_dir=$(ls -1 $final_path/local/lib/perl5/ | grep linux-gnu)
 if [ "$?" -ne 0 ]
 then
-	ynh_die --message="Unable to find the perl directory for your architecture."
+    ynh_die --message="Unable to find the perl directory for your architecture."
 fi
 ynh_replace_string --match_string="__ARCHDIR__" --replace_string="$arch_dir" --target_file="$final_path/script/lutim"
 
@@ -208,17 +208,17 @@ ynh_permission_create --permission="upload images" --allowed="visitors"
 
 if [ $is_public -eq 0 ]
 then
-	# If the app is private, viewing images stays publicly accessible.
-	if [ "$path_url" == "/" ]; then
-	    # If the path is /, clear it to prevent any error with the regex.
-	    path_url=""
-	fi
-	# Modify the domain to be used in a regex
-	domain_regex=$(echo "$domain" | sed 's@-@.@g')
+    # If the app is private, viewing images stays publicly accessible.
+    if [ "$path_url" == "/" ]; then
+        # If the path is /, clear it to prevent any error with the regex.
+        path_url=""
+    fi
+    # Modify the domain to be used in a regex
+    domain_regex=$(echo "$domain" | sed 's@-@.@g')
     ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
 
-	# If the app is not public, then the "visitors" group doesn't have this permission
-	ynh_permission_update --permission="upload images" --remove="visitors"
+    # If the app is not public, then the "visitors" group doesn't have this permission
+    ynh_permission_update --permission="upload images" --remove="visitors"
 fi
 
 #=================================================
