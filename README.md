@@ -1,6 +1,6 @@
 # Lutim for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/lutim.svg)](https://dash.yunohost.org/appci/app/lutim)  
+[![Integration level](https://dash.yunohost.org/integration/lutim.svg)](https://dash.yunohost.org/appci/app/lutim) ![](https://ci-apps.yunohost.org/ci/badges/lutim.status.svg) [![](https://ci-apps.yunohost.org/ci/badges/lutim.maintain.svg)](https://github.com/YunoHost/Apps/#what-to-do-if-i-cant-maintain-my-app-anymore-)  
 [![Install Lutim with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=lutim)
 
 *[Lire ce readme en français.](./README_fr.md)*
@@ -41,7 +41,7 @@ Not relevant.
 
 * x86-64b - [![](https://ci-apps.yunohost.org/ci/logs/lutim%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/lutim/)
 * ARMv8-A - [![](https://ci-apps-arm.yunohost.org/ci/logs/lutim%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lutim/)
-* Jessie x86-64b - [![](https://ci-stretch.nohost.me/ci/logs/lutim%20%28Apps%29.svg)](https://ci-stretch.nohost.me/ci/apps/lutim/)
+* Buster x86-64b - [![](https://ci-buster.nohost.me/ci/logs/lutim%20%28Apps%29.svg)](https://ci-buster.nohost.me/ci/apps/lutim/)
 
 ## Limitations
 
@@ -63,7 +63,7 @@ Please do your pull request to the [testing branch](https://github.com/YunoHost-
 
 To try the testing branch, please proceed like that.
 ```
-sudo yunohost app install https://github.com/YunoHost-Apps/lutim_ynh/tree/testing --debug
+sudo yunohost app install https://github.com/YunoHost-Apps/lutim_ynh/tree/testing --force --debug
 or
 sudo yunohost app upgrade lutim -u https://github.com/YunoHost-Apps/lutim_ynh/tree/testing --debug
 ```

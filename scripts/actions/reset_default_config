@@ -10,10 +10,22 @@ source scripts/_common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+ynh_clean_setup () {
+# Clean installation remaining that are not handle by the remove script.
+    ynh_clean_check_starting
+}
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
+
+#=================================================
 # RETRIEVE ARGUMENTS
 #=================================================
 
-app=${YNH_APP_INSTANCE_NAME:-$YNH_APP_ID}
+app=$YNH_APP_INSTANCE_NAME
+
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
@@ -28,7 +40,7 @@ secret=$(ynh_app_setting_get --app=$app --key=secret)
 file="$1"
 
 if [ "$file" = "lutim.conf" ]; then
-	config_file="$final_path/lutim.conf"
+    config_file="$final_path/lutim.conf"
 fi
 
 #=================================================
@@ -43,15 +55,15 @@ ynh_backup_if_checksum_is_different --file="$config_file"
 
 if [ "$file" = "lutim.conf" ]
 then
-	# Get the default file and overwrite the current config
-	cp /etc/yunohost/apps/$app/conf/lutim.conf.template "$config_file"
+    # Get the default file and overwrite the current config
+    cp /etc/yunohost/apps/$app/conf/lutim.conf.template "$config_file"
 
-	# Recreate the default config
-	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config_file"
-	ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="$config_file"
-	ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$config_file"
-	ynh_replace_string --match_string="__ENCRYPT__" --replace_string="$always_encrypt" --target_file="$config_file"
-	ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$config_file"
+    # Recreate the default config
+    ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config_file"
+    ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="$config_file"
+    ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$config_file"
+    ynh_replace_string --match_string="__ENCRYPT__" --replace_string="$always_encrypt" --target_file="$config_file"
+    ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$config_file"
     # Set the number of process for Lutim to twice the number of CPU core.
     ynh_replace_string --match_string="__WORKERS__" --replace_string="$(( $(nproc) * 2 ))" --target_file="$final_path/lutim.conf"
 fi

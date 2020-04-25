@@ -4,6 +4,20 @@ Changelog
 ## Unreleased
 - Nothing for now...
 
+## [0.11.6~ynh4](https://github.com/YunoHost-Apps/lutim_ynh/pull/46) - 2020-04-25
+
+#### Added
+- [Add new badges](https://github.com/YunoHost-Apps/lutim_ynh/pull/46/commits/4e28257f0550378297789c77a5354b004100f5ae)
+* [New reset actions](https://github.com/YunoHost-Apps/lutim_ynh/pull/46/commits/e1c90a7c1b2c0c66c4d7bfc8a8e2a221d5c817ab)
+
+#### Fixed
+- [Fix potential error on install](https://github.com/YunoHost-Apps/lutim_ynh/pull/46/commits/e481e03e0511787f297e10f85d6a54b3fedb5470)
+
+#### Changed
+- [Indentation](https://github.com/YunoHost-Apps/lutim_ynh/pull/46/commits/a934b7369842dfbdc45e7c1dfdf3483276d4c755)
+- [Misc upgrade](https://github.com/YunoHost-Apps/lutim_ynh/pull/46/commits/750ea401950f4e8b3facfa7caa5bc2388b6a4272)
+
+
 ## [0.11.6~ynh3](https://github.com/YunoHost-Apps/lutim_ynh/pull/45) - 2020-03-12
 
 #### Changed

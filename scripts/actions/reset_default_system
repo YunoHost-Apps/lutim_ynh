@@ -13,6 +13,10 @@ source /usr/share/yunohost/helpers
 # MANAGE SCRIPT FAILURE
 #=================================================
 
+ynh_clean_setup () {
+# Clean installation remaining that are not handle by the remove script.
+    ynh_clean_check_starting
+}
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
 
@@ -22,24 +26,39 @@ ynh_abort_if_errors
 
 app=$YNH_APP_INSTANCE_NAME
 
+type=$1
+
+domain=$(ynh_app_setting_get --app=$app --key=domain)
+path_url=$(ynh_app_setting_get --app=$app --key=path)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-
-#=================================================
-# CHECK IF ARGUMENTS ARE CORRECT
-#=================================================
-
-#=================================================
-# CHECK IF AN ACTION HAS TO BE DONE
-#=================================================
+port=$(ynh_app_setting_get --app=$app --key=port)
 
 #=================================================
 # SPECIFIC ACTION
 #=================================================
-# REMOVE EXPIRED IMAGES
+# RESET THE CONFIG FILE
 #=================================================
-ynh_script_progression --message="Removing expired images..." --weight=9
 
-(cd "$final_path" && exec_as $app $(which carton) exec script/lutim cron cleanfiles)
+if [ $type == nginx ]; then
+    name=Nginx
+elif [ $type == systemd ]; then
+    name=systemd
+else
+    ynh_die --message="The type $type is not recognized"
+fi
+
+ynh_script_progression --message="Resetting the specific configuration of $name for the app $app..." --weight=3
+
+if [ $type == nginx ]
+then
+    (cd scripts; ynh_add_nginx_config)
+
+elif [ $type == systemd ]
+then
+    ynh_systemd_action --action=stop
+    (cd scripts; ynh_add_systemd_config)
+    ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="300"
+fi
 
 #=================================================
 # END OF SCRIPT
