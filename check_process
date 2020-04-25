@@ -4,6 +4,15 @@
         path="/path"	(PATH)
         is_public=1	(PUBLIC|public=1|private=0)
         always_encrypt=1
+    ; Actions
+    ; Config_panel
+        main.configuration.always_encrypt=0|1
+        main.configuration.antiflood=10
+        main.configuration.delay=None|Day|Week|Month|Year
+        main.overwrite_files.overwrite_settings=0|1
+        main.overwrite_files.overwrite_nginx=0|1
+        main.overwrite_files.overwrite_systemd=0|1
+        main.global_config.email_type=0|1
     ; Checks
         pkg_linter=1
         setup_sub_dir=1
@@ -17,6 +26,8 @@
         multi_instance=0
         port_already_use=1	(8095)
         change_url=1
+        actions=1
+        config_panel=1
 ;;; Levels
     Level 5=auto
 ;;; Options
