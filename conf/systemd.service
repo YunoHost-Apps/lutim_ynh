@@ -3,10 +3,9 @@ Description=Image hosting and sharing service
 After=network.target
 
 [Service]
-Type=simple
+Type=forking
 User=__APP__
 Group=__APP__
-RemainAfterExit=yes
 WorkingDirectory=__FINALPATH__/
 PIDFile=__FINALPATH__/script/hypnotoad.pid
 ExecStart=/usr/bin/carton exec hypnotoad script/lutim >> /var/log/lutim/production.log 2>&1
