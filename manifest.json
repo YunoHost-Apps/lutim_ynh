@@ -10,9 +10,13 @@
     "url": "https://lut.im",
     "license": "AGPL-3.0",
     "maintainer": {
+        "name": "None...",
+        "email": ""
+    },
+    "previous_maintainers": [{
         "name": "Maniack Crudelis et matlink",
         "email": "maniackc_dev@crudelis.fr"
-    },
+    }],
     "requirements": {
         "yunohost": ">= 3.7"
     },
