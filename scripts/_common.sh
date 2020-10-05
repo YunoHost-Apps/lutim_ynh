@@ -1,8 +1,10 @@
 #!/bin/bash
 
 #=================================================
-# PERSONAL HELPERS
+# COMMON VARIABLES
 #=================================================
+
+app_depencencies="carton perlmagick libpq-dev shared-mime-info"
 
 #=================================================
 # BACKUP

@@ -1,6 +1,6 @@
-SOURCE_URL=https://framagit.org/fiat-tux/hat-softwares/lutim/-/archive/0.11.6/lutim-0.11.6.tar.gz
-SOURCE_SUM=092fc5b914fc8a2dd46f7101fe94c493
-SOURCE_SUM_PRG=md5sum
+SOURCE_URL=https://framagit.org/fiat-tux/hat-softwares/lutim/-/archive/0.12.0/lutim-0.12.0.tar.gz
+SOURCE_SUM=d431bf4c1fb2323cc4a51958f3f312e9bfe0a5d100afe2e7f99e1ce42f1a5d02
+SOURCE_SUM_PRG=sha256sum
 SOURCE_FORMAT=tar.gz
 SOURCE_IN_SUBDIR=true
 SOURCE_FILENAME=

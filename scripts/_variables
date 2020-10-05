@@ -1,4 +1,0 @@
-#!/bin/bash
-
-# Dependencies
-app_depencencies="carton perlmagick libpq-dev shared-mime-info"
