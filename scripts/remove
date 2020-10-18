@@ -36,7 +36,7 @@ ynh_remove_systemd_config
 # Check if the service is declared in YunoHost
 if ynh_exec_fully_quiet yunohost service status $app
 then
-	ynh_script_progression --message="Removing $app service..."
+	ynh_script_progression --message="Removing Lutim service..."
 	yunohost service remove $app
 fi
 
