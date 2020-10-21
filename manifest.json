@@ -6,15 +6,19 @@
         "en": "Self hosting images and sharing anonymous application",
         "fr": "Application d'hébergement et de partage d'images anonyme"
     },
-    "version": "0.12.0~ynh1",
+    "version": "0.12.1~ynh1",
     "url": "https://lut.im",
     "license": "AGPL-3.0",
     "maintainer": {
+        "name": "None...",
+        "email": ""
+    },
+    "previous_maintainers": [{
         "name": "Maniack Crudelis et matlink",
         "email": "maniackc_dev@crudelis.fr"
-    },
+    }],
     "requirements": {
-        "yunohost": ">= 3.7"
+        "yunohost": ">= 3.8.1"
     },
     "multi_instance": false,
     "services": [
@@ -50,7 +54,8 @@
                 },
                 "default": false,
                 "help": {
-                    "en": "If you set Lutim as public, everyone will be able to upload images and share them.<br>But even if not public, everyone can see an image from a link shared with your Lutim."
+                    "en": "If you set Lutim as public, everyone will be able to upload images and share them.<br>But even if not public, everyone can see an image from a link shared with your Lutim.",
+                    "fr": "Si vous définissez Lutim comme public, tout le monde pourra télécharger des images et les partager.<br>Mais même si ce n'est pas public, tout le monde peut voir une image à partir d'un lien partagé avec votre Lutim."
                 }
             },
             {

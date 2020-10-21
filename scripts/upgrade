@@ -7,8 +7,6 @@
 #=================================================
 
 # Load common variables for all scripts.
-source _variables
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
@@ -139,7 +137,7 @@ ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=15
+ynh_script_progression --message="Backing up Lutim before upgrading (may take a while)..." --weight=15
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -193,7 +191,7 @@ ynh_install_app_dependencies $app_depencencies
 # Overwrite the nginx configuration only if it's allowed
 if [ $overwrite_nginx -eq 1 ]
 then
-    ynh_script_progression --message="Upgrading nginx web server configuration..." --weight=2
+    ynh_script_progression --message="Upgrading NGINX web server configuration..." --weight=2
     ynh_add_nginx_config
 fi
 
@@ -299,7 +297,7 @@ chown $app -R /var/log/$app
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -346,4 +344,4 @@ ynh_send_readme_to_admin --app_message="mail_to_send" --recipients="root" --type
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Upgrade of $app completed" --last
+ynh_script_progression --message="Upgrade of Lutim completed" --last

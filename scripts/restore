@@ -7,8 +7,6 @@
 #=================================================
 
 # Load common variables for all scripts.
-source ../settings/scripts/_variables
-
 source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
@@ -62,7 +60,7 @@ ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 #=================================================
 # RESTORE THE APP MAIN DIR
 #=================================================
-ynh_script_progression --message="Restoring the app main directory..."
+ynh_script_progression --message="Restoring Lutim main directory..."
 
 ynh_restore_file --origin_path="$final_path"
 
@@ -130,7 +128,7 @@ ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..." --weight=2
+ynh_script_progression --message="Reloading NGINX web server..." --weight=2
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -169,4 +167,4 @@ ynh_send_readme_to_admin --app_message="mail_to_send" --recipients="root" --type
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Restoration completed for $app" --last
+ynh_script_progression --message="Restoration completed for Lutim" --last
