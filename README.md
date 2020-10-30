@@ -29,7 +29,7 @@ Then reload the lutim service.
 ## Documentation
 
  * Official documentation: https://framagit.org/luc/lutim/wikis/home
- * YunoHost documentation: There no other documentations, feel free to contribute.
+ * YunoHost documentation: https://yunohost.org/#/app_lutim
 
 ## YunoHost specific features
 
