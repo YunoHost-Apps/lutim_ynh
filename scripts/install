@@ -81,7 +81,7 @@ ynh_setup_source --dest_dir="$final_path"
 #=================================================
 ynh_script_progression --message="Installing dependencies..." --weight=60
 
-ynh_install_app_dependencies $app_depencencies
+ynh_install_app_dependencies $pkg_depencencies
 
 #=================================================
 # NGINX CONFIGURATION

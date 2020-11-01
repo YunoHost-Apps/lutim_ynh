@@ -4,7 +4,7 @@
 # COMMON VARIABLES
 #=================================================
 
-app_depencencies="carton perlmagick libpq-dev shared-mime-info"
+pkg_depencencies="carton perlmagick libpq-dev shared-mime-info"
 
 #=================================================
 # BACKUP
