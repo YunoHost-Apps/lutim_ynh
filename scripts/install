@@ -104,7 +104,7 @@ ynh_system_user_create $app
 #=================================================
 # SETUP LUTIM
 #=================================================
-ynh_script_progression --message="Configure Lutim" --weight=2
+ynh_script_progression --message="Configure $app" --weight=2
 
 # Configure Lutim
 cp ../conf/lutim.conf.template "$final_path/lutim.conf"
@@ -147,7 +147,7 @@ chmod +x $final_path/script/lutim
 #=================================================
 # INSTALL LUTIM WITH CARTON
 #=================================================
-ynh_script_progression --message="Installing Lutim with Carton..." --weight=60
+ynh_script_progression --message="Installing $app with Carton..." --weight=60
 
 mkdir -p /var/log/$app/
 (cd $final_path
@@ -230,7 +230,7 @@ ynh_systemd_action --service_name=nginx --action=reload
 #=================================================
 # CHECK LUTIM BOOTING
 #=================================================
-ynh_script_progression --message="Restarting Lutim..." --weight=6
+ynh_script_progression --message="Restarting $app..." --weight=6
 
 # Wait for lutim to be fully started
 ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
@@ -262,4 +262,4 @@ ynh_send_readme_to_admin --app_message="mail_to_send" --recipients="root" --type
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of Lutim completed" --last
+ynh_script_progression --message="Installation of $app completed" --last

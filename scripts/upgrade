@@ -137,7 +137,7 @@ ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_script_progression --message="Backing up Lutim before upgrading (may take a while)..." --weight=15
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=15
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -208,7 +208,7 @@ ynh_system_user_create --username=$app
 #=================================================
 # SETUP LUTIM
 #=================================================
-ynh_script_progression --message="Reconfiguring Lutim..."
+ynh_script_progression --message="Reconfiguring $app..."
 
 # Overwrite the settings config file only if it's allowed
 if [ $overwrite_settings -eq 1 ]
@@ -272,7 +272,7 @@ ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_fil
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-    ynh_script_progression --message="Upgrading Lutim with Carton..." --weight=4
+    ynh_script_progression --message="Upgrading $app with Carton..." --weight=4
     (cd $final_path
     carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
 fi
@@ -344,4 +344,4 @@ ynh_send_readme_to_admin --app_message="mail_to_send" --recipients="root" --type
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Upgrade of Lutim completed" --last
+ynh_script_progression --message="Upgrade of $app completed" --last

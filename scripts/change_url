@@ -33,7 +33,7 @@ port=$(ynh_app_setting_get --app=$app --key=port)
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_script_progression --message="Backing up Lutim before changing its URL (may take a while)..." --weight=20
+ynh_script_progression --message="Backing up $app before changing its URL (may take a while)..." --weight=20
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -163,4 +163,4 @@ ynh_maintenance_mode_OFF
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Change of URL completed for Lutim" --last
+ynh_script_progression --message="Change of URL completed for $app" --last
