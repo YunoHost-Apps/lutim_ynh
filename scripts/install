@@ -7,8 +7,6 @@
 #=================================================
 
 # Load common variables for all scripts.
-source _variables
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
@@ -83,14 +81,14 @@ ynh_setup_source --dest_dir="$final_path"
 #=================================================
 ynh_script_progression --message="Installing dependencies..." --weight=60
 
-ynh_install_app_dependencies $app_depencencies
+ynh_install_app_dependencies $pkg_depencencies
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring nginx web server..." --weight=2
+ynh_script_progression --message="Configuring NGINX web server..." --weight=2
 
-# Create a dedicated nginx config
+# Create a dedicated NGINX config
 ynh_add_nginx_config
 
 #=================================================
@@ -106,7 +104,7 @@ ynh_system_user_create $app
 #=================================================
 # SETUP LUTIM
 #=================================================
-ynh_script_progression --message="Configure Lutim" --weight=2
+ynh_script_progression --message="Configure $app" --weight=2
 
 # Configure Lutim
 cp ../conf/lutim.conf.template "$final_path/lutim.conf"
@@ -149,7 +147,7 @@ chmod +x $final_path/script/lutim
 #=================================================
 # INSTALL LUTIM WITH CARTON
 #=================================================
-ynh_script_progression --message="Installing Lutim with Carton..." --weight=60
+ynh_script_progression --message="Installing $app with Carton..." --weight=60
 
 mkdir -p /var/log/$app/
 (cd $final_path
@@ -225,14 +223,14 @@ fi
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..." --weight=2
+ynh_script_progression --message="Reloading NGINX web server..." --weight=2
 
 ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # CHECK LUTIM BOOTING
 #=================================================
-ynh_script_progression --message="Restarting Lutim..." --weight=6
+ynh_script_progression --message="Restarting $app..." --weight=6
 
 # Wait for lutim to be fully started
 ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
@@ -248,7 +246,7 @@ ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="
 # SEND A README FOR THE ADMIN
 #=================================================
 
-# Get main domain and buid the url of the admin panel of the app.
+# Get main domain and buid the URL of the admin panel of the app.
 admin_panel="https://$(grep portal_domain /etc/ssowat/conf.json | cut -d'"' -f4)/yunohost/admin/#/apps/$app"
 
 echo "You can find a config file at $final_path/lutim.conf

@@ -7,8 +7,6 @@
 #=================================================
 
 # Load common variables for all scripts.
-source ../settings/scripts/_variables
-
 source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
@@ -62,7 +60,7 @@ ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 #=================================================
 # RESTORE THE APP MAIN DIR
 #=================================================
-ynh_script_progression --message="Restoring the app main directory..."
+ynh_script_progression --message="Restoring $app main directory..."
 
 ynh_restore_file --origin_path="$final_path"
 
@@ -88,7 +86,7 @@ chown -R $app: $final_path
 #=================================================
 ynh_script_progression --message="Reinstalling dependencies..." --weight=60
 
-ynh_install_app_dependencies $app_depencencies
+ynh_install_app_dependencies $pkg_depencencies
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
@@ -130,14 +128,14 @@ ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..." --weight=2
+ynh_script_progression --message="Reloading NGINX web server..." --weight=2
 
 ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # START AND CHECK LUTIM BOOTING
 #=================================================
-ynh_script_progression --message="Restarting Lutim..." --weight=3
+ynh_script_progression --message="Restarting $app..." --weight=3
 
 # Wait for lutim to be fully started
 ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"

@@ -13,7 +13,7 @@ If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to
 Lutim stores images and allows you to see them, download them or share them on social networks.
 Images are indefinitely stored unless you request that they will be deleted at first view or after 24 hours / one week / one month / one year.
 
-**Shipped version:** 0.11.6
+**Shipped version:** 0.12.1
 
 ## Screenshots
 
@@ -23,13 +23,13 @@ Images are indefinitely stored unless you request that they will be deleted at f
 
 ## Configuration
 
-Edit the file `/var/www/lutim/lutim.conf` to edit the configuration of Lutim.
+Edit the file `/var/www/lutim/lutim.conf` to configure Lutim.
 Then reload the lutim service.
 
 ## Documentation
 
  * Official documentation: https://framagit.org/luc/lutim/wikis/home
- * YunoHost documentation: There no other documentations, feel free to contribute.
+ * YunoHost documentation: https://yunohost.org/#/app_lutim
 
 ## YunoHost specific features
 
@@ -39,9 +39,8 @@ Not relevant.
 
 #### Supported architectures
 
-* x86-64b - [![](https://ci-apps.yunohost.org/ci/logs/lutim%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/lutim/)
+* x86-64 - [![](https://ci-apps.yunohost.org/ci/logs/lutim%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/lutim/)
 * ARMv8-A - [![](https://ci-apps-arm.yunohost.org/ci/logs/lutim%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lutim/)
-* Buster x86-64b - [![](https://ci-buster.nohost.me/ci/logs/lutim%20%28Apps%29.svg)](https://ci-buster.nohost.me/ci/apps/lutim/)
 
 ## Limitations
 
@@ -56,8 +55,7 @@ Not relevant.
 
 ---
 
-Developers infos
-----------------
+## Developers infos
 
 Please do your pull request to the [testing branch](https://github.com/YunoHost-Apps/lutim_ynh/tree/testing).
 

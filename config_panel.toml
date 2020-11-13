@@ -8,7 +8,7 @@ name = "Lutim configuration"
     name = "Lutim configuration"
 
         [main.configuration.always_encrypt]
-        ask = "Force the encryption of images ?"
+        ask = "Force the encryption of images?"
         type = "boolean"
         default = true
 
@@ -28,19 +28,19 @@ name = "Lutim configuration"
     name = "Overwriting config files"
 
         [main.overwrite_files.overwrite_settings]
-        ask = "Overwrite the config file lutim.conf ?"
+        ask = "Overwrite the config file lutim.conf?"
         type = "boolean"
         default = true
         help = "If the file is overwritten, a backup will be created."
 
         [main.overwrite_files.overwrite_nginx]
-        ask = "Overwrite the nginx config file ?"
+        ask = "Overwrite the nginx config file?"
         type = "boolean"
         default = true
         help = "If the file is overwritten, a backup will be created."
 
         [main.overwrite_files.overwrite_systemd]
-        ask = "Overwrite the systemd config file ?"
+        ask = "Overwrite the systemd config file?"
         type = "boolean"
         default = true
         help = "If the file is overwritten, a backup will be created."
@@ -49,7 +49,7 @@ name = "Lutim configuration"
     name = "Global configuration"
 
         [main.global_config.email_type]
-        ask = "Send HTML email to admin ?"
+        ask = "Send HTML email to admin?"
         type = "boolean"
         default = true
         help = "Allow app scripts to send HTML mails instead of plain text."

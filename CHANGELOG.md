@@ -1,8 +1,11 @@
 Changelog
 =========
 
-## Unreleased
-- Nothing for now...
+## [0.12.1~ynh1](https://github.com/YunoHost-Apps/lutim_ynh/pull/46) - 2020-10-18
+
+#### Changed
+* [Update to Lutim 0.12.1](https://github.com/YunoHost-Apps/lutim_ynh/pull/52)
+
 
 ## [0.11.6~ynh4](https://github.com/YunoHost-Apps/lutim_ynh/pull/46) - 2020-04-25
 
