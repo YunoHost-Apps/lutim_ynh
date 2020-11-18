@@ -274,7 +274,8 @@ if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
     ynh_script_progression --message="Upgrading $app with Carton..." --weight=4
     (cd $final_path
-    carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
+    ynh_secure_remove --file="$final_path/local"
+    carton install --deployment --without=mysql --without=htpasswd --without=test)
 fi
 
 #=================================================
