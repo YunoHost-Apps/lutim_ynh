@@ -274,7 +274,8 @@ if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
     ynh_script_progression --message="Upgrading $app with Carton..." --weight=4
     (cd $final_path
-    carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
+    ynh_secure_remove --file="$final_path/local"
+    carton install --deployment --without=mysql --without=htpasswd --without=test)
 fi
 
 #=================================================
@@ -293,6 +294,12 @@ ynh_script_progression --message="Upgrading logrotate configuration..."
 
 ynh_use_logrotate --non-append
 chown $app -R /var/log/$app
+
+#=================================================
+# ADVERTISE SERVICE IN ADMIN PANEL
+#=================================================
+
+yunohost service add $app --log $final_path/log/production.log
 
 #=================================================
 # RELOAD NGINX
