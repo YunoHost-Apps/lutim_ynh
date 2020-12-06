@@ -100,7 +100,7 @@ yunohost service add $app --log $final_path/log/production.log
 ynh_script_progression --message="Restoring the systemd configuration..."
 
 ynh_restore_file --origin_path="/etc/systemd/system/$app.service"
-systemctl enable $app.service
+systemctl enable $app.service --quiet
 
 #=================================================
 # RESTORE THE CRON FILE
