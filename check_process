@@ -28,8 +28,6 @@
         change_url=1
         actions=1
         config_panel=1
-;;; Levels
-    Level 5=auto
 ;;; Options
 Email=
 Notification=change
