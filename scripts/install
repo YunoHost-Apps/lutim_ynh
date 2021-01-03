@@ -191,7 +191,7 @@ ynh_use_logrotate
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add $app --log $final_path/log/production.log
+yunohost service add $app --log="$final_path/log/production.log"
 
 #=================================================
 # SETUP SSOWAT

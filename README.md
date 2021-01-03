@@ -1,7 +1,7 @@
 # Lutim for YunoHost
 
 [![Integration level](https://dash.yunohost.org/integration/lutim.svg)](https://dash.yunohost.org/appci/app/lutim) ![](https://ci-apps.yunohost.org/ci/badges/lutim.status.svg) [![](https://ci-apps.yunohost.org/ci/badges/lutim.maintain.svg)](https://github.com/YunoHost/Apps/#what-to-do-if-i-cant-maintain-my-app-anymore-)  
-[![Install Lutim with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=lutim)
+[![Install Lutim with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=lutim)
 
 *[Lire ce readme en français.](./README_fr.md)*
 
