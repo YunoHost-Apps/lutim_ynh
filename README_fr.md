@@ -29,7 +29,7 @@ Rechargez ensuite le service Lutim.
 ## Documentation
 
  * Documentation officielle : https://framagit.org/luc/lutim/wikis/home
- * Documentation YunoHost : https://yunohost.org/#/app_lutim_fr
+ * Documentation YunoHost : https://yunohost.org/fr/app_lutim
 
 ## Fonctionnalités spécifiques à YunoHost
 
@@ -39,8 +39,8 @@ Non applicable.
 
 #### Architectures supportées.
 
-* x86-64 - [![](https://ci-apps.yunohost.org/ci/logs/lutim%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/lutim/)
-* ARMv8-A - [![](https://ci-apps-arm.yunohost.org/ci/logs/lutim%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lutim/)
+* x86-64 - [![](https://ci-apps.yunohost.org/ci/logs/lutim.svg)](https://ci-apps.yunohost.org/ci/apps/lutim/)
+* ARMv8-A - [![](https://ci-apps-arm.yunohost.org/ci/logs/lutim.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lutim/)
 
 ## Limitations
 

@@ -29,7 +29,7 @@ Then reload the lutim service.
 ## Documentation
 
  * Official documentation: https://framagit.org/luc/lutim/wikis/home
- * YunoHost documentation: https://yunohost.org/#/app_lutim
+ * YunoHost documentation: https://yunohost.org/en/app_lutim
 
 ## YunoHost specific features
 
@@ -39,8 +39,8 @@ Not relevant.
 
 #### Supported architectures
 
-* x86-64 - [![](https://ci-apps.yunohost.org/ci/logs/lutim%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/lutim/)
-* ARMv8-A - [![](https://ci-apps-arm.yunohost.org/ci/logs/lutim%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lutim/)
+* x86-64 - [![](https://ci-apps.yunohost.org/ci/logs/lutim.svg)](https://ci-apps.yunohost.org/ci/apps/lutim/)
+* ARMv8-A - [![](https://ci-apps-arm.yunohost.org/ci/logs/lutim.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lutim/)
 
 ## Limitations
 
