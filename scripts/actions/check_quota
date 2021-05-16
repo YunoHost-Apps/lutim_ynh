@@ -39,7 +39,7 @@ final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 #=================================================
 ynh_script_progression --message="Checking the disk quota for images stored by lutim..." --weight=9
 
-(cd "$final_path" && exec_as $app $(which carton) exec script/lutim cron watch)
+(cd "$final_path" && ynh_exec_as $app $(which carton) exec script/lutim cron watch)
 
 #=================================================
 # END OF SCRIPT

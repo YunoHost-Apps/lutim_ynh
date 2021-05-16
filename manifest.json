@@ -6,7 +6,7 @@
         "en": "Anonymous image hosting service",
         "fr": "Service d'hébergement anonyme d'images"
     },
-    "version": "0.12.1~ynh2",
+    "version": "0.12.1~ynh3",
     "url": "https://lut.im",
     "license": "AGPL-3.0-only",
     "maintainer": {
@@ -18,7 +18,7 @@
         "email": "maniackc_dev@crudelis.fr"
     }],
     "requirements": {
-        "yunohost": ">= 4.1.7"
+        "yunohost": ">= 4.2.0"
     },
     "multi_instance": false,
     "services": [
