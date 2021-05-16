@@ -3,8 +3,8 @@
     "id": "lutim",
     "packaging_format": 1,
     "description": {
-        "en": "Self hosting images and sharing anonymous application",
-        "fr": "Application d'hébergement et de partage d'images anonyme"
+        "en": "Anonymous image hosting service",
+        "fr": "Service d'hébergement anonyme d'images"
     },
     "version": "0.12.1~ynh2",
     "url": "https://lut.im",
@@ -57,4 +57,66 @@
             }
         ]
     }
+	"name": "Lutim",
+	"id": "lutim",
+	"packaging_format": 1,
+	"description": {
+		"en": "Anonymous image hosting service",
+		"fr": "Service d'hébergement anonyme d'images"
+	},
+	"version": "0.11.5~ynh1",
+	"url": "https://lut.im",
+	"license": "AGPL-3.0",
+	"maintainer": {
+		"name": "Maniack Crudelis et matlink",
+		"email": "maniackc_dev@crudelis.fr"
+	},
+	"requirements": {
+		"yunohost": ">= 3.4"
+	},
+	"multi_instance": false,
+	"services": [
+		"nginx"
+	],
+	"arguments": {
+		"install" : [
+			{
+				"name": "domain",
+				"type": "domain",
+				"ask": {
+					"en": "Choose a domain for Lutim",
+					"fr": "Choisissez un domaine pour Lutim"
+				},
+				"example": "domain.org"
+			},
+			{
+				"name": "path",
+				"type": "path",
+				"ask": {
+					"en": "Choose a path for Lutim",
+					"fr": "Choisissez un chemin pour Lutim"
+				},
+				"example": "/lutim",
+				"default": "/lutim"
+			},
+			{
+				"name": "is_public",
+				"type": "boolean",
+				"ask": {
+					"en": "Uploading images is it public?",
+					"fr": "L'upload des images est-il public ?"
+				},
+				"default": false
+			},
+			{
+				"name": "always_encrypt",
+				"type": "boolean",
+				"ask": {
+					"en": "Force the encryption of images?",
+					"fr": "Forcer le chiffrement des images ?"
+				},
+				"default": true
+			}
+		]
+	}
 }
