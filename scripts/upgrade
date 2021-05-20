@@ -1,12 +1,11 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC STARTING
+# GENERIC START
 #=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
-# Load common variables for all scripts.
 source _common.sh
 source /usr/share/yunohost/helpers
 
@@ -37,9 +36,35 @@ delay=$(ynh_app_setting_get --app=$app --key=delay)
 #=================================================
 # CHECK VERSION
 #=================================================
+ynh_script_progression --message="Checking version..."
 
 upgrade_type=$(ynh_check_app_version_changed)
 
+#=================================================
+# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
+#=================================================
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=15
+
+# Backup the current version of the app
+ynh_backup_before_upgrade
+ynh_clean_setup () {
+# Clean installation remaining that are not handle by the remove script.
+    ynh_clean_check_starting
+    # restore it if the upgrade fails
+    ynh_restore_upgradebackup
+}
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
+
+#=================================================
+# ACTIVATE MAINTENANCE MODE
+#=================================================
+ynh_script_progression --message="Activating maintenance mode..." --weight=2
+
+ynh_maintenance_mode_ON
+
+#=================================================
+# STANDARD UPGRADE STEPS
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
@@ -135,47 +160,28 @@ ynh_app_setting_delete --app=$app --key=skipped_uris
 ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 
 #=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
+# CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=15
+ynh_script_progression --message="Making sure dedicated system user exists..."
 
-# Backup the current version of the app
-ynh_backup_before_upgrade
-ynh_clean_setup () {
-# Clean installation remaining that are not handle by the remove script.
-    ynh_clean_check_starting
-    # restore it if the upgrade fails
-    ynh_restore_upgradebackup
-}
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+# Create a dedicated user (if not existing)
+ynh_system_user_create --username=$app --home_dir=$final_path
 
-#=================================================
-# ACTIVATE MAINTENANCE MODE
-#=================================================
-ynh_script_progression --message="Activating maintenance mode..." --weight=2
-
-ynh_maintenance_mode_ON
-
-#=================================================
-# STANDARD UPGRADE STEPS
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-    ynh_script_progression --message="Upgrading source files..."
-    # Download, check integrity, uncompress and patch the source from app.src
-    ynh_setup_source --dest_dir="$final_path"
+	ynh_script_progression --message="Upgrading source files..."
+
+	# Download, check integrity, uncompress and patch the source from app.src
+	ynh_setup_source --dest_dir="$final_path"
 fi
 
-#=================================================
-# UPGRADE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Upgrading dependencies..." --weight=9
-
-ynh_install_app_dependencies $pkg_depencencies
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
 
 #=================================================
 # NGINX CONFIGURATION
@@ -189,12 +195,11 @@ then
 fi
 
 #=================================================
-# CREATE DEDICATED USER
+# UPGRADE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..."
+ynh_script_progression --message="Upgrading dependencies..." --weight=9
 
-# Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app
+ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -255,9 +260,7 @@ fi
 # SETUP CRON
 #=================================================
 
-cp ../conf/cron_lutim /etc/cron.d/$app
-ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file=/etc/cron.d/$app
-ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file=/etc/cron.d/$app
+ynh_add_config --template="../conf/cron_lutim" --destination="/etc/cron.d/$app"
 
 #=================================================
 # UPDATE LUTIM WITH CARTON
@@ -273,27 +276,29 @@ then
 fi
 
 #=================================================
-# SECURING FILES AND DIRECTORIES
-#=================================================
-
-# Set permissions on app files
-chown -R $app: $final_path
-
-#=================================================
-# GENERIC FINALISATION
+# GENERIC FINALIZATION
 #=================================================
 # SETUP LOGROTATE
 #=================================================
 ynh_script_progression --message="Upgrading logrotate configuration..."
 
+# Use logrotate to manage app-specific logfile(s)
 ynh_use_logrotate --non-append
 chown $app -R /var/log/$app
 
 #=================================================
-# ADVERTISE SERVICE IN ADMIN PANEL
+# INTEGRATE SERVICE IN YUNOHOST
 #=================================================
-
+ynh_script_progression --message="Integrating service in YunoHost..."
 yunohost service add $app --log="$final_path/log/production.log"
+
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Starting a systemd service...." --weight=4
+
+# Wait for lutim to be fully started
+ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 
 #=================================================
 # RELOAD NGINX
@@ -301,14 +306,6 @@ yunohost service add $app --log="$final_path/log/production.log"
 ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
-
-#=================================================
-# START AND CHECK LUTIM BOOTING
-#=================================================
-ynh_script_progression --message="Restarting Lutim..." --weight=4
-
-# Wait for lutim to be fully started
-ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 
 #=================================================
 # DEACTIVE MAINTENANCE MODE
