@@ -1,0 +1,2 @@
+Lutim stores images and allows you to see them, download them or share them on social networks.
+Images are indefinitely stored unless you request that they will be deleted at first view or after 24 hours / one week / one month / one year.
