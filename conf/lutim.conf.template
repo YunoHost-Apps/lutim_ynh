@@ -123,7 +123,7 @@
     # optional, default is 'none'
     #watermark_default => 'none',
 
-    # choose which watermark (tiling, single or none) should be enforced (users will always have a watermark and won’t be able to disable it)
+    # choose which watermark (tiling, single or none) should be enforced (users will always have a watermark and wonâ€™t be able to disable it)
     # valid values are 'tiling', 'single' or 'none' (case insensitive)
     # optional, default is 'none'
     #watermark_enforce => 'none',
