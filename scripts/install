@@ -14,8 +14,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 ynh_clean_setup () {
-# Clean installation remaining that are not handle by the remove script.
-    ynh_clean_check_starting
+	ynh_clean_check_starting
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
@@ -30,6 +29,8 @@ is_public=$YNH_APP_ARG_IS_PUBLIC
 always_encrypt=$YNH_APP_ARG_ALWAYS_ENCRYPT
 
 app=$YNH_APP_INSTANCE_NAME
+
+secret=$(ynh_string_random)
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
@@ -51,6 +52,7 @@ ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=path --value=$path_url
 ynh_app_setting_set --app=$app --key=is_public --value=$is_public
 ynh_app_setting_set --app=$app --key=always_encrypt --value=$always_encrypt
+ynh_app_setting_set --app=$app --key=secret --value="$secret"
 
 ynh_app_setting_set --app=$app --key=overwrite_settings --value=1
 ynh_app_setting_set --app=$app --key=overwrite_nginx --value=1
@@ -81,7 +83,7 @@ ynh_install_app_dependencies $pkg_dependencies
 ynh_script_progression --message="Configuring system user..." --weight=2
 
 # Create a system user
-ynh_system_user_create --username=$app --home_dir=$final_path
+ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -117,9 +119,9 @@ ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --targ
 ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="$final_path/lutim.conf"
 ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$final_path/lutim.conf"
 ynh_replace_string --match_string="__ENCRYPT__" --replace_string="$always_encrypt" --target_file="$final_path/lutim.conf"
-secret=$(ynh_string_random)
+
 ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$final_path/lutim.conf"
-ynh_app_setting_set --app=$app --key=secret --value="$secret"
+
 # Set the number of process for Lutim to twice the number of CPU core.
 ynh_replace_string --match_string="__WORKERS__" --replace_string="$(( $(nproc) * 2 ))" --target_file="$final_path/lutim.conf"
 # Calculate and store the config file checksum into the app settings
@@ -174,7 +176,7 @@ chown $app -R /var/log/$app
 ln -s /var/log/$app/production.log "$final_path/log/production.log"
 
 #=================================================
-# GENERIC FINALISATION
+# GENERIC FINALIZATION
 #=================================================
 # SETUP LOGROTATE
 #=================================================
