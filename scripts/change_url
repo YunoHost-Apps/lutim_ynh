@@ -28,6 +28,8 @@ ynh_script_progression --message="Loading installation settings..." --weight=2
 
 # Needed for helper "ynh_add_nginx_config"
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+
+# Add settings here as needed by your application
 is_public=$(ynh_app_setting_get --app=$app --key=is_public)
 port=$(ynh_app_setting_get --app=$app --key=port)
 
@@ -39,8 +41,7 @@ ynh_script_progression --message="Backing up the app before changing its URL (ma
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
-    ynh_clean_check_starting
-
+	ynh_clean_check_starting
 	# Remove the new domain config file, the remove script won't do it as it doesn't know yet its location.
 	ynh_secure_remove --file="/etc/nginx/conf.d/$new_domain.d/$app.conf"
 
@@ -77,6 +78,13 @@ fi
 
 #=================================================
 # STANDARD MODIFICATIONS
+#=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Stopping a systemd service..."
+
+ynh_systemd_action --service_name=$app --action="stop"
+
 #=================================================
 # MODIFY URL IN NGINX CONF
 #=================================================
@@ -134,12 +142,12 @@ ynh_replace_string --match_string="\(^ *prefix.*=> '\).*" --replace_string="\1$n
 #=================================================
 # GENERIC FINALISATION
 #=================================================
-# START AND CHECK LUTIM BOOTING
+# START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Restarting Lutim..." --weight=3
+ynh_script_progression --message="Starting a systemd service..." --weight=3
 
-# Wait for lutim to be fully started
-ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
+# Start a systemd service
+ynh_systemd_action --service_name=$app --action="start" --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 
 #=================================================
 # RELOAD NGINX

@@ -6,7 +6,6 @@
     # see http://mojolicio.us/perldoc/Mojo/Server/Hypnotoad for a full list of settings
     hypnotoad => {
         # array of IP addresses and ports you want to listen to
-        #listen => ['http://127.0.0.1:8080'],
         listen => ['http://127.0.0.1:__PORT__'],
         # if you use Lutim behind a reverse proxy like Nginx, you want to set proxy to 1
         # if you use Lutim directly, let it commented
@@ -106,6 +105,29 @@
     # optional, default is 0
     always_encrypt    => __ENCRYPT__,
 
+    # you can allow to use a watermark on the uploaded images (or enforce its use)
+    # define a path to the watermark image (provide an image with alpha channel)
+    # you can define the path relative to lutim directory or set an absolute path
+    # to disable the usage of a watermark, leave it blank or commented
+    # optional, no default
+    #watermark_path              => '',
+
+    # the watermark can be a tiling one or a single one
+    # when using a small one, you can choose where to place it
+    # valid values are 'Center', 'North', 'NorthEast', 'East', 'SouthEast', 'South', 'SouthWest', 'West' and 'NorthWest' (case insensitive)
+    # optional, default is 'SouthEast'
+    #watermark_placement => 'SouthEast',
+
+    # choose which watermark (tiling, single or none) should be used by default
+    # valid values are 'tiling', 'single' or 'none' (case insensitive)
+    # optional, default is 'none'
+    #watermark_default => 'none',
+
+    # choose which watermark (tiling, single or none) should be enforced (users will always have a watermark and won’t be able to disable it)
+    # valid values are 'tiling', 'single' or 'none' (case insensitive)
+    # optional, default is 'none'
+    #watermark_enforce => 'none',
+
     # length of the image's delete token
     # optional, default is 24
     #token_length      => 24,
@@ -114,7 +136,6 @@
     # example: you want to have Lutim under https://example.org/lutim/
     # => set prefix to '/lutim' or to '/lutim/', it doesn't matter
     # optional, defaut is /
-    #prefix            => '/',
     prefix       => '__PATH__',
 
     # choose what database you want to use
@@ -284,7 +305,6 @@
     # max size of the files directory, in octets
     # used by script/lutim cron watch to trigger an action
     # optional, no default
-    #max_total_size    => 10*1024*1024*1024, # (=10 Go)
     max_total_size    => 1024*1024*1024, # (=1 Go)
 
     # default action when files directory is over max_total_size (used with script/lutim cron watch)

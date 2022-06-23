@@ -48,10 +48,9 @@ ynh_script_progression --message="Backing up the app before upgrading (may take 
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
-# Clean installation remaining that are not handle by the remove script.
-    ynh_clean_check_starting
-    # restore it if the upgrade fails
-    ynh_restore_upgradebackup
+	ynh_clean_check_starting
+	# Restore it if the upgrade fails
+	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
@@ -65,6 +64,13 @@ ynh_maintenance_mode_ON
 
 #=================================================
 # STANDARD UPGRADE STEPS
+#=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Stopping a systemd service..."
+
+ynh_systemd_action --service_name=$app --action="stop"
+
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
@@ -165,7 +171,7 @@ ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 ynh_script_progression --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir=$final_path
+ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -184,6 +190,13 @@ chmod -R o-rwx "$final_path"
 chown -R $app:www-data "$final_path"
 
 #=================================================
+# UPGRADE DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Upgrading dependencies..." --weight=9
+
+ynh_install_app_dependencies $pkg_dependencies
+
+#=================================================
 # NGINX CONFIGURATION
 #=================================================
 
@@ -193,13 +206,6 @@ then
     ynh_script_progression --message="Upgrading NGINX web server configuration..." --weight=2
     ynh_add_nginx_config
 fi
-
-#=================================================
-# UPGRADE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Upgrading dependencies..." --weight=9
-
-ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -246,17 +252,6 @@ ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_fil
 ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="../hooks/post_app_removeaccess"
 
 #=================================================
-# SETUP SYSTEMD
-#=================================================
-
-# Overwrite the systemd configuration only if it's allowed
-if [ $overwrite_systemd -eq 1 ]
-then
-    ynh_script_progression --message="Upgrading systemd configuration..." --weight=2
-    ynh_add_systemd_config
-fi
-
-#=================================================
 # SETUP CRON
 #=================================================
 
@@ -276,6 +271,17 @@ then
 fi
 
 #=================================================
+# SETUP SYSTEMD
+#=================================================
+
+# Overwrite the systemd configuration only if it's allowed
+if [ $overwrite_systemd -eq 1 ]
+then
+    ynh_script_progression --message="Upgrading systemd configuration..." --weight=2
+    ynh_add_systemd_config
+fi
+
+#=================================================
 # GENERIC FINALIZATION
 #=================================================
 # SETUP LOGROTATE
@@ -290,15 +296,15 @@ chown $app -R /var/log/$app
 # INTEGRATE SERVICE IN YUNOHOST
 #=================================================
 ynh_script_progression --message="Integrating service in YunoHost..."
+
 yunohost service add $app --log="$final_path/log/production.log"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service...." --weight=4
+ynh_script_progression --message="Starting a systemd service..." --weight=4
 
-# Wait for lutim to be fully started
-ynh_systemd_action --action=restart --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
+ynh_systemd_action --service_name=$app --action="start" --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 
 #=================================================
 # RELOAD NGINX

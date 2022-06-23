@@ -6,7 +6,7 @@
         "en": "Anonymous image hosting service",
         "fr": "Service d'hébergement anonyme d'images"
     },
-    "version": "0.12.1~ynh3",
+    "version": "0.12.1~ynh4",
     "url": "https://lut.im",
     "upstream": {
         "license": "AGPL-3.0-only",
@@ -32,7 +32,7 @@
         "nginx"
     ],
     "arguments": {
-        "install" : [
+        "install": [
             {
                 "name": "domain",
                 "type": "domain"

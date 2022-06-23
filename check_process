@@ -1,25 +1,26 @@
 ;; Test complet
-    ; Manifest
-        domain="domain.tld"
-        path="/path"
-        is_public=1
-        always_encrypt=1
-    ; Checks
-        pkg_linter=1
-        setup_sub_dir=1
-        setup_root=1
-        setup_nourl=0
-        setup_private=1
-        setup_public=1
-        upgrade=1
-        upgrade=1	from_commit=ec8858ed0d054049a0c8f46c6126ee8ae0798e8f
-        backup_restore=1
-        multi_instance=0
-        change_url=1
+	; Manifest
+		domain="domain.tld"
+		path="/path"
+		is_public=1
+		always_encrypt=1
+	; Checks
+		pkg_linter=1
+		setup_sub_dir=1
+		setup_root=1
+		setup_nourl=0
+		setup_private=1
+		setup_public=1
+		upgrade=1
+		upgrade=1	from_commit=ec8858ed0d054049a0c8f46c6126ee8ae0798e8f
+		backup_restore=1
+		multi_instance=0
+		port_already_use=0
+		change_url=1
 ;;; Options
 Email=
-Notification=change
+Notification=none
 ;;; Upgrade options
-    ; commit=ec8858ed0d054049a0c8f46c6126ee8ae0798e8f
-        name=22 May 2020 ec8858ed0d054049a0c8f46c6126ee8ae0798e8f
-        manifest_arg=domain=DOMAIN&path=PATH&admin=USER&is_public=1&always_encrypt=1&
+	; commit=ec8858ed0d054049a0c8f46c6126ee8ae0798e8f
+		name=22 May 2020 ec8858ed0d054049a0c8f46c6126ee8ae0798e8f
+		manifest_arg=domain=DOMAIN&path=PATH&admin=USER&is_public=1&always_encrypt=1&
