@@ -78,87 +78,87 @@ ynh_script_progression --message="Ensuring downward compatibility..." --weight=2
 
 # Fix is_public as a boolean
 if [ "$is_public" = "Yes" ]; then
-    ynh_app_setting_set --app=$app --key=is_public --value=1
-    is_public=1
+	ynh_app_setting_set --app=$app --key=is_public --value=1
+	is_public=1
 elif [ "$is_public" = "No" ]; then
-    ynh_app_setting_set --app=$app --key=is_public --value=0
-    is_public=0
+	ynh_app_setting_set --app=$app --key=is_public --value=0
+	is_public=0
 fi
 
 skipped_uris=$(ynh_app_setting_get --app=$app --key=skipped_uris)
 
 # Unused with the permission system
 if [ ! -z "$skipped_uris" ]; then
-    ynh_app_setting_delete --app=$app --key=skipped_uris
+	ynh_app_setting_delete --app=$app --key=skipped_uris
 fi
 
 # Create the permission "upload images" only if it doesn't exist.
 if ! ynh_permission_exists --permission="upload images"
 then
-    # This is a fake permission without any URL.
-    # The purpose of this permission is only to trigger hooks post_app_add/removeaccess when it's modified.
-    # We can't use a real permission for now because the actual permision system doesn't support regex.
-    ynh_permission_create --permission="upload images" --allowed="visitors"
+	# This is a fake permission without any URL.
+	# The purpose of this permission is only to trigger hooks post_app_add/removeaccess when it's modified.
+	# We can't use a real permission for now because the actual permision system doesn't support regex.
+	ynh_permission_create --permission="upload images" --allowed="visitors"
 
-    if [ $is_public -eq 0 ]
-    then
-        # If the app is private, viewing images stays publicly accessible.
-        if [ "$path_url" == "/" ]; then
-            # If the path is /, clear it to prevent any error with the regex.
-            path_url=""
-        fi
-        # Modify the domain to be used in a regex
-        domain_regex=$(echo "$domain" | sed 's@-@.@g')
-        ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
+	if [ $is_public -eq 0 ]
+	then
+		# If the app is private, viewing images stays publicly accessible.
+		if [ "$path_url" == "/" ]; then
+			# If the path is /, clear it to prevent any error with the regex.
+			path_url=""
+		fi
+		# Modify the domain to be used in a regex
+		domain_regex=$(echo "$domain" | sed 's@-@.@g')
+		ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
 
-        # If the app is not public, then the "visitors" group doesn't have this permission
-        ynh_permission_update --permission="upload images" --remove="visitors"
-    fi
+		# If the app is not public, then the "visitors" group doesn't have this permission
+		ynh_permission_update --permission="upload images" --remove="visitors"
+	fi
 fi
 
 # if final_path isn't set, which can happens with old scripts, set final_path.
 if [ -z "$final_path" ]; then
-    final_path=/var/www/$app
-    ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+	final_path=/var/www/$app
+	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 fi
 
 # Fix always_encrypt as a boolean
 if [ "$always_encrypt" = "Yes" ]; then
-    ynh_app_setting_set --app=$app --key=always_encrypt --value=1
-    always_encrypt=1
+	ynh_app_setting_set --app=$app --key=always_encrypt --value=1
+	always_encrypt=1
 elif [ "$always_encrypt" = "No" ]; then
-    ynh_app_setting_set --app=$app --key=always_encrypt --value=0
-    always_encrypt=0
+	ynh_app_setting_set --app=$app --key=always_encrypt --value=0
+	always_encrypt=0
 fi
 
 # If overwrite_settings doesn't exist, create it
 if [ -z "$overwrite_settings" ]; then
-    overwrite_settings=1
-    ynh_app_setting_set --app=$app --key=overwrite_settings --value=$overwrite_settings
+	overwrite_settings=1
+	ynh_app_setting_set --app=$app --key=overwrite_settings --value=$overwrite_settings
 fi
 
 # If overwrite_nginx doesn't exist, create it
 if [ -z "$overwrite_nginx" ]; then
-    overwrite_nginx=1
-    ynh_app_setting_set --app=$app --key=overwrite_nginx --value=$overwrite_nginx
+	overwrite_nginx=1
+	ynh_app_setting_set --app=$app --key=overwrite_nginx --value=$overwrite_nginx
 fi
 
 # If overwrite_systemd doesn't exist, create it
 if [ -z "$overwrite_systemd" ]; then
-    overwrite_systemd=1
-    ynh_app_setting_set --app=$app --key=overwrite_systemd --value=$overwrite_systemd
+	overwrite_systemd=1
+	ynh_app_setting_set --app=$app --key=overwrite_systemd --value=$overwrite_systemd
 fi
 
 # If secret doesn't exist, create it
 if [ -z "$secret" ]; then
-    secret=$(grep "secrets *=>" "$final_path/lutim.conf" | cut -d\' -f2)
-    ynh_app_setting_set --app=$app --key=secret --value=$secret
+	secret=$(grep "secrets *=>" "$final_path/lutim.conf" | cut -d\' -f2)
+	ynh_app_setting_set --app=$app --key=secret --value=$secret
 fi
 
 # Close opened port
 if yunohost firewall list | grep -q "\- $port$"
 then
-    ynh_exec_quiet yunohost firewall disallow TCP $port
+	ynh_exec_quiet yunohost firewall disallow TCP $port
 fi
 
 # Replace skipped_uris by unprotected_uris for the migration to the new permission system.
@@ -203,8 +203,8 @@ ynh_install_app_dependencies $pkg_dependencies
 # Overwrite the nginx configuration only if it's allowed
 if [ $overwrite_nginx -eq 1 ]
 then
-    ynh_script_progression --message="Upgrading NGINX web server configuration..." --weight=2
-    ynh_add_nginx_config
+	ynh_script_progression --message="Upgrading NGINX web server configuration..." --weight=2
+	ynh_add_nginx_config
 fi
 
 #=================================================
@@ -217,31 +217,23 @@ ynh_script_progression --message="Reconfiguring $app..."
 # Overwrite the settings config file only if it's allowed
 if [ $overwrite_settings -eq 1 ]
 then
-    # Configure Lutim
-    # Verify the checksum of a file, stored by `ynh_store_file_checksum` in the install script.
-    ynh_backup_if_checksum_is_different --file="$final_path/lutim.conf"
-    cp ../conf/lutim.conf.template "$final_path/lutim.conf"
-    ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$final_path/lutim.conf"
-    ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="$final_path/lutim.conf"
-    ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$final_path/lutim.conf"
-    ynh_replace_string --match_string="__ENCRYPT__" --replace_string="$always_encrypt" --target_file="$final_path/lutim.conf"
-    ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$final_path/lutim.conf"
-    # Set the number of process for Lutim to twice the number of CPU core.
-    ynh_replace_string --match_string="__WORKERS__" --replace_string="$(( $(nproc) * 2 ))" --target_file="$final_path/lutim.conf"
-    # Recalculate and store the checksum of the file for the next upgrade.
-    ynh_store_file_checksum --file="$final_path/lutim.conf"
+	workers="$(( $(nproc) * 2 ))"
+	ynh_add_config --template="../conf/lutim.conf.template" --destination="$final_path/lutim.conf"
 
-    # Optional parameters from config-panel feature
-    if [ -n "$antiflood" ]; then
-        ynh_replace_string --match_string=".*anti_flood_delay *=>.*" --replace_string="    anti_flood_delay  => $antiflood," --target_file="$final_path/lutim.conf"
-        # Disable anti_flood_delay if the delay is 0
-        if [ $antiflood = 0 ]; then
-            ynh_replace_string --match_string="\(anti_flood_delay *=>.*\)" --replace_string="#\1" --target_file="$final_path/lutim.conf"
-        fi
-    fi
-    if [ -n "$delay" ]; then
-        ynh_replace_string --match_string=".*default_delay *=>.*" --replace_string="    default_delay     => $delay," --target_file="$final_path/lutim.conf"
-    fi
+	chmod 400 "$final_path/lutim.conf"
+	chown $app:$app "$final_path/lutim.conf"
+
+	# Optional parameters from config-panel feature
+	if [ -n "$antiflood" ]; then
+		ynh_replace_string --match_string=".*anti_flood_delay *=>.*" --replace_string="	anti_flood_delay  => $antiflood," --target_file="$final_path/lutim.conf"
+		# Disable anti_flood_delay if the delay is 0
+		if [ $antiflood = 0 ]; then
+			ynh_replace_string --match_string="\(anti_flood_delay *=>.*\)" --replace_string="#\1" --target_file="$final_path/lutim.conf"
+		fi
+	fi
+	if [ -n "$delay" ]; then
+		ynh_replace_string --match_string=".*default_delay *=>.*" --replace_string="	default_delay	 => $delay," --target_file="$final_path/lutim.conf"
+	fi
 fi
 
 #=================================================
@@ -263,11 +255,11 @@ ynh_add_config --template="../conf/cron_lutim" --destination="/etc/cron.d/$app"
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-    ynh_script_progression --message="Upgrading $app with Carton..." --weight=4
-    pushd "$final_path"
-        ynh_secure_remove --file="$final_path/local"
-        carton install --without=mysql --without=htpasswd --without=test
-    popd
+	ynh_script_progression --message="Upgrading $app with Carton..." --weight=4
+	pushd "$final_path"
+		ynh_secure_remove --file="$final_path/local"
+		carton install --without=mysql --without=htpasswd --without=test
+	popd
 fi
 
 #=================================================
@@ -277,8 +269,8 @@ fi
 # Overwrite the systemd configuration only if it's allowed
 if [ $overwrite_systemd -eq 1 ]
 then
-    ynh_script_progression --message="Upgrading systemd configuration..." --weight=2
-    ynh_add_systemd_config
+	ynh_script_progression --message="Upgrading systemd configuration..." --weight=2
+	ynh_add_systemd_config
 fi
 
 #=================================================

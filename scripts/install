@@ -109,23 +109,15 @@ ynh_add_nginx_config
 #=================================================
 # SPECIFIC SETUP
 #=================================================
-# SETUP LUTIM
+# ADD A CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configure $app" --weight=2
+ynh_script_progression --message="Adding a configuration file..." --weight=2
 
-# Configure Lutim
-cp ../conf/lutim.conf.template "$final_path/lutim.conf"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$final_path/lutim.conf"
-ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="$final_path/lutim.conf"
-ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$final_path/lutim.conf"
-ynh_replace_string --match_string="__ENCRYPT__" --replace_string="$always_encrypt" --target_file="$final_path/lutim.conf"
+workers="$(( $(nproc) * 2 ))"
+ynh_add_config --template="../conf/lutim.conf.template" --destination="$final_path/lutim.conf"
 
-ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$final_path/lutim.conf"
-
-# Set the number of process for Lutim to twice the number of CPU core.
-ynh_replace_string --match_string="__WORKERS__" --replace_string="$(( $(nproc) * 2 ))" --target_file="$final_path/lutim.conf"
-# Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$final_path/lutim.conf"
+chmod 400 "$final_path/lutim.conf"
+chown $app:$app "$final_path/lutim.conf"
 
 #=================================================
 # SETUP HOOKS FILE
@@ -133,14 +125,6 @@ ynh_store_file_checksum --file="$final_path/lutim.conf"
 
 ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="../hooks/post_app_addaccess"
 ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="../hooks/post_app_removeaccess"
-
-#=================================================
-# SETUP SYSTEMD
-#=================================================
-ynh_script_progression --message="Configuring a systemd service..." --weight=2
-
-# Create a dedicated systemd config
-ynh_add_systemd_config
 
 #=================================================
 # SETUP CRON
@@ -162,7 +146,7 @@ carton install 2>&1 | tee -a "/var/log/$app/setup_carton.log")
 arch_dir=$(ls -1 $final_path/local/lib/perl5/ | grep linux-gnu)
 if [ "$?" -ne 0 ]
 then
-    ynh_die --message="Unable to find the perl directory for your architecture."
+	ynh_die --message="Unable to find the perl directory for your architecture."
 fi
 ynh_replace_string --match_string="__ARCHDIR__" --replace_string="$arch_dir" --target_file="$final_path/script/lutim"
 
@@ -174,6 +158,14 @@ ynh_replace_string --match_string="__ARCHDIR__" --replace_string="$arch_dir" --t
 touch /var/log/$app/production.log
 chown $app -R /var/log/$app
 ln -s /var/log/$app/production.log "$final_path/log/production.log"
+
+#=================================================
+# SETUP SYSTEMD
+#=================================================
+ynh_script_progression --message="Configuring a systemd service..." --weight=2
+
+# Create a dedicated systemd config
+ynh_add_systemd_config
 
 #=================================================
 # GENERIC FINALIZATION
@@ -221,17 +213,17 @@ ynh_permission_create --permission="upload images" --allowed="visitors"
 
 if [ $is_public -eq 0 ]
 then
-    # If the app is private, viewing images stays publicly accessible.
-    if [ "$path_url" == "/" ]; then
-        # If the path is /, clear it to prevent any error with the regex.
-        path_url=""
-    fi
-    # Modify the domain to be used in a regex
-    domain_regex=$(echo "$domain" | sed 's@-@.@g')
-    ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
+	# If the app is private, viewing images stays publicly accessible.
+	if [ "$path_url" == "/" ]; then
+		# If the path is /, clear it to prevent any error with the regex.
+		path_url=""
+	fi
+	# Modify the domain to be used in a regex
+	domain_regex=$(echo "$domain" | sed 's@-@.@g')
+	ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
 
-    # If the app is not public, then the "visitors" group doesn't have this permission
-    ynh_permission_update --permission="upload images" --remove="visitors"
+	# If the app is not public, then the "visitors" group doesn't have this permission
+	ynh_permission_update --permission="upload images" --remove="visitors"
 fi
 
 #=================================================
