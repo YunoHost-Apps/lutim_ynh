@@ -103,7 +103,7 @@
 
     # if set to 1, all the images will be encrypted and the encryption option will no be displayed
     # optional, default is 0
-    always_encrypt    => __ENCRYPT__,
+    always_encrypt    => __ALWAYS_ENCRYPT__,
 
     # you can allow to use a watermark on the uploaded images (or enforce its use)
     # define a path to the watermark image (provide an image with alpha channel)
