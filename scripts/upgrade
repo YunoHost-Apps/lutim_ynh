@@ -12,26 +12,26 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..." --weight=4
+#REMOVEME? ynh_script_progression --message="Loading installation settings..." --weight=4
 
-app=$YNH_APP_INSTANCE_NAME
+#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-path_url=$(ynh_app_setting_get --app=$app --key=path)
-is_public=$(ynh_app_setting_get --app=$app --key=is_public)
-port=$(ynh_app_setting_get --app=$app --key=port)
-always_encrypt=$(ynh_app_setting_get --app=$app --key=always_encrypt)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-secret=$(ynh_app_setting_get --app=$app --key=secret)
+#REMOVEME? domain=$(ynh_app_setting_get --app=$app --key=domain)
+#REMOVEME? path=$(ynh_app_setting_get --app=$app --key=path)
+#REMOVEME? is_public=$(ynh_app_setting_get --app=$app --key=is_public)
+#REMOVEME? port=$(ynh_app_setting_get --app=$app --key=port)
+#REMOVEME? always_encrypt=$(ynh_app_setting_get --app=$app --key=always_encrypt)
+#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
+#REMOVEME? secret=$(ynh_app_setting_get --app=$app --key=secret)
 
-overwrite_settings=$(ynh_app_setting_get --app=$app --key=overwrite_settings)
-overwrite_nginx=$(ynh_app_setting_get --app=$app --key=overwrite_nginx)
-overwrite_systemd=$(ynh_app_setting_get --app=$app --key=overwrite_systemd)
-admin_mail_html=$(ynh_app_setting_get --app=$app --key=admin_mail_html)
+#REMOVEME? overwrite_settings=$(ynh_app_setting_get --app=$app --key=overwrite_settings)
+#REMOVEME? overwrite_nginx=$(ynh_app_setting_get --app=$app --key=overwrite_nginx)
+#REMOVEME? overwrite_systemd=$(ynh_app_setting_get --app=$app --key=overwrite_systemd)
+#REMOVEME? admin_mail_html=$(ynh_app_setting_get --app=$app --key=admin_mail_html)
 
 # Optional parameters from config-panel feature
-antiflood=$(ynh_app_setting_get --app=$app --key=antiflood)
-delay=$(ynh_app_setting_get --app=$app --key=delay)
+#REMOVEME? antiflood=$(ynh_app_setting_get --app=$app --key=antiflood)
+#REMOVEME? delay=$(ynh_app_setting_get --app=$app --key=delay)
 
 #=================================================
 # CHECK VERSION
@@ -43,17 +43,17 @@ upgrade_type=$(ynh_check_app_version_changed)
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=15
+#REMOVEME? ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=15
 
 # Backup the current version of the app
-ynh_backup_before_upgrade
-ynh_clean_setup () {
+#REMOVEME? ynh_backup_before_upgrade
+#REMOVEME? ynh_clean_setup () {
 	ynh_clean_check_starting
 	# Restore it if the upgrade fails
-	ynh_restore_upgradebackup
+#REMOVEME? 	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+#REMOVEME? ynh_abort_if_errors
 
 #=================================================
 # ACTIVATE MAINTENANCE MODE
@@ -76,7 +76,7 @@ ynh_systemd_action --service_name=$app --action="stop"
 #=================================================
 ynh_script_progression --message="Ensuring downward compatibility..." --weight=2
 
-skipped_uris=$(ynh_app_setting_get --app=$app --key=skipped_uris)
+#REMOVEME? skipped_uris=$(ynh_app_setting_get --app=$app --key=skipped_uris)
 
 # Unused with the permission system
 if [ ! -z "$skipped_uris" ]; then
@@ -84,33 +84,33 @@ if [ ! -z "$skipped_uris" ]; then
 fi
 
 # Create the permission "upload images" only if it doesn't exist.
-if ! ynh_permission_exists --permission="upload images"
+#REMOVEME? if ! ynh_permission_exists --permission="upload images"
 then
 	# This is a fake permission without any URL.
 	# The purpose of this permission is only to trigger hooks post_app_add/removeaccess when it's modified.
 	# We can't use a real permission for now because the actual permision system doesn't support regex.
-	ynh_permission_create --permission="upload images" --allowed="visitors"
+#REMOVEME? 	ynh_permission_create --permission="upload images" --allowed="visitors"
 
-	if [ $is_public -eq 0 ]
+#REMOVEME? 	if [ $is_public -eq 0 ]
 	then
 		# If the app is private, viewing images stays publicly accessible.
-		if [ "$path_url" == "/" ]; then
+		if [ "$path" == "/" ]; then
 			# If the path is /, clear it to prevent any error with the regex.
-			path_url=""
+			path=""
 		fi
 		# Modify the domain to be used in a regex
 		domain_regex=$(echo "$domain" | sed 's@-@.@g')
-		ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats/?$","$domain_regex$path_url/manifest.webapp/?$","$domain_regex$path_url/?$","$domain_regex$path_url/[d-m]/.*$"
+#REMOVEME? 		ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path/stats/?$","$domain_regex$path/manifest.webapp/?$","$domain_regex$path/?$","$domain_regex$path/[d-m]/.*$"
 
 		# If the app is not public, then the "visitors" group doesn't have this permission
-		ynh_permission_update --permission="upload images" --remove="visitors"
+#REMOVEME? 		ynh_permission_update --permission="upload images" --remove="visitors"
 	fi
 fi
 
-# if final_path isn't set, which can happens with old scripts, set final_path.
-if [ -z "$final_path" ]; then
-	final_path=/var/www/$app
-	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+# if install_dir isn't set, which can happens with old scripts, set install_dir.
+if [ -z "$install_dir" ]; then
+#REMOVEME? 	install_dir=/var/www/$app
+#REMOVEME? 	ynh_app_setting_set --app=$app --key=install_dir --value=$install_dir
 fi
 
 # Fix always_encrypt as a boolean
@@ -142,7 +142,7 @@ fi
 
 # If secret doesn't exist, create it
 if [ -z "$secret" ]; then
-	secret=$(grep "secrets *=>" "$final_path/lutim.conf" | cut -d\' -f2)
+	secret=$(grep "secrets *=>" "$install_dir/lutim.conf" | cut -d\' -f2)
 	ynh_app_setting_set --app=$app --key=secret --value=$secret
 fi
 
@@ -159,10 +159,10 @@ ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..."
+#REMOVEME? ynh_script_progression --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir="$final_path"
+#REMOVEME? ynh_system_user_create --username=$app --home_dir="$install_dir"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -173,19 +173,19 @@ then
 	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path"
+	ynh_setup_source --dest_dir="$install_dir"
 fi
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
+chmod 750 "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R $app:www-data "$install_dir"
 
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Upgrading dependencies..." --weight=9
+#REMOVEME? ynh_script_progression --message="Upgrading dependencies..." --weight=9
 
-ynh_install_app_dependencies $pkg_dependencies
+#REMOVEME? ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # NGINX CONFIGURATION
@@ -209,21 +209,21 @@ ynh_script_progression --message="Reconfiguring $app..."
 if [ $overwrite_settings -eq 1 ]
 then
 	workers="$(( $(nproc) * 2 ))"
-	ynh_add_config --template="../conf/lutim.conf.template" --destination="$final_path/lutim.conf"
+	ynh_add_config --template="../conf/lutim.conf.template" --destination="$install_dir/lutim.conf"
 
-	chmod 400 "$final_path/lutim.conf"
-	chown $app:$app "$final_path/lutim.conf"
+	chmod 400 "$install_dir/lutim.conf"
+	chown $app:$app "$install_dir/lutim.conf"
 
 	# Optional parameters from config-panel feature
 	if [ -n "$antiflood" ]; then
-		ynh_replace_string --match_string=".*anti_flood_delay *=>.*" --replace_string="	anti_flood_delay  => $antiflood," --target_file="$final_path/lutim.conf"
+		ynh_replace_string --match_string=".*anti_flood_delay *=>.*" --replace_string="	anti_flood_delay  => $antiflood," --target_file="$install_dir/lutim.conf"
 		# Disable anti_flood_delay if the delay is 0
 		if [ $antiflood = 0 ]; then
-			ynh_replace_string --match_string="\(anti_flood_delay *=>.*\)" --replace_string="#\1" --target_file="$final_path/lutim.conf"
+			ynh_replace_string --match_string="\(anti_flood_delay *=>.*\)" --replace_string="#\1" --target_file="$install_dir/lutim.conf"
 		fi
 	fi
 	if [ -n "$delay" ]; then
-		ynh_replace_string --match_string=".*default_delay *=>.*" --replace_string="	default_delay	 => $delay," --target_file="$final_path/lutim.conf"
+		ynh_replace_string --match_string=".*default_delay *=>.*" --replace_string="	default_delay	 => $delay," --target_file="$install_dir/lutim.conf"
 	fi
 fi
 
@@ -247,8 +247,8 @@ ynh_add_config --template="../conf/cron_lutim" --destination="/etc/cron.d/$app"
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
 	ynh_script_progression --message="Upgrading $app with Carton..." --weight=4
-	pushd "$final_path"
-		ynh_secure_remove --file="$final_path/local"
+	pushd "$install_dir"
+#REMOVEME? 		ynh_secure_remove --file="$install_dir/local"
 		carton install --without=mysql --without=htpasswd --without=test
 	popd
 fi
@@ -280,7 +280,7 @@ chown $app -R /var/log/$app
 #=================================================
 ynh_script_progression --message="Integrating service in YunoHost..."
 
-yunohost service add $app --log="$final_path/log/production.log"
+yunohost service add $app --log="$install_dir/log/production.log"
 
 #=================================================
 # START SYSTEMD SERVICE
@@ -292,9 +292,9 @@ ynh_systemd_action --service_name=$app --action="start" --line_match="Manager.*s
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
+#REMOVEME? ynh_script_progression --message="Reloading NGINX web server..."
 
-ynh_systemd_action --service_name=nginx --action=reload
+#REMOVEME? ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # DEACTIVE MAINTENANCE MODE
@@ -313,7 +313,7 @@ admin_panel="https://$(grep portal_domain /etc/ssowat/conf.json | cut -d'"' -f4)
 # Build the changelog
 ynh_app_changelog || true
 
-echo "You can find a config file at $final_path/lutim.conf
+echo "You can find a config file at $install_dir/lutim.conf
 
 You can configure this app easily by using the experimental __URL_TAG1__config-panel feature__URL_TAG2__$admin_panel/config-panel__URL_TAG3__.
 You can also find some specific actions for this app by using the experimental __URL_TAG1__action feature__URL_TAG2__$admin_panel/actions__URL_TAG3__.
