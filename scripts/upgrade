@@ -10,50 +10,10 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# LOAD SETTINGS
-#=================================================
-#REMOVEME? ynh_script_progression --message="Loading installation settings..." --weight=4
-
-#REMOVEME? app=$YNH_APP_INSTANCE_NAME
-
-#REMOVEME? domain=$(ynh_app_setting_get --app=$app --key=domain)
-#REMOVEME? path=$(ynh_app_setting_get --app=$app --key=path)
-#REMOVEME? is_public=$(ynh_app_setting_get --app=$app --key=is_public)
-#REMOVEME? port=$(ynh_app_setting_get --app=$app --key=port)
-#REMOVEME? always_encrypt=$(ynh_app_setting_get --app=$app --key=always_encrypt)
-#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
-#REMOVEME? secret=$(ynh_app_setting_get --app=$app --key=secret)
-
-#REMOVEME? overwrite_settings=$(ynh_app_setting_get --app=$app --key=overwrite_settings)
-#REMOVEME? overwrite_nginx=$(ynh_app_setting_get --app=$app --key=overwrite_nginx)
-#REMOVEME? overwrite_systemd=$(ynh_app_setting_get --app=$app --key=overwrite_systemd)
-#REMOVEME? admin_mail_html=$(ynh_app_setting_get --app=$app --key=admin_mail_html)
-
-# Optional parameters from config-panel feature
-#REMOVEME? antiflood=$(ynh_app_setting_get --app=$app --key=antiflood)
-#REMOVEME? delay=$(ynh_app_setting_get --app=$app --key=delay)
-
-#=================================================
 # CHECK VERSION
 #=================================================
-ynh_script_progression --message="Checking version..."
 
 upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
-#=================================================
-#REMOVEME? ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=15
-
-# Backup the current version of the app
-#REMOVEME? ynh_backup_before_upgrade
-#REMOVEME? ynh_clean_setup () {
-	ynh_clean_check_starting
-	# Restore it if the upgrade fails
-#REMOVEME? 	ynh_restore_upgradebackup
-}
-# Exit if an error occurs during the execution of the script
-#REMOVEME? ynh_abort_if_errors
 
 #=================================================
 # ACTIVATE MAINTENANCE MODE
@@ -81,36 +41,6 @@ ynh_script_progression --message="Ensuring downward compatibility..." --weight=2
 # Unused with the permission system
 if [ ! -z "$skipped_uris" ]; then
 	ynh_app_setting_delete --app=$app --key=skipped_uris
-fi
-
-# Create the permission "upload images" only if it doesn't exist.
-#REMOVEME? if ! ynh_permission_exists --permission="upload images"
-then
-	# This is a fake permission without any URL.
-	# The purpose of this permission is only to trigger hooks post_app_add/removeaccess when it's modified.
-	# We can't use a real permission for now because the actual permision system doesn't support regex.
-#REMOVEME? 	ynh_permission_create --permission="upload images" --allowed="visitors"
-
-#REMOVEME? 	if [ $is_public -eq 0 ]
-	then
-		# If the app is private, viewing images stays publicly accessible.
-		if [ "$path" == "/" ]; then
-			# If the path is /, clear it to prevent any error with the regex.
-			path=""
-		fi
-		# Modify the domain to be used in a regex
-		domain_regex=$(echo "$domain" | sed 's@-@.@g')
-#REMOVEME? 		ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path/stats/?$","$domain_regex$path/manifest.webapp/?$","$domain_regex$path/?$","$domain_regex$path/[d-m]/.*$"
-
-		# If the app is not public, then the "visitors" group doesn't have this permission
-#REMOVEME? 		ynh_permission_update --permission="upload images" --remove="visitors"
-	fi
-fi
-
-# if install_dir isn't set, which can happens with old scripts, set install_dir.
-if [ -z "$install_dir" ]; then
-#REMOVEME? 	install_dir=/var/www/$app
-#REMOVEME? 	ynh_app_setting_set --app=$app --key=install_dir --value=$install_dir
 fi
 
 # Fix always_encrypt as a boolean
@@ -146,24 +76,6 @@ if [ -z "$secret" ]; then
 	ynh_app_setting_set --app=$app --key=secret --value=$secret
 fi
 
-# Close opened port
-if yunohost firewall list | grep -q "\- $port$"
-then
-	ynh_exec_quiet yunohost firewall disallow TCP $port
-fi
-
-# Replace skipped_uris by unprotected_uris for the migration to the new permission system.
-ynh_app_setting_delete --app=$app --key=skipped_uris
-ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-#REMOVEME? ynh_script_progression --message="Making sure dedicated system user exists..."
-
-# Create a dedicated user (if not existing)
-#REMOVEME? ynh_system_user_create --username=$app --home_dir="$install_dir"
-
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
@@ -176,16 +88,8 @@ then
 	ynh_setup_source --dest_dir="$install_dir"
 fi
 
-chmod 750 "$install_dir"
 chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"
-
-#=================================================
-# UPGRADE DEPENDENCIES
-#=================================================
-#REMOVEME? ynh_script_progression --message="Upgrading dependencies..." --weight=9
-
-#REMOVEME? ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # NGINX CONFIGURATION
@@ -290,42 +194,10 @@ ynh_script_progression --message="Starting a systemd service..." --weight=4
 ynh_systemd_action --service_name=$app --action="start" --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 
 #=================================================
-# RELOAD NGINX
-#=================================================
-#REMOVEME? ynh_script_progression --message="Reloading NGINX web server..."
-
-#REMOVEME? ynh_systemd_action --service_name=nginx --action=reload
-
-#=================================================
 # DEACTIVE MAINTENANCE MODE
 #=================================================
-ynh_script_progression --message="Disabling maintenance mode..." --weight=7
 
 ynh_maintenance_mode_OFF
-
-#=================================================
-# SEND A README FOR THE ADMIN
-#=================================================
-
-# Get main domain and buid the url of the admin panel of the app.
-admin_panel="https://$(grep portal_domain /etc/ssowat/conf.json | cut -d'"' -f4)/yunohost/admin/#/apps/$app"
-
-# Build the changelog
-ynh_app_changelog || true
-
-echo "You can find a config file at $install_dir/lutim.conf
-
-You can configure this app easily by using the experimental __URL_TAG1__config-panel feature__URL_TAG2__$admin_panel/config-panel__URL_TAG3__.
-You can also find some specific actions for this app by using the experimental __URL_TAG1__action feature__URL_TAG2__$admin_panel/actions__URL_TAG3__.
-
-If you're facing an issue or want to improve this app, please open a new issue in this __URL_TAG1__project__URL_TAG2__https://github.com/YunoHost-Apps/lutim_ynh__URL_TAG3__.
-
----
-
-Changelog since your last upgrade:
-$(cat changelog)" > mail_to_send
-
-ynh_send_readme_to_admin --app_message="mail_to_send" --recipients="root" --type=upgrade
 
 #=================================================
 # END OF SCRIPT

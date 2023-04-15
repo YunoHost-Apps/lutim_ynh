@@ -1,5 +1,5 @@
 [Unit]
-Description=Lutim: Image hosting and sharing service
+Description=Lutim: image hosting and sharing service
 After=network.target
 
 [Service]

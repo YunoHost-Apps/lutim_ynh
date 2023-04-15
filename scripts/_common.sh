@@ -4,9 +4,6 @@
 # COMMON VARIABLES
 #=================================================
 
-# dependencies used by the app
-#REMOVEME? pkg_dependencies="carton perlmagick libpq-dev shared-mime-info"
-
 #=================================================
 # PERSONAL HELPERS
 #=================================================
