@@ -36,42 +36,35 @@ ynh_systemd_action --service_name=$app --action="stop"
 #=================================================
 ynh_script_progression --message="Ensuring downward compatibility..." --weight=2
 
-#REMOVEME? skipped_uris=$(ynh_app_setting_get --app=$app --key=skipped_uris)
-
-# Unused with the permission system
-if [ ! -z "$skipped_uris" ]; then
-	ynh_app_setting_delete --app=$app --key=skipped_uris
-fi
-
 # Fix always_encrypt as a boolean
-if [ "$always_encrypt" = "Yes" ]; then
+if [ "${always_encrypt:-}" = "Yes" ]; then
 	ynh_app_setting_set --app=$app --key=always_encrypt --value=1
 	always_encrypt=1
-elif [ "$always_encrypt" = "No" ]; then
+elif [ "${always_encrypt:-}" = "No" ]; then
 	ynh_app_setting_set --app=$app --key=always_encrypt --value=0
 	always_encrypt=0
 fi
 
 # If overwrite_settings doesn't exist, create it
-if [ -z "$overwrite_settings" ]; then
+if [ -z "${overwrite_settings:-}" ]; then
 	overwrite_settings=1
 	ynh_app_setting_set --app=$app --key=overwrite_settings --value=$overwrite_settings
 fi
 
 # If overwrite_nginx doesn't exist, create it
-if [ -z "$overwrite_nginx" ]; then
+if [ -z "${overwrite_nginx:-}" ]; then
 	overwrite_nginx=1
 	ynh_app_setting_set --app=$app --key=overwrite_nginx --value=$overwrite_nginx
 fi
 
 # If overwrite_systemd doesn't exist, create it
-if [ -z "$overwrite_systemd" ]; then
+if [ -z "${overwrite_systemd:-}" ]; then
 	overwrite_systemd=1
 	ynh_app_setting_set --app=$app --key=overwrite_systemd --value=$overwrite_systemd
 fi
 
 # If secret doesn't exist, create it
-if [ -z "$secret" ]; then
+if [ -z "${secret:-}" ]; then
 	secret=$(grep "secrets *=>" "$install_dir/lutim.conf" | cut -d\' -f2)
 	ynh_app_setting_set --app=$app --key=secret --value=$secret
 fi
