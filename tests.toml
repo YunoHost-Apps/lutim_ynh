@@ -2,6 +2,14 @@ test_format = 1.0
 
 [default]
 
-    # ------------
-    # Tests to run
-    # ------------
+    # -------------------------------
+    # Default args to use for install
+    # -------------------------------
+
+        args.always_encrypt=1
+
+    # -------------------------------
+    # Commits to test upgrade from
+    # -------------------------------
+
+    test_upgrade_from.ec8858ed0d054049a0c8f46c6126ee8ae0798e8f.name = "Upgrade from 22 May 2020"
