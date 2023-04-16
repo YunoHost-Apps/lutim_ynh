@@ -19,7 +19,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 Lutim stores images and allows you to see them, download them or share them on social networks.
 Images are indefinitely stored unless you request that they will be deleted at first view or after 24 hours / one week / one month / one year.
 
-**Shipped version:** 0.12.1~ynh4
+**Shipped version:** 0.12.1~ynh5
 
 **Demo:** https://lut.im/
 ## Documentation and resources
