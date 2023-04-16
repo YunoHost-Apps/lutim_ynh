@@ -17,7 +17,7 @@ userdoc = "https://framagit.org/luc/lutim/wikis/home"
 code = "https://framagit.org/fiat-tux/hat-softwares/lutim"
 
 [integration]
-yunohost = ">= 1.1.17"
+yunohost = ">= 11.1.17"
 architectures = "all"
 multi_instance = false
 ldap = false
