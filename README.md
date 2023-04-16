@@ -22,13 +22,6 @@ Images are indefinitely stored unless you request that they will be deleted at f
 **Shipped version:** 0.12.1~ynh4
 
 **Demo:** https://lut.im/
-## Disclaimers / important information
-
-## Configuration
-
-Edit the file `/var/www/lutim/lutim.conf` to configure Lutim.
-Then reload the lutim service.
-
 ## Documentation and resources
 
 * Official app website: <https://lut.im>

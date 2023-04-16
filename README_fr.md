@@ -22,13 +22,6 @@ Les images sont stockées indéfiniment à moins que vous ne demandiez qu'elles 
 **Version incluse :** 0.12.1~ynh4
 
 **Démo :** https://lut.im/
-## Avertissements / informations importantes
-
-## Configuration
-
-Éditez le fichier `/var/www/lutim/lutim.conf` pour configurer Lutim.
-Rechargez ensuite le service Lutim.
-
 ## Documentations et ressources
 
 * Site officiel de l’app : <https://lut.im>
