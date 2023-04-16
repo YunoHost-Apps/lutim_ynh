@@ -15,6 +15,7 @@ source /usr/share/yunohost/helpers
 
 path=$old_path
 domain=$old_domain
+
 ynh_maintenance_mode_ON
 
 #=================================================
