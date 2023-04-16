@@ -145,7 +145,7 @@ if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
 	ynh_script_progression --message="Upgrading $app with Carton..." --weight=4
 	pushd "$install_dir"
-#REMOVEME? 		ynh_secure_remove --file="$install_dir/local"
+		ynh_secure_remove --file="$install_dir/local"
 		carton install --without=mysql --without=htpasswd --without=test
 	popd
 fi
