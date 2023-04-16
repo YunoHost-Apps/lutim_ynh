@@ -35,10 +35,10 @@ ram.runtime = "50M"
     default = "/lutim"
 
     [install.init_main_permission]
-    help.en = "If you set Lutim as public, everyone will be able to upload images and share them.<br>But even if not public, everyone can see an image from a link shared with your Lutim."
-    help.fr = "Si vous définissez Lutim comme public, tout le monde pourra télécharger des images et les partager.<br>Mais même si ce n'est pas public, tout le monde peut voir une image à partir d'un lien partagé avec votre Lutim."
+    help.en = "If you set Lutim as visitors, everyone will be able to upload images and share them.<br>But even if not public, everyone can see an image from a link shared with your Lutim."
+    help.fr = "Si vous définissez Lutim comme visitors, tout le monde pourra télécharger des images et les partager.<br>Mais même si ce n'est pas public, tout le monde peut voir une image à partir d'un lien partagé avec votre Lutim."
     type = "group"
-    default = false
+    default = "visitors"
 
     [install.always_encrypt]
     ask.en = "Force the encryption of images?"
