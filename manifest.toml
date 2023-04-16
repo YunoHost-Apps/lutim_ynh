@@ -5,7 +5,7 @@ name = "Lutim"
 description.en = "Anonymous image hosting service"
 description.fr = "Service d'hébergement anonyme d'images"
 
-version = "0.12.1~ynh4"
+version = "0.12.1~ynh5"
 
 maintainers = []
 
