@@ -1,2 +1,1 @@
-Éditez le fichier `__INSTALL_DIR__/lutim.conf` pour configurer Lutim.
-Rechargez ensuite le service Lutim.
+Vous pouvez modifier `__INSTALL_DIR__/lutim.conf` pour configurer Lutim, puis rechargez le service `lutim`.

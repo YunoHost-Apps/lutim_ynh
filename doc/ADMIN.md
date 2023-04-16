@@ -1,4 +1,1 @@
-## Configuration
-
-Edit the file `__INSTALL_DIR__/lutim.conf` to configure Lutim.
-Then reload the lutim service.
+You can edit `__INSTALL_DIR__/lutim.conf` to configure Lutim, then reload the `lutim` service.
