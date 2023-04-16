@@ -112,14 +112,14 @@ then
 	chown $app:$app "$install_dir/lutim.conf"
 
 	# Optional parameters from config-panel feature
-	if [ -n "$antiflood" ]; then
+	if [ -n "${antiflood:-}" ]; then
 		ynh_replace_string --match_string=".*anti_flood_delay *=>.*" --replace_string="	anti_flood_delay  => $antiflood," --target_file="$install_dir/lutim.conf"
 		# Disable anti_flood_delay if the delay is 0
 		if [ $antiflood = 0 ]; then
 			ynh_replace_string --match_string="\(anti_flood_delay *=>.*\)" --replace_string="#\1" --target_file="$install_dir/lutim.conf"
 		fi
 	fi
-	if [ -n "$delay" ]; then
+	if [ -n "${delay:-}" ]; then
 		ynh_replace_string --match_string=".*default_delay *=>.*" --replace_string="	default_delay	 => $delay," --target_file="$install_dir/lutim.conf"
 	fi
 fi
