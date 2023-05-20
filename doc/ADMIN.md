@@ -1,0 +1,1 @@
+You can edit `__INSTALL_DIR__/lutim.conf` to configure Lutim, then reload the `lutim` service.
