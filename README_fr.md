@@ -27,7 +27,7 @@ Les images sont stockées indéfiniment à moins que vous ne demandiez qu'elles 
 * Site officiel de l’app : <https://lut.im>
 * Documentation officielle utilisateur : <https://framagit.org/luc/lutim/wikis/home>
 * Dépôt de code officiel de l’app : <https://framagit.org/fiat-tux/hat-softwares/lutim>
-* Documentation YunoHost pour cette app : <https://yunohost.org/app_lutim>
+* YunoHost Store: <https://apps.yunohost.org/app/lutim>
 * Signaler un bug : <https://github.com/YunoHost-Apps/lutim_ynh/issues>
 
 ## Informations pour les développeurs

@@ -27,7 +27,7 @@ Images are indefinitely stored unless you request that they will be deleted at f
 * Official app website: <https://lut.im>
 * Official user documentation: <https://framagit.org/luc/lutim/wikis/home>
 * Upstream app code repository: <https://framagit.org/fiat-tux/hat-softwares/lutim>
-* YunoHost documentation for this app: <https://yunohost.org/app_lutim>
+* YunoHost Store: <https://apps.yunohost.org/app/lutim>
 * Report a bug: <https://github.com/YunoHost-Apps/lutim_ynh/issues>
 
 ## Developer info
