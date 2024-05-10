@@ -5,7 +5,7 @@ name = "Lutim"
 description.en = "Anonymous image hosting service"
 description.fr = "Service d'hébergement anonyme d'images"
 
-version = "0.12.1~ynh5"
+version = "0.17.0~ynh1"
 
 maintainers = []
 
@@ -48,8 +48,8 @@ ram.runtime = "50M"
 
 [resources]
         [resources.sources.main]
-        url = "https://framagit.org/fiat-tux/hat-softwares/lutim/-/archive/0.12.1/lutim-0.12.1.tar.gz"
-        sha256 = "141f142d47e3a8367e0c292304ddbecfc34b49ae7e561e2c3526000040318973"
+        url = "https://framagit.org/fiat-tux/hat-softwares/lutim/-/archive/0.17.0/lutim-0.17.0.tar.bz2"
+        sha256 = "cd42bf93498121d90584a749db11901af5360c8e0de948b294c3bf44d287749f"
         autoupdate.strategy = "latest_gitlab_release"
 
     [resources.ports]
