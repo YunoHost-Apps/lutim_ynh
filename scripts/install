@@ -54,7 +54,7 @@ ynh_add_nginx_config
 ynh_script_progression --message="Adding a configuration file..." --weight=2
 
 workers="$(( $(nproc) * 2 ))"
-ynh_add_config --template="../conf/lutim.conf.template" --destination="$install_dir/lutim.conf"
+ynh_add_config --template="lutim.conf.template" --destination="$install_dir/lutim.conf"
 
 chmod 400 "$install_dir/lutim.conf"
 chown $app:$app "$install_dir/lutim.conf"
@@ -63,7 +63,7 @@ chown $app:$app "$install_dir/lutim.conf"
 # SETUP CRON
 #=================================================
 
-ynh_add_config --template="../conf/cron_lutim" --destination="/etc/cron.d/$app"
+ynh_add_config --template="cron_lutim" --destination="/etc/cron.d/$app"
 chmod +x $install_dir/script/lutim
 
 #=================================================
@@ -100,20 +100,8 @@ ynh_script_progression --message="Configuring a systemd service..." --weight=2
 # Create a dedicated systemd config
 ynh_add_systemd_config
 
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SETUP LOGROTATE
-#=================================================
-ynh_script_progression --message="Configuring log rotation..." --weight=2
-
 # Use logrotate to manage application logfile(s)
 ynh_use_logrotate
-
-#=================================================
-# INTEGRATE SERVICE IN YUNOHOST
-#=================================================
-ynh_script_progression --message="Integrating service in YunoHost..."
 
 yunohost service add $app --log="$install_dir/log/production.log"
 
