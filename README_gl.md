@@ -19,7 +19,7 @@ NON debe editarse manualmente.
 Lutim stores images and allows you to see them, download them or share them on social networks.
 Images are indefinitely stored unless you request that they will be deleted at first view or after 24 hours / one week / one month / one year.
 
-**Versión proporcionada:** 0.12.1~ynh5
+**Versión proporcionada:** 0.17.0~ynh1
 
 **Demo:** <https://lut.im/>
 ## Documentación e recursos

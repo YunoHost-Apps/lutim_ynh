@@ -3,7 +3,7 @@
 请勿手动编辑。
 -->
 
-# YunoHost 的 Lutim
+# YunoHost 上的 Lutim
 
 [![集成程度](https://dash.yunohost.org/integration/lutim.svg)](https://dash.yunohost.org/appci/app/lutim) ![工作状态](https://ci-apps.yunohost.org/ci/badges/lutim.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/lutim.maintain.svg)
 
@@ -19,7 +19,7 @@
 Lutim stores images and allows you to see them, download them or share them on social networks.
 Images are indefinitely stored unless you request that they will be deleted at first view or after 24 hours / one week / one month / one year.
 
-**分发版本：** 0.12.1~ynh5
+**分发版本：** 0.17.0~ynh1
 
 **演示：** <https://lut.im/>
 ## 文档与资源
