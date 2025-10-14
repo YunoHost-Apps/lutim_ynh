@@ -32,32 +32,16 @@ elif [ "${always_encrypt:-}" = "No" ]; then
 fi
 
 # If overwrite_settings doesn't exist, create it
-# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=overwrite_settings --value=1
-if [ -z "${overwrite_settings:-}" ]; then
-	overwrite_settings=1
-	ynh_app_setting_set --key=overwrite_settings --value=$overwrite_settings
-fi
+ynh_app_setting_set_default --key=overwrite_settings --value=1
 
 # If overwrite_nginx doesn't exist, create it
-# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=overwrite_nginx --value=1
-if [ -z "${overwrite_nginx:-}" ]; then
-	overwrite_nginx=1
-	ynh_app_setting_set --key=overwrite_nginx --value=$overwrite_nginx
-fi
+ynh_app_setting_set_default --key=overwrite_nginx --value=1
 
 # If overwrite_systemd doesn't exist, create it
-# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=overwrite_systemd --value=1
-if [ -z "${overwrite_systemd:-}" ]; then
-	overwrite_systemd=1
-	ynh_app_setting_set --key=overwrite_systemd --value=$overwrite_systemd
-fi
+ynh_app_setting_set_default --key=overwrite_systemd --value=1
 
 # If secret doesn't exist, create it
-# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=secret --value=$(grep "secrets *=>" "$install_dir/lutim.conf" | cut -d\' -f2)
-if [ -z "${secret:-}" ]; then
-	secret=$(grep "secrets *=>" "$install_dir/lutim.conf" | cut -d\' -f2)
-	ynh_app_setting_set --key=secret --value=$secret
-fi
+ynh_app_setting_set_default --key=secret --value=$(grep "secrets *=>" "$install_dir/lutim.conf" | cut -d\' -f2)
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -89,9 +73,6 @@ then
 	workers="$(( $(nproc) * 2 ))"
 	ynh_config_add --template="lutim.conf.template" --destination="$install_dir/lutim.conf"
 
-	chmod 400 "$install_dir/lutim.conf"
-	chown $app:$app "$install_dir/lutim.conf"
-
 	# Optional parameters from config-panel feature
 	if [ -n "${antiflood:-}" ]; then
 		ynh_replace --match=".*anti_flood_delay *=>.*" --replace="	anti_flood_delay  => $antiflood," --file="$install_dir/lutim.conf"
@@ -114,16 +95,12 @@ ynh_config_add --template="cron_lutim" --destination="/etc/cron.d/$app"
 #=================================================
 # UPDATE LUTIM WITH CARTON
 #=================================================
+ynh_script_progression "Upgrading $app with Carton..."
 
-# FIXME: this is still supported but the recommendation is now to *always* re-setup the app sources wether or not the upstream sources changed
-if ynh_app_upstream_version_changed
-then
-	ynh_script_progression "Upgrading $app with Carton..."
-	pushd "$install_dir"
-		ynh_safe_rm "$install_dir/local"
-		carton install --without=mysql --without=htpasswd --without=test
-	popd
-fi
+pushd "$install_dir"
+	ynh_safe_rm "$install_dir/local"
+	carton install --without=mysql --without=htpasswd --without=test
+popd
 
 #=================================================
 # SETUP SYSTEMD
@@ -156,7 +133,7 @@ yunohost service add $app --log="$install_dir/log/production.log"
 #=================================================
 ynh_script_progression "Starting $app's systemd service..."
 
-ynh_systemctl --service=$app --action="start" --wait_until="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
+ynh_systemctl --service=$app --action="start" --log_path="/var/log/$app/production.log"
 
 #=================================================
 # DEACTIVE MAINTENANCE MODE
