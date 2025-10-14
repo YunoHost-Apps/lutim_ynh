@@ -18,23 +18,9 @@ ynh_backup "$install_dir"
 
 ynh_backup "/etc/nginx/conf.d/$domain.d/$app.conf"
 
-#=================================================
-# SPECIFIC BACKUP
-#=================================================
-# BACKUP LOGROTATE
-#=================================================
-
 ynh_backup "/etc/logrotate.d/$app"
 
-#=================================================
-# BACKUP SYSTEMD
-#=================================================
-
 ynh_backup "/etc/systemd/system/$app.service"
-
-#=================================================
-# BACKUP VARIOUS FILES
-#=================================================
 
 ynh_backup "/etc/cron.d/$app"
 

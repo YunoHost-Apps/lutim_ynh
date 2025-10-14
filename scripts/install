@@ -29,8 +29,6 @@ ynh_script_progression "Setting up source files..."
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$install_dir"
 
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R o-rwx "$install_dir"
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R $app:$app "$install_dir"
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
@@ -39,8 +37,6 @@ ynh_script_progression "Configuring NGINX web server..."
 # Create a dedicated NGINX config
 ynh_config_add_nginx
 
-#=================================================
-# SPECIFIC SETUP
 #=================================================
 # ADD A CONFIGURATION
 #=================================================
@@ -114,13 +110,13 @@ yunohost service add $app --log="$install_dir/log/production.log"
 ynh_script_progression "Starting $app's systemd service..."
 
 # Wait for lutim to be fully started
-ynh_systemctl --action=restart --wait_until="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
+ynh_systemctl --action=restart --log_path="/var/log/$app/production.log"
 ynh_systemctl --action=stop
 
 # Set right permissions on new files created at first start
 #REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R $app:$app $install_dir
 # Wait for lutim to be fully started
-ynh_systemctl --action=restart --wait_until="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
+ynh_systemctl --action=restart --log_path="/var/log/$app/production.log"
 
 #=================================================
 # END OF SCRIPT
