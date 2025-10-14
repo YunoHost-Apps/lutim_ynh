@@ -30,23 +30,27 @@ ynh_script_progression "Setting up source files..."
 ynh_setup_source --dest_dir="$install_dir"
 
 #=================================================
-# NGINX CONFIGURATION
+# APP INITIAL CONFIGURATION
 #=================================================
-ynh_script_progression "Configuring NGINX web server..."
-
-# Create a dedicated NGINX config
-ynh_config_add_nginx
-
-#=================================================
-# ADD A CONFIGURATION
-#=================================================
-ynh_script_progression "Adding $app's configuration..."
+ynh_script_progression "Adding $app's configuration files..."
 
 workers="$(( $(nproc) * 2 ))"
 ynh_config_add --template="lutim.conf.template" --destination="$install_dir/lutim.conf"
 
-chmod 400 "$install_dir/lutim.conf"
-chown $app:$app "$install_dir/lutim.conf"
+#=================================================
+# SYSTEM CONFIGURATION
+#=================================================
+ynh_script_progression "Adding system configurations related to $app..."
+
+# Create a dedicated NGINX config
+ynh_config_add_nginx
+
+# Create a dedicated systemd config
+ynh_config_add_systemd
+
+yunohost service add $app --log="$install_dir/log/production.log"
+
+ynh_config_add_logrotate
 
 #=================================================
 # SETUP CRON
@@ -70,6 +74,7 @@ if [ "$?" -ne 0 ]
 then
 	ynh_die "Unable to find the perl directory for your architecture."
 fi
+
 ynh_replace --match="__ARCHDIR__" --replace="$arch_dir" --file="$install_dir/script/lutim"
 
 #=================================================
@@ -78,31 +83,7 @@ ynh_replace --match="__ARCHDIR__" --replace="$arch_dir" --file="$install_dir/scr
 
 # Making log a symbolic link to /var/log
 touch /var/log/$app/production.log
-#REMOVEME? Assuming ynh_config_add_logrotate is called, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown $app -R /var/log/$app
 ln -s /var/log/$app/production.log "$install_dir/log/production.log"
-
-#=================================================
-# SETUP SYSTEMD
-#=================================================
-ynh_script_progression "Configuring $app's systemd service..."
-
-# Create a dedicated systemd config
-ynh_config_add_systemd
-
-#=================================================
-# SETUP LOGROTATE
-#=================================================
-ynh_script_progression "Configuring log rotation..."
-
-# Use logrotate to manage application logfile(s)
-ynh_config_add_logrotate
-
-#=================================================
-# INTEGRATE SERVICE IN YUNOHOST
-#=================================================
-ynh_script_progression "Integrating service in YunoHost..."
-
-yunohost service add $app --log="$install_dir/log/production.log"
 
 #=================================================
 # START SYSTEMD SERVICE
@@ -114,7 +95,6 @@ ynh_systemctl --action=restart --log_path="/var/log/$app/production.log"
 ynh_systemctl --action=stop
 
 # Set right permissions on new files created at first start
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R $app:$app $install_dir
 # Wait for lutim to be fully started
 ynh_systemctl --action=restart --log_path="/var/log/$app/production.log"
 
