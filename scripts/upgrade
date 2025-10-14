@@ -1,89 +1,79 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# CHECK VERSION
-#=================================================
-
-upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
 # ACTIVATE MAINTENANCE MODE
 #=================================================
-ynh_script_progression --message="Activating maintenance mode..." --weight=2
+ynh_script_progression "Activating maintenance mode..."
 
 ynh_maintenance_mode_ON
 
 #=================================================
-# STANDARD UPGRADE STEPS
-#=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Stopping a systemd service..."
+ynh_script_progression "Stopping $app's systemd service..."
 
-ynh_systemd_action --service_name=$app --action="stop"
+ynh_systemctl --service=$app --action="stop"
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
-ynh_script_progression --message="Ensuring downward compatibility..." --weight=2
+ynh_script_progression "Ensuring downward compatibility..."
 
 # Fix always_encrypt as a boolean
 if [ "${always_encrypt:-}" = "Yes" ]; then
-	ynh_app_setting_set --app=$app --key=always_encrypt --value=1
+	ynh_app_setting_set --key=always_encrypt --value=1
 	always_encrypt=1
 elif [ "${always_encrypt:-}" = "No" ]; then
-	ynh_app_setting_set --app=$app --key=always_encrypt --value=0
+	ynh_app_setting_set --key=always_encrypt --value=0
 	always_encrypt=0
 fi
 
 # If overwrite_settings doesn't exist, create it
+# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=overwrite_settings --value=1
 if [ -z "${overwrite_settings:-}" ]; then
 	overwrite_settings=1
-	ynh_app_setting_set --app=$app --key=overwrite_settings --value=$overwrite_settings
+	ynh_app_setting_set --key=overwrite_settings --value=$overwrite_settings
 fi
 
 # If overwrite_nginx doesn't exist, create it
+# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=overwrite_nginx --value=1
 if [ -z "${overwrite_nginx:-}" ]; then
 	overwrite_nginx=1
-	ynh_app_setting_set --app=$app --key=overwrite_nginx --value=$overwrite_nginx
+	ynh_app_setting_set --key=overwrite_nginx --value=$overwrite_nginx
 fi
 
 # If overwrite_systemd doesn't exist, create it
+# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=overwrite_systemd --value=1
 if [ -z "${overwrite_systemd:-}" ]; then
 	overwrite_systemd=1
-	ynh_app_setting_set --app=$app --key=overwrite_systemd --value=$overwrite_systemd
+	ynh_app_setting_set --key=overwrite_systemd --value=$overwrite_systemd
 fi
 
 # If secret doesn't exist, create it
+# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=secret --value=$(grep "secrets *=>" "$install_dir/lutim.conf" | cut -d\' -f2)
 if [ -z "${secret:-}" ]; then
 	secret=$(grep "secrets *=>" "$install_dir/lutim.conf" | cut -d\' -f2)
-	ynh_app_setting_set --app=$app --key=secret --value=$secret
+	ynh_app_setting_set --key=secret --value=$secret
 fi
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
-if [ "$upgrade_type" == "UPGRADE_APP" ]
+# FIXME: this is still supported but the recommendation is now to *always* re-setup the app sources wether or not the upstream sources changed
+if ynh_app_upstream_version_changed
 then
-	ynh_script_progression --message="Upgrading source files..."
+	ynh_script_progression "Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
 	ynh_setup_source --dest_dir="$install_dir"
 fi
 
-chmod -R o-rwx "$install_dir"
-chown -R $app:www-data "$install_dir"
-
+#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R o-rwx "$install_dir"
+#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R $app:www-data "$install_dir"
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
@@ -91,36 +81,34 @@ chown -R $app:www-data "$install_dir"
 # Overwrite the nginx configuration only if it's allowed
 if [ $overwrite_nginx -eq 1 ]
 then
-	ynh_script_progression --message="Upgrading NGINX web server configuration..." --weight=2
-	ynh_add_nginx_config
+	ynh_script_progression "Upgrading NGINX web server configuration..."
+	ynh_config_add_nginx
 fi
 
 #=================================================
-# SPECIFIC UPGRADE
-#=================================================
 # SETUP LUTIM
 #=================================================
-ynh_script_progression --message="Reconfiguring $app..."
+ynh_script_progression "Reconfiguring $app..."
 
 # Overwrite the settings config file only if it's allowed
 if [ $overwrite_settings -eq 1 ]
 then
 	workers="$(( $(nproc) * 2 ))"
-	ynh_add_config --template="../conf/lutim.conf.template" --destination="$install_dir/lutim.conf"
+	ynh_config_add --template="lutim.conf.template" --destination="$install_dir/lutim.conf"
 
 	chmod 400 "$install_dir/lutim.conf"
 	chown $app:$app "$install_dir/lutim.conf"
 
 	# Optional parameters from config-panel feature
 	if [ -n "${antiflood:-}" ]; then
-		ynh_replace_string --match_string=".*anti_flood_delay *=>.*" --replace_string="	anti_flood_delay  => $antiflood," --target_file="$install_dir/lutim.conf"
+		ynh_replace --match=".*anti_flood_delay *=>.*" --replace="	anti_flood_delay  => $antiflood," --file="$install_dir/lutim.conf"
 		# Disable anti_flood_delay if the delay is 0
 		if [ $antiflood = 0 ]; then
-			ynh_replace_string --match_string="\(anti_flood_delay *=>.*\)" --replace_string="#\1" --target_file="$install_dir/lutim.conf"
+			ynh_replace --match="\(anti_flood_delay *=>.*\)" --replace="#\1" --file="$install_dir/lutim.conf"
 		fi
 	fi
 	if [ -n "${delay:-}" ]; then
-		ynh_replace_string --match_string=".*default_delay *=>.*" --replace_string="	default_delay	 => $delay," --target_file="$install_dir/lutim.conf"
+		ynh_replace --match=".*default_delay *=>.*" --replace="	default_delay	 => $delay," --file="$install_dir/lutim.conf"
 	fi
 fi
 
@@ -128,17 +116,18 @@ fi
 # SETUP CRON
 #=================================================
 
-ynh_add_config --template="../conf/cron_lutim" --destination="/etc/cron.d/$app"
+ynh_config_add --template="cron_lutim" --destination="/etc/cron.d/$app"
 
 #=================================================
 # UPDATE LUTIM WITH CARTON
 #=================================================
 
-if [ "$upgrade_type" == "UPGRADE_APP" ]
+# FIXME: this is still supported but the recommendation is now to *always* re-setup the app sources wether or not the upstream sources changed
+if ynh_app_upstream_version_changed
 then
-	ynh_script_progression --message="Upgrading $app with Carton..." --weight=4
+	ynh_script_progression "Upgrading $app with Carton..."
 	pushd "$install_dir"
-		ynh_secure_remove --file="$install_dir/local"
+		ynh_safe_rm "$install_dir/local"
 		carton install --without=mysql --without=htpasswd --without=test
 	popd
 fi
@@ -150,34 +139,32 @@ fi
 # Overwrite the systemd configuration only if it's allowed
 if [ $overwrite_systemd -eq 1 ]
 then
-	ynh_script_progression --message="Upgrading systemd configuration..." --weight=2
-	ynh_add_systemd_config
+	ynh_script_progression "Upgrading systemd configuration..."
+	ynh_config_add_systemd
 fi
 
 #=================================================
-# GENERIC FINALIZATION
-#=================================================
 # SETUP LOGROTATE
 #=================================================
-ynh_script_progression --message="Upgrading logrotate configuration..."
+ynh_script_progression "Upgrading logrotate configuration..."
 
 # Use logrotate to manage app-specific logfile(s)
-ynh_use_logrotate --non-append
-chown $app -R /var/log/$app
+ynh_config_add_logrotate
+#REMOVEME? Assuming ynh_config_add_logrotate is called, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown $app -R /var/log/$app
 
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
 #=================================================
-ynh_script_progression --message="Integrating service in YunoHost..."
+ynh_script_progression "Integrating service in YunoHost..."
 
 yunohost service add $app --log="$install_dir/log/production.log"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..." --weight=4
+ynh_script_progression "Starting $app's systemd service..."
 
-ynh_systemd_action --service_name=$app --action="start" --line_match="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
+ynh_systemctl --service=$app --action="start" --wait_until="Manager.*started" --log_path="/var/log/$app/production.log" --timeout="120"
 
 #=================================================
 # DEACTIVE MAINTENANCE MODE
@@ -189,4 +176,4 @@ ynh_maintenance_mode_OFF
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Upgrade of $app completed" --last
+ynh_script_progression "Upgrade of $app completed"

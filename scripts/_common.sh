@@ -1,15 +1,7 @@
 #!/bin/bash
 
 #=================================================
-# COMMON VARIABLES
-#=================================================
-
-#=================================================
-# PERSONAL HELPERS
-#=================================================
-
-#=================================================
-# EXPERIMENTAL HELPERS
+# COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
 ynh_maintenance_mode_ON () {
@@ -22,7 +14,7 @@ ynh_maintenance_mode_ON () {
 	fi
 
 	mkdir -p /var/www/html/
-	
+
 	# Create an html to serve as maintenance notice
 	echo "<!DOCTYPE html>
 <html>
@@ -90,5 +82,3 @@ ynh_maintenance_mode_OFF () {
 
 	systemctl reload nginx
 }
-
-
