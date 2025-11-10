@@ -65,4 +65,4 @@ ram.runtime = "50M"
     main.url = "/"
 
     [resources.apt]
-    packages = "carton, make, perlmagick, libpq-dev, shared-mime-info"
+    packages = "carton, make, perlmagick, libpq-dev, shared-mime-info, libmojo-sqlite-perl, libdatetime-perl, libcrypt-cbc-perl"
